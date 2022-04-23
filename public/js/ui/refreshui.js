@@ -80,12 +80,8 @@ function refreshUI(){
   displayBuyOrders()
   displayEquipment()
   displayHistory()
-  $("#skillPointProgress").attr('aria-valuenow', 0)
   $("#skillPointProgress").attr('aria-valuemax', labor.actionsUntilSkill)
-  if (labor.allocatedSkillPoints + labor.availableSkillPoints < labor.maxSkillPoints){
-    $("#skillPointProgress").attr('aria-valuenow', labor.actions)
-    $("#skillPointProgress").attr('aria-valuemax', labor.actionsUntilSkill)
-  }
+  $("#skillPointProgress").attr('aria-valuenow', labor.actions)
   let progressCent = ($("#skillPointProgress").attr('aria-valuenow') / $("#skillPointProgress").attr('aria-valuemax')).toFixed(2) * 100
   $("#skillPointProgress").css('width', progressCent + "%")
   $("#eatFood").prop('checked', settings.eatFood)

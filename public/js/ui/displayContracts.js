@@ -1,5 +1,4 @@
 function displayContracts(){
-  console.log('displayContracts')
   let html = ""
   let previousItems = []
   let alwaysHireableActions = ['harvest-wheat', 'harvest-herbal-greens',

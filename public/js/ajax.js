@@ -25,6 +25,5 @@ $.get('/ajax', function(data){
   statusHistory = obj.statusHistory
   userID        = obj.userID
   username      = obj.username
-  console.log(actions)
   refreshUI()
 })

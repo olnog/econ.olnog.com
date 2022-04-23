@@ -20,7 +20,6 @@ function displayActions(){ //39
 
   }
   */
-  console.log(actions.possible)
   for (i in actions.unlocked){
     let thisIsDisabled = 'btn-primary'
     let impossibleActionClass = ''

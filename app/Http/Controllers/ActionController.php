@@ -47,8 +47,7 @@ class ActionController extends Controller
     {
       \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
       $actionName = $request->name;
-
-      if ($request->automation){
+      if ($request->automation  == 'true'){
         $food = \App\Items::fetchByName('Food', Auth::id());
         if ($food->quantity == 0){
           echo json_encode(['error' => "You're automating actions but you don't have any more food." ]);

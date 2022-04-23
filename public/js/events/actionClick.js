@@ -1,7 +1,6 @@
 $(document).on('click', '.action', function(e) {
   let actionName = e.target.id.substring('action-'.length)
   $("#lastAction").html($("#" + e.target.id).html())
-  console.log('actionButton:' + actionName)
   action(actionName)
   lastAction = actionName
   refreshUI()

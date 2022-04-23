@@ -1,6 +1,5 @@
 $(document).on('click', 'button', function(e) {
   buttonMetric.push(e.target.id)
-  console.log(buttonMetric)
 })
 $(document).on('keyup', '#chatContent', function(e) {
   if(e.key == 'Enter'){
