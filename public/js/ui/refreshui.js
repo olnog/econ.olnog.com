@@ -1,6 +1,8 @@
 function refreshUI(){
-  console.log('refresh')
-  console.log(labor.availableSkillPoints, labor.startingSkillPoints)
+  //console.log('refresh')
+  //console.log(labor.availableSkillPoints, labor.startingSkillPoints)
+
+  /*
   if (!skipForcedSkillSCreen && labor.availableSkillPoints == labor.startingSkillPoints){
 
     $("#mainScreen").addClass('d-none')
@@ -8,6 +10,7 @@ function refreshUI(){
     displaySkills("forcedSkillListing")
     return
   }
+  */
   hideForcedSkillScreen()
   if(!doTheyOwnLand()){
     $(".payAllBribes").addClass('d-none')

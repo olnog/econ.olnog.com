@@ -79,12 +79,12 @@ class User extends Authenticatable
       $labor->workHours = 1000;
       $labor->startingWorkHours = 1000;
       $labor->equipped = null;
-      $labor->startingSkillPoints = 6;
-      $labor->availableSkillPoints = $labor->startingSkillPoints;
+      $labor->startingSkillPoints = 3;
+      $labor->availableSkillPoints = 3;
       $labor->allocatedSkillPoints = 0;
-      $labor->maxSkillPoints = 30;
+      $labor->maxSkillPoints = 0;
       $labor->actions=0;
-      $labor->actionsUntilSkill = $labor->workHours / $labor->maxSkillPoints;
+      $labor->actionsUntilSkill = 30;
       $labor->rebirth=false;
       $labor->legacy = null;
       $labor->legacySkillTypeID = null;

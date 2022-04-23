@@ -131,7 +131,7 @@ function hideForcedSkillScreen(){
   $(".forcedSkillScreen").addClass('d-none')
   $("#mainScreen").removeClass('d-none')
   skipForcedSkillSCreen = true
-  scrollTop: $("#lastAction").offset().top
+  //scrollTop: $("#lastAction").offset().top
 }
 function incrementSkill(skillIdentifier){
   let csrf = fetchCSRF()

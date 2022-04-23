@@ -7,7 +7,9 @@ function action (actionName){
     nanoMeds: $("#useNanoMeds").is(':checked')
   }
   console.log(buttonMetric)
+  console.log('action')
   $.post( "/actions", {name: actionName, buttons: buttonMetric, automation: automation != null, consumption: JSON.stringify(consumption), _token: csrf }).done(function(data){
+    console.log(data)
     buttonMetric = []
     if (JSON.parse(data).error != undefined){
       displayError(JSON.parse(data).error)

@@ -1,4 +1,4 @@
-$(document).on('click', '.action:not(.btn-warning)', function(e) {
+$(document).on('click', '.action', function(e) {
   let actionName = e.target.id.substring('action-'.length)
   $("#lastAction").html($("#" + e.target.id).html())
   console.log('actionButton:' + actionName)

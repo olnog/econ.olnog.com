@@ -168,6 +168,14 @@
       </div><div class='col-lg-9 col-7'>
         <input type='checkbox' id='hideImpossible' class='formatActions ms-3'> Hide unavailable actions?
       </div>
+    </div><div class='ms-3'>
+      <div class="progress">
+        <div id='skillPointProgress' class="progress-bar" role="progressbar"
+          aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+
+      <span id='skillUnlocked' class='ms-3'> You can unlock a new skill!</span>
+      <a href='/actionTypes/'>[ list ] </a>
     </div><div id='actionsSection' class='ms-3'>
       <div id='newBuildingAvailable' class='fw-bold mt-2'>You've got a new building available to build!</div>
       <div id='buildingCosts'>
@@ -195,6 +203,7 @@
         </div>
       </div>
     </div>
+    <!--
     <div  class='mt-5'>
       <div>
         Skills
@@ -240,7 +249,9 @@
       </div>
     <div id='skillListing' class='ms-3'>
 
-    </div><div id='' class='fw-bold'>
+    </div>
+    -->
+    <div id='' class='fw-bold'>
       Rebirth
       <button id='show-resetSection' class='show btn btn-link'>+</button>
       <button id='hide-resetSection' class='hide btn btn-link d-none'>-</button>

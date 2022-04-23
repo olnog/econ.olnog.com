@@ -100,12 +100,11 @@ Route::get('/ajax', function () {
   if (Auth::check()){
     $user = \App\User::find(Auth::id());
     echo json_encode([
-      'actions'       => \App\Actions::available(),
+      'actions'       => \App\Actions::fetch(\Auth::id()),
       'autoBribe'     => $user->autoBribe,
       'avgBribe'      => \App\Land::averageBribe(),
       'buildingLeases'=> \App\BuildingLease::fetch(),
       'buildings'     => \App\Buildings::fetch(),
-
       'buildingSlots' => $user->buildingSlots,
       'buyOrders'     => \App\BuyOrders::fetch(null),
       'clacks'        => $user->clacks,
@@ -177,10 +176,13 @@ Route::post('/rebirth', function(Request $request){
 
 });
 
-Route::post('/reset', function(){
+Route::get('/reset', function(){
+  \App\User::reset();
+  /*
   $labor = \App\Labor::fetch();
   $labor->rebirth = true;
   $labor->save();
+  */
   return redirect()->route('home');
 });
 
@@ -188,22 +190,23 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::resources([
-  'actions' => 'ActionController',
-  'bids' => 'BidController',
+  'actions'         => 'ActionController',
+  'actionTypes'     => 'ActionTypeController',
+  'bids'            => 'BidController',
   'buildingLease'   => 'BuildingLeaseController',
-  'chat' => 'ChatController',
-  'contracts' => 'ContractController',
-  'equipment' => 'EquipmentController',
-  'history' => 'HistoryController',
-  'labor' => 'LaborController',
-  'land' => 'LandController',
-  'lease' => 'LeaseController',
-  'skills' => 'SkillsController',
-  'skillTypes' => 'SkillTypeController',
-  'items' => "ItemController",
-  'itemTypes' => "ItemTypeController",
-  'buildings' => 'BuildingController',
-  'buildingTypes' => 'BuildingTypeController',
-  'buyOrders' => 'BuyOrderController',
-  'robots' => 'RobotController',
+  'chat'            => 'ChatController',
+  'contracts'       => 'ContractController',
+  'equipment'       => 'EquipmentController',
+  'history'         => 'HistoryController',
+  'labor'           => 'LaborController',
+  'land'            => 'LandController',
+  'lease'           => 'LeaseController',
+  'skills'          => 'SkillsController',
+  'skillTypes'      => 'SkillTypeController',
+  'items'           => "ItemController",
+  'itemTypes'       => "ItemTypeController",
+  'buildings'       => 'BuildingController',
+  'buildingTypes'   => 'BuildingTypeController',
+  'buyOrders'       => 'BuyOrderController',
+  'robots'          => 'RobotController',
 ]);

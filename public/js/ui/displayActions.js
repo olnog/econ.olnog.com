@@ -1,13 +1,16 @@
 function displayActions(){ //39
   html = ""
+  /*
   if (skills.construction.rank > 0 ){
     html = "<button id='build' class='btn btn-primary whyNot'>build</button></span>"
       + "<select id='buildingsThatCanBeBuilt' class='d-none me-3'><option selected></option></select>"
   }
+  */
   if (lastAction != null || lastContractAction != null){
     $("#lastAction").prop('disabled', false)
     $("#startAutomation").prop('disabled', false)
   }
+  /*
   if (!actions.available.includes(lastAction) && lastContractAction == null){
     lastAction = null
     $("#startAutomation").prop('disabled', true)
@@ -16,22 +19,33 @@ function displayActions(){ //39
     }
 
   }
-  for (i in actions.possible){
+  */
+  console.log(actions.possible)
+  for (i in actions.unlocked){
     let thisIsDisabled = 'btn-primary'
     let impossibleActionClass = ''
     let whyNotStart = ''
     let whyNotEnd = ''
+    /*
     if (!actions.available.includes(actions.possible[i])){
       thisIsDisabled = ' btn-warning whyNot'
       impossibleActionClass = ' impossible '
       whyNotStart = "<span id='whyNot-" + actions.possible[i] + "' class='whyNot'>"
       whyNotEnd = '</span>'
     }
-    html += "<button  id='action-" + actions.possible[i]
-      + "' class='m-2 action btn " + thisIsDisabled + " " + impossibleActionClass + "'>"
-      + dedashify(actions.possible[i]) + "</button>"
+    */
+    let actionButton = "<button  id='action-" + actions.unlocked[i].name
+      + "' class='m-2 action btn " + thisIsDisabled + " " + " btn-warning'>"
+      + dedashify(actions.unlocked[i].name) + "</button>"
+    if (actions.possible.includes(actions.unlocked[i].name)){
+      actionButton = "<button  id='action-" + actions.unlocked[i].name
+        + "' class='m-2 action btn " + thisIsDisabled + " " + " btn-primary'>"
+        + dedashify(actions.unlocked[i].name) + "</button>"
+    }
+    html += actionButton
   }
   $("#actionListing").html(html)
+
   if (lastAction == null && lastContractAction == null){
     $("#lastAction").prop('disabled', true)
   }
@@ -41,9 +55,11 @@ function displayActions(){ //39
 
     $("#lastAction").prop('disabled', true)
   }
+  /*
   if (skills.construction.rank > 0){
     displayAvailableBuildings()
   }
+  */
   formatActions()
 }
 

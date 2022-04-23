@@ -22,7 +22,7 @@ class ActionController extends Controller
      */
     public function index()
     {
-      echo json_encode(\App\Actions::available());
+      echo json_encode(\App\Actions::available(\Auth::id()));
       $labor = \App\Labor::fetch();
 
     }
@@ -44,7 +44,7 @@ class ActionController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {      
+    {
       \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
       $actionName = $request->name;
 
@@ -69,7 +69,7 @@ class ActionController extends Controller
       }
       $user = \App\User::find(\Auth::id());
       echo json_encode([
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'buildingSlots' => $user->buildingSlots,
         'buildings' => \App\Buildings::fetch(),
         'clacks' => $user->clacks,

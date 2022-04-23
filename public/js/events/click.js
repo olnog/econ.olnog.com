@@ -178,6 +178,19 @@ $(document).on('click', '.takeover', function(e) {
   takeover(landID, amount)
 })
 
+$(document).on('click', '.updateActionType', function(e) {
+  $("#updateActionTypeForm")
+    .html($("#updateActionTypeForm").html()
+    + "<input type='hidden' name='_method' value='PUT'>")
+
+  $("#actionName").val($("#actionTypeName" + e.target.id.split('-')[1]).html())
+  $("#actionDescription").val($("#actionTypeDescription" + e.target.id.split('-')[1]).html())
+
+  $("#createAction").html('update')
+  $("#updateActionTypeForm").attr('action', '/actionTypes/' + e.target.id.split('-')[1] )
+  window.location.hash = '#updateActionTypeForm';
+})
+
 $(document).on('click', '.updateBuildingType', function(e) {
   let buildingTypeID = e.target.id.split('-')[1]
   let buildingTypeName = $("#buildingName-" + buildingTypeID).html().trim()

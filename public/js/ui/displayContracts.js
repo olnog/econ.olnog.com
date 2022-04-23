@@ -159,6 +159,7 @@ function displayContracts(){
           }
           signContract += "</select>"
         }
+        /*
         if (actions.buildings.length > 0){
           signContract += "<button id='buildContract-" + contracts[i].id + "' class='ms-5 buildContract btn btn-danger btn-lg'>build</button><select id='buildContractBuilding-" + contracts[i].id + "'><option></option>"
           for (let i in actions.buildings){
@@ -166,6 +167,7 @@ function displayContracts(){
           }
           signContract += "</select>"
         }
+        */
       }
       html += " willing to <span class='fw-bold'>build or repair</span> for "
         + contracts[i].price.toLocaleString()

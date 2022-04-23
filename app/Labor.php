@@ -123,16 +123,22 @@ class Labor extends Model
 
     }
 
-    public static function doAction($userID){
-
+    public static function doAction($userID, $actionID){
+      $action = \App\Actions::find($actionID);
       $labor = \App\Labor::where('userID', $userID)->first();
       $labor->actions++;
       if ($labor->actions >= $labor->actionsUntilSkill){
-        $labor->actionsUntilSkill *= 1.1;
+        $labor->actionsUntilSkill *= 2;
         $labor->actions=0;
         \App\Labor::incrementSkillPoints($userID);
       }
       $labor->save();
+      $action->totalUses++;
+      if ($action->totalUses >= $action->nextRank){
+        $action->rank++;
+        $action->nextRank *= 4;
+      }
+      $action->save();
     }
 
     public static function feedChildren($userID){
@@ -189,13 +195,13 @@ class Labor extends Model
     }
     public static function incrementSkillPoints($userID){
       $labor = \App\Labor::where('userID', $userID)->first();
-
+      /*
       if ($labor->availableSkillPoints >= $labor->maxSkillPoints){
         return \App\Labor::increaseMaxSkillPoints();
       }
+      */
       $labor->availableSkillPoints++;
       $labor->save();
-
 
     }
 

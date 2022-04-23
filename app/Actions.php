@@ -10,14 +10,35 @@ use \App\Labor;
 
 class Actions extends Model
 {
-  /*
-    CHANGE AVIALABLE TO FETCH
-  */
-    public static function available(){
+  protected $table = 'actions';
+
+  public static function fetch($userID){
+      return [
+        'unlocked'=>\App\Actions::fetchUnlocked($userID),
+        'possible'=>\App\Actions::available($userID),
+      ];
+  }
+
+  public static function fetchUnlocked($userID){
+    return \App\Actions
+      ::join('action_types', 'actions.actionTypeID', 'action_types.id')
+      ->where('userID', $userID)->where('unlocked', true)
+      ->select('name', 'actions.id', 'actionTypeID', 'totalUses', 'nextRank',
+      'rank', 'unlocked')->get();
+  }
+
+  public static function fetchByName($userID, $name){
+    $actionType = \App\ActionTypes::where('name', $name)->first();
+    return \App\Actions::where('actionTypeID', $actionType->id)
+      ->where('userID', $userID)->first();
+  }
+
+    public static function available($userID){
+      $availableActions = [];
       $availableBuildings = null;
       $labor = \App\Labor::where('userID', \Auth::id())->first();
       //if (Skills::fetchByIdentifier('construction', Auth::id())->rank > 0){
-        $availableBuildings  = Actions::fetchAvailableBuildings();
+        //$availableBuildings  = Actions::fetchAvailableBuildings();
       //}
       $solarElectricity = 0;
       if (\App\Buildings::doesItExist('Solar Power Plant', Auth::id())){
@@ -26,14 +47,13 @@ class Actions extends Model
       }
 
 
-      $possibleActions = \App\Actions::possible();
-      foreach ($possibleActions as $actionName){
+      $possibleActions = \App\Actions::fetchUnlocked($userID);
+      foreach ($possibleActions as $action){
+        $actionName = $action->name;
         if ($actionName == 'chop-tree'
         && ((!Labor::areTheyEquippedWith('Axe', Auth::id())
         && !Labor::areTheyEquippedWith('Chainsaw (electric)', Auth::id())
         && !Labor::areTheyEquippedWith('Chainsaw (gas)', Auth::id()))
-
-
           || !Land::doTheyHaveAccessTo('forest'))){
           continue;
         } else if ($actionName == 'cook-meat'
@@ -151,8 +171,6 @@ class Actions extends Model
         || !\App\Items::doTheyHave('Electricity', 10)
         || !\App\Items::doTheyHave('HerbMeds', 10)
         || !\App\Items::doTheyHave('Bio Material', 10)
-        || \App\Skills::fetchByIdentifier('biologicalEngineering', Auth::id())->rank < 1
-        || \App\Skills::fetchByIdentifier('medicine', Auth::id())->rank < 1
         )){
           continue;
         } else if ($actionName == 'make-book'
@@ -271,8 +289,6 @@ class Actions extends Model
           || !\App\Items::doTheyHave('Electricity', 100)
           || !\App\Items::doTheyHave('BioMeds', 10)
           || !\App\Items::doTheyHave('Nanites', 10)
-          || \App\Skills::fetchByIdentifier('nanotechnology', Auth::id())->rank < 1
-          || \App\Skills::fetchByIdentifier('medicine', Auth::id())->rank < 1
           )){
             continue;
 
@@ -391,8 +407,6 @@ class Actions extends Model
           && (!\App\Buildings::didTheyAlreadyBuildThis('Oil Refinery', Auth::id())
           || !\App\Items::doTheyHave('Electricity', 100)
           || !\App\Items::doTheyHave('Oil', 100)
-          || \App\Skills::fetchByIdentifier('petroleumEngineering', Auth::id())->rank < 1
-          || \App\Skills::fetchByIdentifier('chemicalEngineering', Auth::id())->rank < 1
         )){
           continue;
         } else if ($actionName == 'smelt-copper'
@@ -426,15 +440,19 @@ class Actions extends Model
         $availableActions [] = $actionName;
 
       }
+      return $availableActions;
+      /*
       return ['possible' => $possibleActions, 'available'=>$availableActions,
         'buildings' => $availableBuildings, 'robots' => \App\Actions::fetchRobotActions()];
+        */
     }
 
 
 
     public static function do($actionName, $consumption, $agentID, $contractorID, $robotID){
       \App\Metric::newAction($agentID, $actionName);
-      \App\Labor::doAction($agentID);
+      $action = \App\Actions::fetchByName($agentID, $actionName);
+      \App\Labor::doAction($agentID, $action->id);
       $status = "";
       $contractorCaption = " They ";
       $agentCaption = " They ";
@@ -502,8 +520,7 @@ class Actions extends Model
         }
         if ($robot == null){
           $equipmentCaption = Equipment::useEquipped($agentID);
-          $lumberjackingSkill = Skills::fetchByIdentifier('lumberjacking', $agentID);
-          $logsChopped = $lumberjackingSkill->rank * $baseChop * $landBonus;
+          $logsChopped = $action->rank * $baseChop * $landBonus;
         } else {
           $equipmentCaption = \App\Robot::useEquipped($robotID);
           $logsChopped = $baseChop;
@@ -558,12 +575,7 @@ class Actions extends Model
         }
         $production = 100;
         if ($robot == null){
-          $engineering  = Skills::fetchByIdentifier('engineering ', $agentID);
-          $geneticEngineering  = Skills::fetchByIdentifier('geneticEngineering ', $agentID);
-          $production = $engineering->rank * 100;
-          if ($geneticEngineering->rank > 0){
-            $production *= $geneticEngineering->rank;
-          }
+          $production = $action->rank * 100;
         }
         $buildingCaption = \App\Buildings::use('Clone Vat', $agentID);
         $corpse->quantity -= 1;
@@ -603,12 +615,7 @@ class Actions extends Model
         }
         $production = 10;
         if ($robot == null){
-          $engineering  = Skills::fetchByIdentifier('engineering ', $agentID);
-          $biologicalEngineering = \App\Skills::fetchByIdentifier('biologicalEngineering', $agentID);
-          $production = $engineering->rank * 10;
-          if ($biologicalEngineering->rank > 0){
-            $production *= $biologicalEngineering->rank;
-          }
+          $production = $action->rank * 10;
         }
         if (!\App\Buildings::didTheyAlreadyBuildThis('Bio Lab', $agentID)){
           return [
@@ -647,13 +654,7 @@ class Actions extends Model
         $buildingCaption = "";
         $production = 10;
         if ($robot == null){
-          $chemicalEngineering = Skills::fetchByIdentifier('chemicalEngineering', $agentID);
-          $engineering = Skills::fetchByIdentifier('engineering', $agentID);
-
-          $production = $engineering->rank * 10;
-          if ($chemicalEngineering->rank > 0){
-            $production *= $chemicalEngineering->rank;
-          }
+          $production = $action->rank * 10;
         }
         if (!\App\Buildings::didTheyAlreadyBuildThis('Chem Lab', $agentID)){
           return [
@@ -688,12 +689,7 @@ class Actions extends Model
       } else if ($actionName == 'convert-wood-to-coal'){
         $production = 100;
         if ($robot == null){
-          $chemicalEngineering = Skills::fetchByIdentifier('chemicalEngineering', $agentID);
-          $engineering = Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank * 100;
-          if ($chemicalEngineering->rank > 0){
-            $production *= $chemicalEngineering->rank;
-          }
+          $production = $action->rank * 100;
         }
         $wood = \App\Items::fetchByName('Wood', $agentID);
         $coal = \App\Items::fetchByName('Coal', $agentID);
@@ -717,7 +713,6 @@ class Actions extends Model
         $wood->save();
         $electricity->quantity -= 100;
         $electricity->save();
-
         $coal->quantity += $production;
         $coal->save();
         $status = $agentCaption .  " used 1,000 Wood "
@@ -735,13 +730,7 @@ class Actions extends Model
         || $actionName == 'convert-wood-to-carbon-nanotubes'){
         $production = 10;
         if ($robot == null){
-          $chemicalEngineering = Skills::fetchByIdentifier('chemicalEngineering', $agentID);
-          $engineering = Skills::fetchByIdentifier('engineering', $agentID);
-
-          $production = $engineering->rank * 10;
-          if ($chemicalEngineering->rank > 0){
-            $production *= $chemicalEngineering->rank;
-          }
+          $production = $action->rank * 10;
         }
         $possibleInputs = [
           'convert-coal-to-carbon-nanotubes' => 'Coal',
@@ -786,14 +775,8 @@ class Actions extends Model
       } else if ($actionName == 'convert-uranium-ore-to-plutonium'){
         $production = 10;
         if ($robot == null){
-          $nuclearEngineering = Skills::fetchByIdentifier('nuclearEngineering', $agentID);
-          $engineering = Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank * 10;
-          if ($nuclearEngineering->rank > 0){
-            $production *= $nuclearEngineering->rank;
-          }
+          $production = $action->rank * 10;
         }
-
         $uranium = \App\Items::fetchByName('Uranium Ore', $agentID);
         $electricity = \App\Items::fetchByName('Electricity', $agentID);
         $buildingCaption = "";
@@ -866,8 +849,7 @@ class Actions extends Model
         $buildingCaption = \App\Buildings::use($buildingName, $agentID);
         $foodCooked = 2 * $modifier;
         if ($robot == null){
-          $cookingSkill = Skills::fetchByIdentifier('cooking', $agentID);
-          $foodCooked = $cookingSkill->rank * 2 * $modifier;
+          $foodCooked = $action->rank * 2 * $modifier;
         }
 
         $foodSource->quantity -= $modifier;
@@ -919,8 +901,7 @@ class Actions extends Model
         $land = \App\Land::all();
         $production = 1;
         if ($robot == null){
-          $exploringSkill = Skills::fetchByIdentifier('exploring', $agentID);
-          $production = $exploringSkill->rank;
+          $production = $action->rank;
         }
 
         $satellite = \App\Items::fetchByName('Satellite', $agentID);
@@ -1024,13 +1005,7 @@ class Actions extends Model
         $buildingCaption = \App\Buildings::use('Coal Power Plant', $agentID);
         $production = 1000;
         if ($robot == null){
-          $electricalEngineering = \App\Skills::fetchByIdentifier('electricalEngineering', $agentID);
-          $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank * 1000;
-          if ($electricalEngineering->rank > 0){
-            $production *= $electricalEngineering->rank;
-          }
-
+          $production = $action->rank * 1000;
         }
         $electricity = Items::fetchByName('Electricity', $agentID);
         $coal->quantity -= 1000;
@@ -1058,8 +1033,7 @@ class Actions extends Model
           return ['error' => 'You do not have enough Plutonium. You need 1000. '];
         }
         $buildingCaption = \App\Buildings::use('Nuclear Power Plant', $agentID);
-        $electricityProduced = floor((\App\Skills::fetchByIdentifier('nuclearEngineering', $agentID)->rank
-          + \App\Skills::fetchByIdentifier('electricalEngineering', $agentID)->rank) / 2) * 1000000;
+        $electricityProduced = $action->rank * 1000000;
 
         $electricity = Items::fetchByName('Electricity', $agentID);
         $plutonium->quantity -= 1000;
@@ -1144,13 +1118,7 @@ class Actions extends Model
           $field = \App\Buildings::fetchField('Rubber Plantation', $contractorID);
           $rubberYield = $field->rubber;
           if ($robot == null){
-            $farming = Skills::fetchByIdentifier('farming', $agentID);
-            $farmingRubber = Skills::fetchByIdentifier('farmingRubber', $agentID);
-            $rubberYield = $field->rubber * $farming->rank;
-            if ($farmingRubber->rank > 0 ){
-              $rubberYield *= $farmingRubber->rank;
-            }
-
+            $rubberYield = $field->rubber * $action->rank;
           }
           $rubber = Items::fetchByName('Rubber', $contractorID);
           \App\Buildings::destroy($field->id);
@@ -1252,14 +1220,8 @@ class Actions extends Model
           $field = \App\Buildings::fetchField($whichItemType[$actionName] . ' Field', $contractorID);
           $yield = $field[$whichVarName[$actionName]];
           if ($robot == null){
-            $farming = Skills::fetchByIdentifier('farming', $agentID);
-            $farmingSpecific = Skills::fetchByIdentifier($whichSkillName[$actionName], $agentID);
-            $yield = $field[$whichVarName[$actionName]] * $farming->rank;
-            if ($farmingSpecific->rank > 0){
-              $yield *= $farmingSpecific->rank;
-            }
+            $yield = $field[$whichVarName[$actionName]] * $action->rank;
           }
-
           \App\Buildings::destroy($field->id);
           $user = \App\User::find($contractorID);
           $user->buildingSlots++;
@@ -1268,7 +1230,6 @@ class Actions extends Model
           $produce->save();
           $totalYield += $yield;
         }
-
         $status = $agentCaption . " harvested " . $totalYield . " "
           . $whichItemType[$actionName] . " from " . $howManyFields . " "
           . $whichItemType[$actionName] . " Field(s). "  . $equipmentCaption . $fuelStatus ;
@@ -1281,10 +1242,8 @@ class Actions extends Model
       } else if ($actionName == 'hunt'){
         $meatHunted = 2;
         if ($robot == null){
-          $huntingSkill = Skills::fetchByIdentifier('hunting', $agentID);
-          $meatHunted = $huntingSkill->rank * 2;
+          $meatHunted = $action->rank * 2;
         }
-
         $meat = Items::fetchByName('Meat', $contractorID);
         $meat->quantity += $meatHunted;
         $meat->save();
@@ -1299,9 +1258,7 @@ class Actions extends Model
         if ($robot != null){
           return;
         }
-        $biologicalEngineering = Skills::fetchByIdentifier('biologicalEngineering', $agentID);
-        $medicine = Skills::fetchByIdentifier('medicine', $agentID);
-        $production = floor(($biologicalEngineering->rank + $medicine->rank) / 2);
+        $production = $action->rank;
         $electricity = \App\Items::fetchByName('Electricity', $agentID);
         $herbMeds = \App\Items::fetchByName('HerbMeds', $agentID);
         $bioMaterial = \App\Items::fetchByName('Bio Material', $agentID);
@@ -1347,7 +1304,6 @@ class Actions extends Model
         if ($robot != null){
           return;
         }
-        $education = Skills::fetchByIdentifier('education', $agentID);
         $book = Items::fetchByName('Books', $contractorID);
         $paper = Items::fetchByName('Paper', $agentID);
         $labor = \App\Labor::where('userID', $agentID)->first();
@@ -1362,7 +1318,7 @@ class Actions extends Model
         }
         $paper->quantity -= 100;
         $paper->save();
-        $book->quantity += $education->rank;
+        $book->quantity += $action->rank;
         $book->save();
         $labor->availableSkillPoints--;
         $labor->save();
@@ -1378,8 +1334,7 @@ class Actions extends Model
       } else if ($actionName == 'make-contract'){
         $production = 1;
         if ($robot == null){
-          $contractingSkill = Skills::fetchByIdentifier('contracting', $agentID);
-          $production = $contractingSkill->rank;
+          $production = $action->rank;
         }
         $paper = Items::fetchByName('Paper', $agentID);
         if ($paper->quantity < 1){
@@ -1387,7 +1342,6 @@ class Actions extends Model
             'error' => $agentCaption . " do not have enough Paper. (1 needed)",
           ];
         }
-
         $paper->quantity--;
         $paper->save();
         $contract = Items::fetchByName('Contracts', $contractorID);
@@ -1404,12 +1358,7 @@ class Actions extends Model
       } else if ($actionName == 'make-CPU'){
         $production = 1;
         if ($robot == null){
-          $electricalEngineering = Skills::fetchByIdentifier('electricalEngineering', $agentID);
-          $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank;
-          if ($electricalEngineering->rank > 0){
-            $production *= $electricalEngineering->rank;
-          }
+          $production = $action->rank;
         }
 
         $silicon = \App\Items::fetchByName('Silicon', $agentID);
@@ -1491,12 +1440,7 @@ class Actions extends Model
         }
         $quantity = 1;
         if ($robot == null){
-          $vehicularEngineering = Skills::fetchByIdentifier('vehicularEngineering', $agentID);
-          $engineering = Skills::fetchByIdentifier('engineering', $agentID);
-          $quantity = $engineering->rank;
-          if ($vehicularEngineering->rank > 0){
-            $quantity *= $vehicularEngineering->rank;
-          }
+          $quantity = $action->rank;
         }
         $electricity->quantity -= 1000;
         $electricity->save();
@@ -1533,19 +1477,10 @@ class Actions extends Model
       } else if ($actionName == 'make-diesel-engine' || $actionName == 'make-gasoline-engine'){
         $production = 1;
         if ($robot == null){
-          $machining = Skills::fetchByIdentifier('machining', $agentID);
-          $production = $machining->rank;
+          $production = $action->rank;
         }
         $steel = \App\Items::fetchByName('Steel Ingots', $agentID);
         $iron = \App\Items::fetchByName('Iron Ingots', $agentID);      $quantity = 1;
-      if ($robot == null){
-        $toolmakingSpecific = Skills::fetchByIdentifier('toolmakingPowered', $agentID);
-        $toolmaking = Skills::fetchByIdentifier('toolmaking', $agentID);
-        $quantity = $toolmaking->rank;
-        if ($toolmakingSpecific->rank > 0){
-          $quantity *= $toolmakingSpecific->rank;
-        }
-      }
         $copper = \App\Items::fetchByName('Copper Ingots', $agentID);
         $engines = ['make-diesel-engine' => 'Diesel Engines', 'make-gasoline-engine'=>'Gasoline Engines'];
         if ($steel->quantity < 40 || $iron->quantity < 40 || $copper->quantity < 20){
@@ -1575,8 +1510,7 @@ class Actions extends Model
       } else if ($actionName == 'make-electric-motor' || $actionName == 'make-gas-motor'){
         $production = 1;
         if ($robot == null){
-          $machining = Skills::fetchByIdentifier('machining', $agentID);
-          $production = $machining->rank;
+          $production = $action->rank;
         }
 
         $steel = \App\Items::fetchByName('Steel Ingots', $agentID);
@@ -1633,12 +1567,7 @@ class Actions extends Model
       }
       $quantity = 1;
       if ($robot == null){
-        $toolmakingSpecific = Skills::fetchByIdentifier('toolmakingPowered', $agentID);
-        $toolmaking = Skills::fetchByIdentifier('toolmaking', $agentID);
-        $quantity = $toolmaking->rank;
-        if ($toolmakingSpecific->rank > 0){
-          $quantity *= $toolmakingSpecific->rank;
-        }
+        $quantity = $action->rank;
       }
       $steel->quantity -= 10;
       $steel->save();
@@ -1657,8 +1586,7 @@ class Actions extends Model
       } else if ($actionName == 'make-HerbMed'){
         $production = 1;
         if ($robot == null){
-          $medicine = Skills::fetchByIdentifier('medicine', $agentID);
-          $production = $medicine->rank;
+          $production = $action->rank;
         }
 
         $greens = Items::fetchByName('Herbal Greens', $agentID);
@@ -1692,11 +1620,7 @@ class Actions extends Model
 
         $material = ucfirst(explode('-', $actionName)[1]);
         $durabilityCaption = ItemTypes::durability(1);
-        $quantity = 1;
         if ($robot == null){
-          $toolmakingSpecific = Skills::fetchByIdentifier('toolmaking' . $material, $agentID);
-          $toolmaking = Skills::fetchByIdentifier('toolmaking', $agentID);
-          $quantity = $toolmaking->rank;
           if ($toolmakingSpecific->rank > 0){
             $durabilityCaption = ItemTypes::durability($toolmakingSkill->rank);
           }
@@ -1721,7 +1645,7 @@ class Actions extends Model
             'error' => "You do not have enough Wood. (1 needed).",
           ];
         }
-        $item->quantity += $quantity;
+        $item->quantity += $action->rank;
         $item->save();
         $stone->quantity -= 1;
         $stone->save();
@@ -1740,8 +1664,7 @@ class Actions extends Model
       } else if ($actionName == 'make-nanites'){
         $production = 1;
         if ($robot == null){
-          $nanotechnology = \App\Skills::fetchByIdentifier('nanotechnology', $agentID);
-          $production = $nanotechnology->rank;
+          $production = $action->rank;
         }
 
         $electricity = \App\Items::fetchByName('Electricity', $agentID);
@@ -1788,9 +1711,8 @@ class Actions extends Model
         if ($robot != null){
           return;
         }
-        $nanotechnology = Skills::fetchByIdentifier('nanotechnology', $agentID);
-        $medicine = Skills::fetchByIdentifier('medicine', $agentID);
-        $production = floor(($nanotechnology->rank + $medicine->rank) / 2);
+
+        $production = $action->rank;
         $electricity = \App\Items::fetchByName('Electricity', $agentID);
         $bioMeds = \App\Items::fetchByName('BioMeds', $agentID);
         $nanites = \App\Items::fetchByName('Nanites', $agentID);
@@ -1842,8 +1764,7 @@ class Actions extends Model
         $electricMotors = \App\Items::fetchByName('Electric Motors', $agentID);
         $production = 1;
         if ($robot == null){
-          $robotics  = Skills::fetchByIdentifier('robotics ', $agentID);
-          $production = $robotics->rank;
+          $production = $action->rank;
         }
         if (!\App\Buildings::didTheyAlreadyBuildThis('Robotics Lab', $agentID)){
           return [
@@ -1907,12 +1828,7 @@ class Actions extends Model
       $steel = \App\Items::fetchByName('Steel Ingots', $agentID);
       $production = 1;
       if ($robot == null){
-        $aerospaceEngineering  = Skills::fetchByIdentifier('aerospaceEngineering ', $agentID);
-        $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-        $production = $engineering->rank;
-        if ($aerospaceEngineering->rank > 0){
-          $production *= $aerospaceEngineering->rank;
-        }
+        $production = $action->rank;
       }
       if (!\App\Buildings::didTheyAlreadyBuildThis('Propulsion Lab', $agentID)){
         return [
@@ -1930,9 +1846,9 @@ class Actions extends Model
         return [
           'error' => "You don't have enough Steel Ingots (1000 needed) to do this.",
         ];
-      } else if ($electricity->quantity < 100 ){
+      } else if ($electricity->quantity < 1000 ){
         return [
-          'error' => "You don't have enough Electricity (100 needed) to do this.",
+          'error' => "You don't have enough Electricity (1000 needed) to do this.",
         ];
       }
       $buildingCaption = \App\Buildings::use('Propulsion Lab', $agentID);
@@ -1961,12 +1877,7 @@ class Actions extends Model
       } else if ($actionName == 'make-tire' || $actionName == 'make-radiation-suit'){
         $production = 1;
         if ($robot == null){
-          $chemicalEngineering = Skills::fetchByIdentifier('chemicalEngineering', $agentID);
-          $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank;
-          if ($chemicalEngineering->rank > 0){
-            $production *= $chemicalEngineering->rank;
-          }
+          $production = $action->rank;
         }
         $rubber = \App\Items::fetchByName('Rubber', $agentID);
         $electricity = \App\Items::fetchByName('Electricity', $agentID);
@@ -2006,13 +1917,12 @@ class Actions extends Model
         }
 
 
+
       } else if ($actionName == 'make-paper'){
         $production = 10;
         if ($robot == null){
-          $papermaking = Skills::fetchByIdentifier('papermaking', $agentID);
-          $production = $papermaking->rank * 10;
+          $production = $action->rank * 10;
         }
-
         $wood = Items::fetchByName('Wood', $agentID);
         $wood->quantity--;
         $wood->save();
@@ -2031,12 +1941,7 @@ class Actions extends Model
       } else if ($actionName == 'make-satellite'){
         $production = 1;
         if ($robot == null){
-          $aerospaceEngineering  = Skills::fetchByIdentifier('aerospaceEngineering ', $agentID);
-          $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank;
-          if ($aerospaceEngineering->rank > 0){
-            $production *= $aerospaceEngineering->rank;
-          }
+          $production = $action->rank;
         }
         $electricity = \App\Items::fetchByName('Electricity', $agentID);
         $cpu = \App\Items::fetchByName('CPU', $agentID);
@@ -2107,12 +2012,7 @@ class Actions extends Model
       } else if ($actionName == 'make-solar-panel'){
         $production = 1;
         if ($robot == null){
-          $electricalEngineering = Skills::fetchByIdentifier('electricalEngineering', $agentID);
-          $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank;
-          if ($electricalEngineering->rank > 0){
-            $production *= $electricalEngineering->rank;
-          }
+          $production = $action->rank;
         }
         $steel = \App\Items::fetchByName('Steel Ingots', $agentID);
         $copper = \App\Items::fetchByName('Copper Ingots', $agentID);
@@ -2189,8 +2089,7 @@ class Actions extends Model
         }
         $flourProduced = $modifier * .5;
         if ($robot == null){
-          $flourMillingSkill = Skills::fetchByIdentifier('flourMilling', $agentID);
-          $flourProduced = $flourMillingSkill->rank * ($modifier * .5);
+          $flourProduced = $action->rank * ($modifier * .5);
         }
         $wheat->quantity -= $modifier;
         $wheat->save();
@@ -2229,8 +2128,7 @@ class Actions extends Model
         }
         $woodProduced = 100 * $modifier;
         if ($robot == null){
-          $sawmillingSkill = Skills::fetchByIdentifier('sawmilling', $agentID);
-          $woodProduced = $sawmillingSkill->rank * 100 * $modifier;
+          $woodProduced = $action->rank * 100 * $modifier;
         }
         $logs->quantity -= $modifier;
         $logs->save();
@@ -2306,13 +2204,8 @@ class Actions extends Model
         $production = $modifier;
         if ($robot == null){
           $equipmentCaption = Equipment::useEquipped($agentID);
+          $production = $action->rank * ($modifier + $landBonus);
 
-          $miningSand = Skills::fetchByIdentifier('miningSand', $agentID);
-          $mining = Skills::fetchByIdentifier('mining', $agentID);
-          $production = $mining->rank * ($modifier + $landBonus);
-          if ($miningSand->rank > 0){
-            $production *= $miningSand->rank;
-          }
         } else {
           $equipmentCaption = \App\Robot::useEquipped($robotID);
         }
@@ -2404,13 +2297,8 @@ class Actions extends Model
         $production = $modifier;
         if ($robot == null){
           $equipmentCaption = Equipment::useEquipped($agentID);
-          $miningSpecific = Skills::fetchByIdentifier($miningArr[$actionName]['skill'], $agentID);
-          $mining = Skills::fetchByIdentifier('mining', $agentID);
+          $production = $action->rank * ($modifier + $landBonus);
 
-          $production = $mining->rank * ($modifier + $landBonus);
-          if ($miningSpecific->rank > 0){
-            $production *= $miningSpecific->rank;
-          }
         } else {
           $equipmentCaption = \App\Robot::useEquipped($robotID);
         }
@@ -2485,12 +2373,8 @@ class Actions extends Model
         }
         $production = 10;
         if ($robot == null){
-          $farming = \App\Skills::fetchByIdentifier('farming', $agentID);
-          $farmingRubber = \App\Skills::fetchByIdentifier('farmingRubber', $agentID);
-          $production = $farming->rank * (10 + $landBonus);
-          if ($farmingRubber->rank > 0){
-            $production *= $farmingRubber->rank;
-          }
+          $production = $action->rank * (10 + $landBonus);
+
         }
         $rubberPlantationType = \App\BuildingTypes::fetchByName('Rubber Plantation');
         $contractor = \App\User::find($contractorID);
@@ -2529,12 +2413,7 @@ class Actions extends Model
         ];
         $production = 10;
         if ($robot == null){
-          $farming = \App\Skills::fetchByIdentifier('farming', $agentID);
-          $farmingSpecific = \App\Skills::fetchByIdentifier($whichSkillName[$actionName], $agentID);
-          $production = $farming->rank * 10;
-          if ($farmingSpecific->rank > 0){
-            $production *= $farmingSpecific->rank;
-          }
+          $production = $action->rank * 10;
         }
         $fieldType = \App\BuildingTypes::fetchByName($whichItemType[$actionName] . ' Field');
         $contractor = \App\User::find($contractorID);
@@ -2563,13 +2442,7 @@ class Actions extends Model
         $buildingCaption = \App\Buildings::use('Oil Well', $agentID);
         $oilProduced = 10;
         if ($robot == null){
-          $petroleumEngineering = \App\Skills::fetchByIdentifier('petroleumEngineering', $agentID);
-          $engineering = Skills::fetchByIdentifier('engineering', $agentID);
-          $oilProduced = $engineering->rank * 10;
-
-          if ($petroleumEngineering->rank){
-            $oilProduced *= $petroleumEngineering->rank;
-          }
+          $oilProduced = $action->rank * 10;
         }
         $landResource = \App\Land::takeResource('Oil',  $agentID, $oilProduced, true);
         if ($landResource != true){
@@ -2603,9 +2476,8 @@ class Actions extends Model
           return ['error' => "You need to have at least 100 Oil to refine oil."];
         }
         $buildingCaption = \App\Buildings::use('Oil Refinery', $agentID);
-        $petroleumEngineering = \App\Skills::fetchByIdentifier('petroleumEngineering', $agentID);
-        $chemicalEngineering = \App\Skills::fetchByIdentifier('chemicalEngineering', $agentID);
-        $refineryYield = floor(($petroleumEngineering->rank + $chemicalEngineering->rank) / 2);
+
+        $refineryYield = $action->rank;
         $electricity->quantity -= 100;
         $electricity->save();
         $oil->quantity -= 100;
@@ -2676,12 +2548,7 @@ class Actions extends Model
         }
         $production = $productionModifier;
         if ($robot == null){
-          $smeltingCopper = Skills::fetchByIdentifier('smeltingCopper', $agentID);
-          $smelting = Skills::fetchByIdentifier('smelting', $agentID);
-          $production = $smelting->rank  * $productionModifier;
-          if ($smeltingCopper->rank > 0){
-            $production *= $smeltingCopper->rank;
-          }
+          $production = $action->rank  * $productionModifier;
         }
         $buildingCaption = \App\Buildings::use($buildingName, $agentID);
         $copperOre->quantity -= $modifier;
@@ -2752,12 +2619,7 @@ class Actions extends Model
         }
         $production = $productionModifier;
         if ($robot == null){
-          $smeltingIron = Skills::fetchByIdentifier('smeltingIron', $agentID);
-          $smelting = Skills::fetchByIdentifier('smelting', $agentID);
-          $production = $smelting->rank  * $productionModifier;
-          if ($smeltingIron->rank > 0){
-            $production *= $smeltingIron->rank;
-          }
+          $production = $action->rank  * $productionModifier;
         }
         $buildingCaption = \App\Buildings::use($buildingName, $agentID);
         $ironOre->quantity -= $modifier;
@@ -2828,12 +2690,7 @@ class Actions extends Model
         }
         $production = $productionModifier;
         if ($robot == null){
-          $smeltingSteel = Skills::fetchByIdentifier('smeltingSteel', $agentID);
-          $smelting = Skills::fetchByIdentifier('smelting', $agentID);
-          $production = $smelting->rank  * $productionModifier;
-          if ($smeltingSteel->rank > 0){
-            $production *= $smeltingSteel->rank;
-          }
+          $production = $action->rank  * $productionModifier;
         }
         $buildingCaption = \App\Buildings::use($buildingName, $agentID);
         $ironIngots->quantity -= $modifier;
@@ -2871,12 +2728,7 @@ class Actions extends Model
         $electricity = \App\Items::fetchByName('Electricity', $contractorID);
         $production = 1;
         if ($robot == null){
-          $electricalEngineering = \App\Skills::fetchByIdentifier('electricalEngineering', $agentID);
-          $engineering = \App\Skills::fetchByIdentifier('engineering', $agentID);
-          $production = $engineering->rank;
-          if ($electricalEngineering->rank > 0){
-            $production *= $electricalEngineering->rank;
-          }
+          $production = $action->rank;
         }
         $production *= $powerPlant->electricity;
         $powerPlant->electricity = 0;
