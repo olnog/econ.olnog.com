@@ -72,6 +72,13 @@ $(document).on('change', '.formatActions', function(e) {
 
 })
 
+$(document).on('change', '.filterActionTypes', function(e) {
+  $(".noDo").removeClass('d-none')
+  if ($("#showOnlyActionsYouCanDo").is(':checked')){
+    $(".noDo").addClass('d-none')
+  }
+
+})
 
 $(document).on('change', '.filterBuildings', function(e) {
   formatBuildings()

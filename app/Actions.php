@@ -47,7 +47,7 @@ class Actions extends Model
       }
 
 
-      $possibleActions = \App\Actions::fetchUnlocked($userID);
+      $possibleActions = \App\ActionTypes::all();
       foreach ($possibleActions as $action){
         $actionName = $action->name;
         if ($actionName == 'chop-tree'
@@ -1624,7 +1624,7 @@ class Actions extends Model
       ){
 
         $material = ucfirst(explode('-', $actionName)[1]);
-        $durabilityCaption = ItemTypes::durability(1);        
+        $durabilityCaption = ItemTypes::durability(1);
         $toolType = ItemTypes::where('material', explode('-', $actionName)[1])
           ->where('durability', $durabilityCaption)
           ->where('name', ucfirst(explode('-', $actionName)[2]))->first();

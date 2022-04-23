@@ -17,6 +17,7 @@ class ActionTypeController extends Controller
       return view('ActionTypes.index')->with([
         'actionTypes' => $actionTypes,
         'labor'       => \App\Labor::fetch(),
+        'availableActions'  => \App\Actions::available(\Auth::id()),
       ]);
     }
 

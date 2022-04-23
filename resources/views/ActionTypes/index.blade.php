@@ -5,9 +5,12 @@
     <a href="{{route('home')}}">[ Home ]</a>
   </div><div class='text-center'>
     You have {{$labor->availableSkillPoints }} point(s) to unlock a skill with.
+  </div><div class='text-center fw-bold'>
+    <input type='checkbox' id='showOnlyActionsYouCanDo' class='filterActionTypes' checked>
+    Show Only Actions You Can Do Now
   </div>
   @foreach($actionTypes as $actionType)
-    <div>
+    <div class="@if(in_array($actionType->name, $availableActions)) yesDo @else noDo d-none @endif">
       <?php $action = \App\Actions::fetchByName(\Auth::id(), $actionType->name); ?>
       @if ($action->unlocked == false)
       <form method='POST' action="/actionTypes/{{$actionType->id}}">
