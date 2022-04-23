@@ -264,6 +264,7 @@ class Labor extends Model
       $labor->actionsUntilSkill = 30;
       $labor->rebirth = false;
       $labor->save();
+      \App\Actions::reset();
 
       $corpse = \App\Items::fetchByName('Corpse', Auth::id());
       $corpse->quantity++;

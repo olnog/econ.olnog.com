@@ -12,7 +12,7 @@
   @foreach($actionTypes as $actionType)
     <div class="@if(in_array($actionType->name, $availableActions)) yesDo @else noDo d-none @endif">
       <?php $action = \App\Actions::fetchByName(\Auth::id(), $actionType->name); ?>
-      @if ($action->unlocked == false)
+      @if ($action->unlocked == false && $labor->availableSkillPoints > 0)
       <form method='POST' action="/actionTypes/{{$actionType->id}}">
       @csrf()
       {{ @method_field('PUT') }}

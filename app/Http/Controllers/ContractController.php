@@ -38,8 +38,8 @@ class ContractController extends Controller
         'items' => \App\Items::fetchInventory(),
         'buildings' => \App\Buildings::fetchBuilt(),
         'constructionSkill' => \App\Skills::fetchByIdentifier('construction', \Auth::id()),
-        'hireableActions' => \App\Actions::list(),
-        'freelanceActions' => \App\Actions::possible(),
+        'hireableActions' => \App\ActionTypes::all(),
+        'freelanceActions' => \App\Actions::fetchUnlocked(\Auth::id()),
         'labor' => \App\Labor::fetch(),
         'land' => \App\Land::where('userID', Auth::id())->get(),
       ]);
@@ -523,8 +523,6 @@ class ContractController extends Controller
       } else if ($request->type == 'hire'){
         $employer = \App\User::find($contract->userID);
         $user = Auth::user();
-        $skillIdentifier = \App\Actions::list()[$contract->action];
-        $skill = \App\Skills::fetchByIdentifier($skillIdentifier, $user->id);
         $cost = $contract->price;
         if ($contract->pricePerSkill){
           $cost = $contract->price * $skill->rank;
@@ -534,13 +532,6 @@ class ContractController extends Controller
           echo json_encode(['error' => "The contractor did not have the necessary clacks for this contract."]);
           $contract->active=false;
           $contract->save();
-          return;
-        } else if ($skillIdentifier != null
-          && $skill->rank < $contract->minSkillLevel){
-          $skillType = \App\SkillTypes::find($skill->skillTypeID);
-          echo json_encode(['error' => "You need to have a skill level of "
-            . $contract->minSkillLevel . " in ". $skillType->name
-            . " in order to do this action."]);
           return;
         }
         $user->clacks += $cost;
@@ -554,7 +545,8 @@ class ContractController extends Controller
           $contract->save();
           return;
         }
-        $msg = \App\Actions::do($contract->action, \App\Labor::defaultConsumption(\Auth::id()), Auth::id(), $contract->userID, null);
+        $msg = \App\Actions::do($contract->action, Auth::id(),
+          $contract->userID, null);
 
         if (isset($msg['error'])){
           $status = $msg['error'];
@@ -595,7 +587,7 @@ class ContractController extends Controller
         $user->save();
         $freelancer->clacks += $contract->price;
         $freelancer->save();
-        $msg = \App\Actions::do($contract->action, \App\Labor::defaultConsumption($contract->userID), $contract->userID, Auth::id(), null);
+        $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null);
         if (isset($msg['error'])){
           $status = $msg['error'];
         }  else {
@@ -789,7 +781,7 @@ class ContractController extends Controller
         'land' => \App\Land::fetch(),
         'leases' => \App\Lease::fetch(),
         'contracts' => \App\Contracts::fetch(),
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'land' => \App\Land::fetch(),
       ]);
 

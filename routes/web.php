@@ -185,13 +185,13 @@ Route::post('/rebirth', function(Request $request){
 
 });
 
-Route::get('/reset', function(){
-  \App\User::reset();
-  /*
+Route::post('/reset', function(){
+  //\App\User::reset();
+
   $labor = \App\Labor::fetch();
   $labor->rebirth = true;
   $labor->save();
-  */
+
   return redirect()->route('home');
 });
 

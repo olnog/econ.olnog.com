@@ -90,7 +90,7 @@ class User extends Authenticatable
       foreach($robots as $robot){
         \App\Robot::destroy($robot->id);
       }
-
+      \App\Actions::reset();
       \App\Skills::reset();
 
       $user = Auth::user();

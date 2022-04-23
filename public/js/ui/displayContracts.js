@@ -115,7 +115,7 @@ function displayContracts(){
       }
 
     } else if (contracts[i].category == 'hire'){
-      if (alwaysHireableActions.includes(contracts[i].action) || actions.available.includes(contracts[i].action)){
+      if (alwaysHireableActions.includes(contracts[i].action) || actions.possible.includes(contracts[i].action)){
         signContract = "<button id='hire-" + contracts[i].id
           + "' class='hire btn btn-success'>" + contracts[i].action + "</button>"
       }

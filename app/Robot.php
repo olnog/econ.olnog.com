@@ -58,7 +58,8 @@ class Robot extends Model
         }
         $robot->defaultAction = $defaultAction;
 
-        $msg = \App\Actions::do($defaultAction, null, \Auth::id(), \Auth::id(), $robotID);
+        $msg = \App\Actions::do($defaultAction, \Auth::id(), \Auth::id(),
+          $robotID);
         if (isset($msg['status'])){
           $robot->uses--;
           $electricity->quantity -= 100;

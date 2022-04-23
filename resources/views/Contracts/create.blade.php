@@ -7,18 +7,18 @@
 <div>
   What type of contract do you want to create?
 </div><div class='ms-3 mb-3'>
-  <input type='radio' id='contractCategory' name='category' value='hire'> Hire</input>
-  <input type='radio' id='contractCategory-freelance' name='category'
-    value='freelance' @if($defaultCategory=='freelance') checked @endif> Freelance</input>
+  <input type='radio' class='contractCategory' name='category' value='hire'> Hire</input>
+  <input type='radio' class='contractCategory' name='category'
+    value='freelance' > Freelance</input>
 
-  <input type='radio' id='contractCategory' name='category' value='construction'>Available for Construction & Repair</input>
-  <input type='radio' id='contractCategory' name='category' value='buyOrder'> Buy Items</input>
-  <input type='radio' id='contractCategory' name='category' value='sellOrder'> Sell Items</input>
-  <input type='radio' id='contractCategory' name='category' value='buyLand'>Buy Land</input>
-  <input type='radio' id='contractCategory' name='category' value='sellLand'>Sell Land</input>
-  <input type='radio' id='contractCategory' name='category' value='reproduction'>Reproduction</input>
-  <input type='radio' id='contractCategory' name='category' value='lease'>Lease Land</input>
-  <input type='radio' id='contractCategory' name='category' value='leaseBuilding'>Lease Buildings</input>
+  <input type='radio' class='contractCategory' name='category' value='construction'>Available for Construction & Repair</input>
+  <input type='radio' class='contractCategory' name='category' value='buyOrder'> Buy Items</input>
+  <input type='radio' class='contractCategory' name='category' value='sellOrder'> Sell Items</input>
+  <input type='radio' class='contractCategory' name='category' value='buyLand'>Buy Land</input>
+  <input type='radio' class='contractCategory' name='category' value='sellLand'>Sell Land</input>
+  <input type='radio' class='contractCategory' name='category' value='reproduction'>Reproduction</input>
+  <input type='radio' class='contractCategory' name='category' value='lease'>Lease Land</input>
+  <input type='radio' class='contractCategory' name='category' value='leaseBuilding'>Lease Buildings</input>
 
 
 </div><div id='contractError' class='text-danger text-center'>
@@ -120,7 +120,7 @@
       <select name='action'><option></option>
 
         @foreach($freelanceActions as $action)
-          <option>{{ $action }}</option>
+          <option>{{ $action->name }}</option>
         @endforeach
 
       </select>
@@ -153,8 +153,8 @@
   </div><div>
     Action:
     <select name='action'> <option></option>
-      @foreach($hireableActions as $action=>$skillName)
-        <option value='{{ $action }}'>{{ $action }}</option>
+      @foreach($hireableActions as $action)
+        <option value='{{ $action }}'>{{ $action->name }}</option>
       @endforeach
     </select>
   </div><div>

@@ -56,7 +56,7 @@ class ActionController extends Controller
         $food->quantity--;
         $food->save();
       }
-      $msg = \App\Actions::do($actionName, \App\Labor::formatConsumption(json_decode($request->consumption)), Auth::id(), Auth::id(), null);
+      $msg = \App\Actions::do($actionName, Auth::id(), Auth::id(), null);
       $status = "";
       if (isset($msg['error'])){
         echo json_encode(['error' => $msg['error'] ]);

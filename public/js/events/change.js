@@ -18,14 +18,12 @@ $(document).on('change', '.buyUntil', function(e) {
   }
 })
 
-$(document).on('change', '#contractCategory', function(e) {
+$(document).on('change', '.contractCategory', function(e) {
   $(".contractSection").addClass('d-none')
   if ($("#contractCategory:checked").val() == 'sellLand' && !doTheyOwnLand()){
     $("#contractError").html("You don't own any land to sell. (Explore.)")
     return
-  } else if ($("#contractCategory:checked").val() == 'freelance' && labor.workHours == 0){
-    $("#contractError").html("You aren't able to freelance because you have no work hours to work.")
-    return
+
   } else   if ($("#contractCategory:checked").val() == 'repair' && buildings.built.length == 0){
       $("#contractError").html("You don't have any buildings to repair.")
       return;
@@ -38,7 +36,8 @@ $(document).on('change', '#contractCategory', function(e) {
   } else {
     $("#contractError").html('')
   }
-  $("#" + $("#contractCategory:checked").val() + "Section").removeClass('d-none')
+  console.log("#" + $(".contractCategory:checked").val() + "Section")
+  $("#" + $(".contractCategory:checked").val() + "Section").removeClass('d-none')
 })
 
 $(document).on('change', '.contractFilter', function(e) {

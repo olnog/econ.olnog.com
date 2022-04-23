@@ -89,7 +89,7 @@ function displayHireableActions(){
   for (let i in contracts){
     if (contracts[i].category=='hire'
       && (alwaysHireableActions.includes(contracts[i].action)
-      || actions.available.includes(contracts[i].action))){
+      || actions.possible.includes(contracts[i].action))){
       html += "<button id='hireAction-" + contracts[i].id
       + "' class='hire btn btn-success'>" + contracts[i].action + " (+"
       + contracts[i].price + ")</button>"
