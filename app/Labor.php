@@ -17,7 +17,7 @@ class Labor extends Model
         return false;
       }
       $equipment = Equipment::find($labor->equipped);
-      if ($equipment->type->name == $itemName){
+      if (substr($equipment->type->name, 0, strlen($itemName)) == $itemName){
         return true;
       }
       return false;

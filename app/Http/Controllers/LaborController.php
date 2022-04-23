@@ -51,10 +51,14 @@ class LaborController extends Controller
      */
     public function store(Request $request)
     {
+      $usesArr = ['stone' => 100, 'iron'=> 1000, 'steel'=> 10000];
       $toolItem = Items::where('items.id', $request->itemID)
         ->join('itemTypes', 'items.itemTypeID', 'itemTypes.id')
         ->select('items.id', 'itemTypeID', 'quantity', 'name', 'description',
           'durability', 'material')->first();
+      if ($toolItem->material != null){
+        $numOfUses = $usesArr[$toolItem->material];
+      }
       if ($toolItem->quantity < 1){
         return;
       }
@@ -73,8 +77,6 @@ class LaborController extends Controller
         || substr($toolItem['name'], 0, strlen('Bulldozer'))  == 'Bulldozer'
       ){
         $numOfUses = 1000;
-      } else {
-        $numOfUses = \App\Equipment::fetchUses($toolItem->material, $toolItem->durability);
       }
       $equipment->uses = $numOfUses;
       $equipment->totalUses = $numOfUses;
@@ -88,7 +90,7 @@ class LaborController extends Controller
 
       $labor->save();
       echo json_encode([
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(),
         'labor' => \App\Labor::fetch(),
         'items' => Items::fetch(),
         'equipment' => \App\Equipment::fetch()

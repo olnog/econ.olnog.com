@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<a href='{{ route('home')}}'>[ home ]</a>
+<div>
+  <a href='{{ route('home')}}'>[ home ]</a>
+</div><div class='text-center'>
+  Number of Items: {{count($itemTypes)}}
+</div>
 <form id='updateItemTypeForm' method="POST" action="{{ route('itemTypes.store') }}" class=' mt-3 mb-3'>
     @csrf
     <input type='hidden' id='itemTypeIDInput'>
@@ -21,8 +25,12 @@
   </div>
 
 </form>
+@foreach ($itemTypes as $itemType)
+  <div> <a href="#itemTypeDiv{{$itemType->id}}">{{$itemType->name}}</a></div>
+@endforeach
+
   @foreach ($itemTypes as $itemType)
-    <div class='fw-bold'>
+    <div id='itemTypeDiv{{$itemType->id}}' class='fw-bold'>
       #{{$itemType->id}} <span id='itemName{{ $itemType->id }}'>{{ $itemType->name }}</span>
       @if($itemType->material != null)
       ( {{ $itemType->material }} / {{ $itemType->durability }} )
@@ -30,6 +38,12 @@
       <button id='updateItemType-{{$itemType->id}}' class='updateItemType btn btn-link'>[ update ]</button>
     </div><div id='itemDescription{{ $itemType->id }}'>
       {{ $itemType->description }}
+    </div><div class='mb-3'>
+      <form method='POST' action="/itemTypes/{{$itemType->id}}">
+        @method('delete')
+        @csrf()
+        <button class='btn btn-danger'>delete</button>
+      </form>
     </div>
 
   @endforeach

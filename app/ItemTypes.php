@@ -16,6 +16,7 @@ class ItemTypes extends Model
   public static function new($itemTypeID){
     $buyOrder = new \App\BuyOrders;
     $buyOrder->itemTypeID = $itemTypeID;
+    $buyOrder->unitCost = 1;
     $buyOrder->save();
     $itemType = \App\ItemTypes::find($itemTypeID);
     foreach (\App\User::all() as $user){

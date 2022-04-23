@@ -43,18 +43,14 @@ class ItemTypeController extends Controller
 
       if ($request->tool == 'on'){
         $materials = ["iron", "stone", 'steel'];
-        $durabilities = ["horrible", "poor", "average", "good", "great"];
         foreach($materials as $material){
-          foreach($durabilities as $durability){
             $itemTypes = new ItemTypes;
-            $itemTypes->name = $request->name;
+            $itemTypes->name = $request->name . " (" . $material . ")";
             $itemTypes->countable = $request->countable == 'on';
             $itemTypes->description = $request->description;
-            $itemTypes->durability = $durability;
             $itemTypes->material = $material;
             $itemTypes->save();
             \App\ItemTypes::new($itemTypes->id);
-          }
         }
         return redirect()->route('itemTypes.index');
       }
@@ -114,6 +110,28 @@ class ItemTypeController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if (\Auth::id() != 5){
+          return;
+        }
+        $itemType = \App\ItemTypes::find($id);
+        $buyOrders = \App\BuyOrders::where('itemTypeID', $itemType->id)->get();
+        $contracts = \App\Contracts::where('itemTypeID', $itemType->id)->get();
+        $equipment = \App\Equipment::where('itemTypeID', $itemType->id)->get();
+        $items = \App\Items::where('itemTypeID', $itemType->id)->get();
+        foreach ($buyOrders as $buyOrder){
+          \App\BuyOrders::destroy($buyOrder->id);
+        }
+        foreach($contracts as $contract){
+          \App\Contracts::destroy($contract->id);
+        }
+        foreach($equipment as $shit){
+          \App\Equipment::destroy($shit->id);
+        }
+        foreach($items as $item){
+          \App\Items::destroy($item->id);
+        }
+        \App\ItemTypes::destroy($itemType->id);
+        return redirect()->route('itemTypes.index');
+
     }
 }

@@ -1634,20 +1634,19 @@ class Actions extends Model
       ){
 
         $material = ucfirst(explode('-', $actionName)[1]);
-        $durabilityCaption = ItemTypes::durability(1);
         $toolType = ItemTypes::where('material', explode('-', $actionName)[1])
-          ->where('durability', $durabilityCaption)
-          ->where('name', ucfirst(explode('-', $actionName)[2]))->first();
+          ->where('name', ucfirst(explode('-', $actionName)[2]) . " ("
+            . explode('-', $actionName)[1] . ")")->first();
         $item = Items::where('itemTypeID', $toolType->id)
           ->where('userID', $contractorID)->first();
         if ($material != 'Stone'){
           $material .= " Ingots";
         }
-        $stone = Items::fetchByName($material, $agentID);
+        $buildMaterial = Items::fetchByName($material, $agentID);
         $wood = Items::fetchByName('Wood', $agentID);
-        if ($stone->quantity < 1){
+        if ($buildMaterial->quantity < 1){
           return [
-            'error' => "You do not have enough " . $material . " (1 needed).",
+            'error' => "You do not have enough " . $material . " (1 needed)." . $buildMaterial->id,
           ];
         } else if ($wood->quantity < 1){
           return [
@@ -1656,12 +1655,12 @@ class Actions extends Model
         }
         $item->quantity += $action->rank;
         $item->save();
-        $stone->quantity -= 1;
-        $stone->save();
+        $buildMaterial->quantity -= 1;
+        $buildMaterial->save();
         $wood->quantity -= 1;
         $wood->save();
-        $status = $agentCaption . " used 1 " . explode('-', $actionName)[1] . " [" . number_format($stone->quantity) . "]"
-          . " and 1 wood [" . number_format($wood->quantity) . "] to make " . $quantity . " " . $durabilityCaption . " "
+        $status = $agentCaption . " used 1 " . explode('-', $actionName)[1] . " [" . number_format($buildMaterial->quantity) . "]"
+          . " and 1 wood [" . number_format($wood->quantity) . "] to make " . $action->rank . " "
           . explode('-', $actionName)[1] . " " . explode('-', $actionName)[2]
           . ". <button id='statusEquipItem-" . $item->id . "' class='equipItem btn btn-link'>[ equip item ]</button>";
         if ($agentID == $contractorID){
