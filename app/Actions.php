@@ -263,13 +263,16 @@ class Actions extends Model
           || !\App\Items::doTheyHave('Iron Ingots', 40)
           || !\App\Items::doTheyHave('Steel Ingots', 40)
           || !\App\Items::doTheyHave('Copper Ingots', 20)
+          || !\App\Items::doTheyHave('Electricity', 100)
+
           )){
             continue;
         } else if (($actionName == 'make-electric-motor' || $actionName == 'make-gas-motor')
           && (!\App\Buildings::doesItExist('Machine Shop', Auth::id())
           || !\App\Items::doTheyHave('Iron Ingots', 10)
           || !\App\Items::doTheyHave('Steel Ingots', 10)
-          || !\App\Items::doTheyHave('Copper Ingots', 50)
+          || !\App\Items::doTheyHave('Copper Ingots', 5)
+          || !\App\Items::doTheyHave('Electricity', 25)
           )){
             continue;
 
@@ -1457,6 +1460,8 @@ class Actions extends Model
         if ($robot == null){
           $quantity = $action->rank;
         }
+        $buildingCaption = \App\Buildings::use('Garage', $agentID);
+
         $electricity->quantity -= 1000;
         $electricity->save();
         $steel->quantity -= $requirements[explode('-', $actionName)[2]]['steel'];
@@ -1479,7 +1484,7 @@ class Actions extends Model
           . $requirements[explode('-', $actionName)[2]]['copper'] . " Copper ["
           . number_format($copper->quantity) . "] and 1 " . explode('-', $actionName)[1]
           . " engine to create " . $quantity . " "
-          . ucfirst(explode('-', $actionName)[2]) . " (" . explode('-', $actionName)[1] . ")";
+          . ucfirst(explode('-', $actionName)[2]) . " (" . explode('-', $actionName)[1] . ") " . $buildingCaption;
         if ($agentID == $contractorID){
           $status .= " You now have " . $vehicles->quantity . ".";
         }
@@ -1497,13 +1502,23 @@ class Actions extends Model
         $steel = \App\Items::fetchByName('Steel Ingots', $agentID);
         $iron = \App\Items::fetchByName('Iron Ingots', $agentID);      $quantity = 1;
         $copper = \App\Items::fetchByName('Copper Ingots', $agentID);
+        $electricity = \App\Items::fetchByName('Electricity', $agentID);
         $engines = ['make-diesel-engine' => 'Diesel Engines', 'make-gasoline-engine'=>'Gasoline Engines'];
-        if ($steel->quantity < 40 || $iron->quantity < 40 || $copper->quantity < 20){
+        if ($steel->quantity < 40 || $iron->quantity < 40
+          || $copper->quantity < 20 || $electricity->quantity < 100){
           return [
             'error' => $agentCaption . " do not have enough materials to create this engine."
           ];
+        } else if (!\App\Buildings::doesItExist('Machine Shop', $agentID)){
+          return [
+            'error' => $agentCaption . " do not have a Machine Shop."
+          ];
         }
+        $buildingCaption = \App\Buildings::use('Machine Shop', $agentID);
+
         $engineType = $engines[$actionName];
+        $electricity->quantity -= 100;
+        $electricity->save();
         $steel->quantity -= 40;
         $steel->save();
         $iron->quantity -= 40;
@@ -1513,9 +1528,11 @@ class Actions extends Model
         $enginesBeingCreated = \App\Items::fetchByName($engineType, $contractorID);
         $enginesBeingCreated->quantity += $production;
         $enginesBeingCreated->save();
-        $status = $agentCaption . " used 40 Steel [" . number_format($steel->quantity)
+        $status = $agentCaption . " used 100 Electricity ["
+        . number_format($electricity->quantity) . "], 40 Steel [" . number_format($steel->quantity)
           . "], 40 Iron [" . number_format($iron->quantity) . "] and 20 Copper ["
-          . number_format($copper->quantity) . "] to create " . $production . " " . $engineType . ". ";
+          . number_format($copper->quantity) . "] to create " . $production . " "
+          . $engineType . ". " .  $buildingCaption;
         if ($agentID == $contractorID){
           $status .= " You now have " . number_format($enginesBeingCreated->quantity) . ".";
         }
@@ -1531,13 +1548,24 @@ class Actions extends Model
         $steel = \App\Items::fetchByName('Steel Ingots', $agentID);
         $iron = \App\Items::fetchByName('Iron Ingots', $agentID);
         $copper = \App\Items::fetchByName('Copper Ingots', $agentID);
+        $electricity = \App\Items::fetchByName('Electricity', $agentID);
+
         $engines = ['make-electric-motor' => 'Electric Motors', 'make-gas-motor'=>'Gas Motors'];
-        if ($steel->quantity < 10 || $iron->quantity < 10 || $copper->quantity < 5){
+        if ($steel->quantity < 10 || $iron->quantity < 10
+          || $copper->quantity < 5 || $electricity->quantity < 25){
           return [
             'error' => $agentCaption . " do not have enough materials to create this motor."
           ];
+        } else if (!\App\Buildings::doesItExist('Machine Shop', $agentID)){
+          return [
+            'error' => $agentCaption . " do not have a Machine Shop."
+          ];
         }
+        $buildingCaption = \App\Buildings::use('Machine Shop', $agentID);
+
         $engineType = $engines[$actionName];
+        $electricity->quantity -= 25;
+        $electricity->save();
         $steel->quantity -= 10;
         $steel->save();
         $iron->quantity -= 10;
@@ -1549,7 +1577,7 @@ class Actions extends Model
         $enginesBeingCreated->save();
         $status = $agentCaption . " used 10 Steel [" . number_format($steel->quantity)
           . "], 10 Iron [" . number_format($iron->quantity) . "] and 5 Copper ["
-          . number_format($copper->quantity) . "] to create " . $production . " " . $engineType . ". ";
+          . number_format($copper->quantity) . "] to create " . $production . " " . $engineType . ". " . $buildingCaption;
         if ($agentID == $contractorID){
           $status .= " You now have " . number_format($enginesBeingCreated->quantity) . ".";
         }
