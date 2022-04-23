@@ -37,6 +37,14 @@ class Actions extends Model
       $availableActions = [];
       $availableBuildings = null;
       $labor = \App\Labor::where('userID', \Auth::id())->first();
+      $wearingRadiationSuit = false;
+      if ($labor->alsoEquipped != null){
+        $equipment = \App\Equipment::find($labor->alsoEquipped);
+        $itemType = \App\ItemTypes::find($equipment->itemTypeID);
+        if ($itemType->name == 'Radiation Suit'){
+          $wearingRadiationSuit = true;
+        }
+      }
       //if (Skills::fetchByIdentifier('construction', Auth::id())->rank > 0){
         //$availableBuildings  = Actions::fetchAvailableBuildings();
       //}
@@ -389,6 +397,8 @@ class Actions extends Model
             && !Labor::areTheyEquippedWith('Jackhammer (gas)', Auth::id()))
             || !Land::doTheyHaveAccessTo('mountains'))){
           continue;
+        } else if ($actionName == 'mine-uranium-ore' && !$wearingRadiationSuit){
+        continue;
         } else if ($actionName == 'plant-rubber-plantation'
           && (\App\User::find(Auth::id())->buildingSlots<1
           || !Land::doTheyHaveAccessTo('jungle'))){
@@ -2240,6 +2250,7 @@ class Actions extends Model
       } else if ($actionName == 'mine-coal' || $actionName == 'mine-iron-ore'
         || $actionName == 'mine-stone' || $actionName == 'mine-copper-ore'
         || $actionName == 'mine-uranium-ore'){
+        $labor = \App\Labor::where('userID', $agentID)->first();
         $electricity = Items::fetchByName('Electricity', $contractorID);
         $gas = Items::fetchByName('Gasoline', $contractorID);
         $leaseStatus = '';
@@ -2273,6 +2284,15 @@ class Actions extends Model
           return [
             'error' => $agentCaption . " have a gas-powered Jackhammer equipped but does not have enough Gasoline to use it."
           ];
+        } else if ($labor->alsoEquipped != null){
+          $equipment = \App\Equipment::find($labor->alsoEquipped);
+          $itemType = \App\ItemTypes::find($equipment->itemTypeID);
+          if ($itemType->name != 'Radiation Suit'
+            && $actionName ==  'mine-uranium-ore'){
+            return [
+              'error' => $agentCaption . " need a Radiation Suit in order to mine Uranium Ore."
+            ];
+          }
         }
         $buildingCaption = "";
         $modifier = 10;
@@ -2329,11 +2349,8 @@ class Actions extends Model
         if ($agentID == $contractorID){
           $status .= " You  now have " . number_format($itemProduced->quantity) . ". " ;
         }
-        if ($actionName ==  'mine-uranium-ore' && $robot == null){
-          $labor = \App\Labor::where('userID', $agentID)->first();
-          $wearingRadiationSuit = false;
-          if ($labor->alsoEquipped != null){
-            $equipment = \App\Equipment::find($labor->alsoEquipped);
+        if ($actionName ==  'mine-uranium-ore' && $robot == null
+          && $labor->alsoEquipped != null){
             $equipment->uses--;
             $equipment->save();
             if ($equipment->uses < 1){
@@ -2342,15 +2359,6 @@ class Actions extends Model
               $labor->alsoEquipped = null;
               $labor->save();
             }
-            $itemType = \App\ItemTypes::find($equipment->itemTypeID);
-            if ($itemType->name == 'Radiation Suit'){
-              $wearingRadiationSuit = true;
-            }
-          }
-          if (!$wearingRadiationSuit ){
-            $radStatus = " You weren't wearing a Radiation Suit, so you took a lot of radiation. It's going to take a lot longer to learn things now. ";
-            \App\Labor::radPenalty($agentID);
-          }
         }
 
 
