@@ -13,6 +13,7 @@
       <form method='POST' action="/actionTypes/{{$actionType->id}}">
       @csrf()
       {{ @method_field('PUT') }}
+      <input type='hidden' name='whatWeDoing' value='notUpdating'>
       <button id='incrementSkill-{{$actionType->id}}' class='btn btn-outline-success me-3'>+</button>
       <span class='fw-bold'>{{$actionType->name}}</span>
 
@@ -23,7 +24,7 @@
       @else
         &#10003;
         <span class='fw-bold'>{{$actionType->name}}</span>
-        ({{$action->rank}})
+        {{$action->rank}}X
         <a href=# id='show-actionTypeDescription{{$actionType->id}}' class='ms-3 show  '>[ + ]</a>
         <a href='#' id='hide-actionTypeDescription{{$actionType->id}}' class='ms-3 hide d-none'>[ - ]</a>
       @endif

@@ -28,7 +28,7 @@ class ActionTypeController extends Controller
     public function create()
     {
         return view('ActionTypes.create')->with([
-          'actionTypes' => \App\ActionTypes::all(),
+          'actionTypes' => \App\ActionTypes::orderBy("name")->get(),
         ]);
     }
 
@@ -40,15 +40,17 @@ class ActionTypeController extends Controller
      */
     public function store(Request $request)
     {
-      $actionType = \App\ActionTypes::find($id);
-      if ($request->actionDescription == null){
-        $actionType->description = "";
-      } else {
-        $actionType->description = trim($request->actionDescription);
-      }
-      $actionType->name = trim($request->actionName);
+      $actionType = new \App\ActionType;
+      $actionType->name = $request->actionName;
+      $actionType->description = $request->actionDescription;
       $actionType->save();
-      return redirect()->route('actionTypes.create');
+      $users = \App\User::all();
+      foreach ($users as $user){
+        $action = new \App\Actions;
+        $action->userID = \Auth::id();
+        $action->actionTypeID = $actionType->id;
+        $action->save();
+      }
     }
 
     /**
@@ -82,6 +84,18 @@ class ActionTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
+      if ($request->whatWeDoing == 'update'){
+        $actionType = \App\ActionTypes::find($id);
+        if ($request->actionDescription == null){
+          $actionType->description = "";
+        } else {
+          $actionType->description = trim($request->actionDescription);
+        }
+        $actionType->name = trim($request->actionName);
+        $actionType->save();
+        return redirect()->route('actionTypes.create');
+      }
+
       $actionType = \App\ActionTypes::find($id);
       $action = \App\Actions::where('userID', \Auth::id())
         ->where('actionTypeID', $actionType->id)->first();
@@ -89,9 +103,6 @@ class ActionTypeController extends Controller
       if (!$action->unlocked && $labor->availableSkillPoints > 0 ){
         $labor->availableSkillPoints--;
         $labor->save();
-        if ($action->rank == 0){
-          $action->rank = 1;
-        }
         $action->unlocked = true;
         $action->save();
       }

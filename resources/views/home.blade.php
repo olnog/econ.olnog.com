@@ -387,6 +387,8 @@
 
   @if (\Auth::id() == 5)
     <div class='mainScreen text-center mb-3 mt-5'>
+      <a href='/actionTypes/create' class='m-3'>Action Types</a>
+
       <a href='/skillTypes' class='m-3'>Skill Types</a>
       <a href='/itemTypes' class='m-3'>Item Types</a>
       <a href='/buildingTypes' class='m-3'>Building Types</a>

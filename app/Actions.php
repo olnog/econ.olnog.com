@@ -452,6 +452,11 @@ class Actions extends Model
     public static function do($actionName, $consumption, $agentID, $contractorID, $robotID){
       \App\Metric::newAction($agentID, $actionName);
       $action = \App\Actions::fetchByName($agentID, $actionName);
+      if (!$action->unlocked || $action->rank == 0){
+        return [
+          'error' => "This action hasn't been unlocked yet.",
+        ];
+      }
       \App\Labor::doAction($agentID, $action->id);
       $status = "";
       $contractorCaption = " They ";
@@ -1619,13 +1624,7 @@ class Actions extends Model
       ){
 
         $material = ucfirst(explode('-', $actionName)[1]);
-        $durabilityCaption = ItemTypes::durability(1);
-        if ($robot == null){
-          if ($toolmakingSpecific->rank > 0){
-            $durabilityCaption = ItemTypes::durability($toolmakingSkill->rank);
-          }
-
-        }
+        $durabilityCaption = ItemTypes::durability(1);        
         $toolType = ItemTypes::where('material', explode('-', $actionName)[1])
           ->where('durability', $durabilityCaption)
           ->where('name', ucfirst(explode('-', $actionName)[2]))->first();

@@ -6,7 +6,7 @@
 </div>
 <form id='updateActionTypeForm' method="POST" action="{{ route('actionTypes.store') }}" class='mt-3 mb-3'>
     @csrf
-
+    <input type='hidden' name='whatWeDoing' value='update'>
   <div class='fw-bold'>
     Name:
   </div><div>

@@ -258,12 +258,8 @@ class Labor extends Model
           $labor->startingSkillPoints++;
       }
 
-      $labor->maxSkillPoints += $labor->pendingMaxSkillPoints;
-      $labor->pendingMaxSkillPoints = 0;
 
-      $labor->workHours = $labor->startingWorkHours;
-      $labor->availableSkillPoints = $labor->startingSkillPoints;
-      $labor->allocatedSkillPoints = 0;
+      $labor->availableSkillPoints = 4;
       $labor->actions = 0;
       $labor->actionsUntilSkill = 30;
       $labor->rebirth = false;

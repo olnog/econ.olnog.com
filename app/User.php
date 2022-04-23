@@ -76,13 +76,9 @@ class User extends Authenticatable
       }
 
       $labor = \App\Labor::fetch();
-      $labor->workHours = 1000;
-      $labor->startingWorkHours = 1000;
+
       $labor->equipped = null;
-      $labor->startingSkillPoints = 3;
-      $labor->availableSkillPoints = 3;
-      $labor->allocatedSkillPoints = 0;
-      $labor->maxSkillPoints = 0;
+      $labor->availableSkillPoints = 4;
       $labor->actions=0;
       $labor->actionsUntilSkill = 30;
       $labor->rebirth=false;
