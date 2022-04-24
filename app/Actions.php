@@ -1359,6 +1359,43 @@ class Actions extends Model
 
 
 
+      } else if ($actionName == 'make-clone'){
+        $production = 1;
+        if ($robot == null){
+          $production = $action->rank;
+        }
+        $electricity = Items::fetchByName('Electricity', $contractorID);
+        $geneticMaterial = Items::fetchByName('Genetic Material', $contractorID);
+        $clones = Items::fetchByName('Clones', $contractorID);
+        if ($geneticMaterial->quantity < 1000){
+          return [
+            'error' => $agentCaption . " do not have enough Genetic Material. (1,000 needed)",
+          ];
+        } else if ($electricity->quantity < 1){
+          return [
+            'error' => $agentCaption . " do not have enough Electricity. (100,000 needed)",
+          ];
+        } else if (!\App\Buildings::didTheyAlreadyBuildThis('Clone Vat', $contractorID)){
+          return [
+            'error' => "You need to have a Clone Vat to do this.",
+          ];
+        }
+        $electricity->quantity -= 100000;
+        $electricity->save();
+        $geneticMaterial->quantity -= 1000;
+        $geneticMaterial->save();
+        $clones += $production;
+        $clones->save();
+        $status = $agentCaption . " created " . $production
+          . " Clone(s) from 1,000 Genetic Material. ["
+          . number_format($geneticMaterial->quantity) . "] and 100,000 Electricity ["
+          . number_format($electricity->quantity) . "].";
+        if ($agentID == $contractorID){
+          $status .= " You now have " . number_format($clones->quantity) . ".";
+        }
+
+
+
       } else if ($actionName == 'make-contract'){
         $production = 1;
         if ($robot == null){

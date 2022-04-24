@@ -12,9 +12,14 @@
       Which would you rather do?
     </div><div class='ms-3'>
       <input type='checkbox' name='legacy' @if($children < 1) disabled @endif>
-      Legacy - start your next game with your actions still locked but your
+      Legacy - reststart with your actions still locked but your
       rank progress is saved. (requires one of your Children - which can be
       created through a Reproduction contract)
+    </div><div class='ms-3'>
+      <input type='checkbox' name='immortality' @if($clones < 1) disabled @endif>
+      Immortality - restart with your actions still locked but your
+      rank progress is saved and you get a point back for each action. (requires one of your Clones - which can be
+      created using a Clone Vat)
     </div><div class='mt-5'>
       <button class='btn btn-primary form-control'>rebirth</button>
     </div>

@@ -19,8 +19,9 @@ class Robot extends Model
     }
 
     public static function fetch(){
-      return \App\Robot::join('skillTypes', 'robots.skillTypeID', 'skillTypes.id')
-        ->select('robots.id', 'name', 'skillTypeID', 'uses', 'num', 'defaultAction', 'doDefaultWhenAble')->where('userID', \Auth::id())->get();
+      return \App\Robot::join('action_types', 'robots.actionTypeID', 'action_types.id')
+        ->select('robots.id', 'name', 'actionTypeID', 'uses', 'num', 'defaultAction',
+        'doDefaultWhenAble')->where('userID', \Auth::id())->get();
     }
 
     public static function fetchBannedActions(){

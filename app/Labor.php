@@ -211,7 +211,8 @@ class Labor extends Model
       $labor->save();
     }
 
-    public static function rebirth($legacy){
+    public static function rebirth($legacy, $immortality){
+      $availableSkillPoints = 4;
       $labor = \App\Labor::fetch();
       if (!$labor->rebirth){
         return;
@@ -225,7 +226,6 @@ class Labor extends Model
       }
       $user->save();
       if ($legacy){
-
         $children = \App\Items::fetchByName('Children', \Auth::id());
         if ($children->quantity < 1){
           return;
@@ -233,10 +233,21 @@ class Labor extends Model
         $children->quantity--;
         $children->save();
       }
-      \App\Actions::reset($legacy);
-      $labor->availableSkillPoints = 4;
-      $labor->actions = 0;
-      $labor->actionsUntilSkill = 30;
+      if ($immortality){
+        $clones = \App\Items::fetchByName('Clones', \Auth::id());
+        if ($clones->quantity < 1){
+          return;
+        }
+        $clones->quantity--;
+        $clones->save();
+        $availableSkillPoints = count(\App\Actions::fetchUnlocked(\Auth::id()));
+      }
+      if (!$immortality){
+        $labor->actions = 0;
+        $labor->actionsUntilSkill = 30;
+      }
+      \App\Actions::reset($legacy ||  $immortality);
+      $labor->availableSkillPoints = $availableSkillPoints;
       $labor->rebirth = false;
       $labor->save();
       $corpse = \App\Items::fetchByName('Corpse', Auth::id());

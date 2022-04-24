@@ -150,13 +150,10 @@ Route::get('/rebirth', function () {
   if (!$labor->rebirth ){
     return redirect()->route('home');
   }
-
   return view('rebirth')->with([
-    'books' => \App\Items::fetchByName('Books', \Auth::id())->quantity,
     'children' => \App\Items::fetchByName('Children', \Auth::id())->quantity,
+    'clones' => \App\Items::fetchByName('Clones', \Auth::id())->quantity,
     'labor' => $labor,
-    'skills'=>\App\Skills::where('userID', Auth::id())->where('rank', '>', 0)
-      ->join("skillTypes", 'skills.skillTypeID', 'skillTypes.id')->get(),
     'tax' => \App\Labor::fetchTax(),
   ]);
 })->name('rebirth');
@@ -166,7 +163,7 @@ Route::post('/rebirth', function(Request $request){
   if (!$labor->rebirth ){
     return redirect()->route('home');
   }
-  \App\Labor::rebirth($request->legacy == "on");
+  \App\Labor::rebirth($request->legacy == "on", $request->immortality == "on");
   return redirect()->route('home');
 
 });
