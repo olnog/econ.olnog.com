@@ -1,6 +1,7 @@
 $.get('/ajax', function(data){
   let obj = JSON.parse(data)
   actions       = obj.actions
+  actionTypes   = obj.actionTypes
   autoBribe     = obj.autoBribe
   avgBribe      = obj.avgBribe
   buildings     = obj.buildings

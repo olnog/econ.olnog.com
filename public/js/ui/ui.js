@@ -72,18 +72,18 @@ function displayRobots (){
 
 function displayRobotSkill(){
   let html = "<option value='null'></option>"
-  let skillList = []
-  let badSkillList = ['construction', 'education']
-  for (let i in skills){
-    if (skills[i].rank > 0){
-      skillList.push(i)
+  let actionList = []
+  let badActionList = ['build', 'repair', 'make-book']
+  for (let i in actions.unlocked){
+    if (actions.unlocked[i].rank > 0){
+      actionList.push(actions.unlocked[i].name)
     }
   }
-  for (let i in skillList){
-    if (badSkillList.includes(skillList[i])){
+  for (let i in actionList){
+    if (badActionList.includes(actionList[i])){
       continue
     }
-    html += "<option value='" + skillList[i] + "'>" + skills[skillList[i]].caption + "</option>"
+    html += "<option value='" + actionList[i] + "'>" + dedashify(actionList[i]) + "</option>"
   }
   $(".reprogramList").html(html)
   $("#robotSkillList").html(html)

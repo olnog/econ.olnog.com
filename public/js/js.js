@@ -239,11 +239,11 @@ function processAndSendRobotActions(){
   })
 }
 
-function programRobot(skillIdentifier){
-  if (skillIdentifier == 'null'){
+function programRobot(actionName){
+  if (actionName == 'null'){
     return
   }
-  $.post( "/robots", {skillIdentifier: skillIdentifier, _token: fetchCSRF() }).done(function(data){
+  $.post( "/robots", {actionName: actionName, _token: fetchCSRF() }).done(function(data){
     if (JSON.parse(data).error != undefined){
       displayError(JSON.parse(data).error)
       return
@@ -254,11 +254,11 @@ function programRobot(skillIdentifier){
   })
 }
 
-function reprogramRobot(skillIdentifier, id){
-  if (skillIdentifier == 'null'){
+function reprogramRobot(actionName, id){
+  if (actionName == 'null'){
     return
   }
-  $.post( "/robots/" + id, {skillIdentifier: skillIdentifier, _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
+  $.post( "/robots/" + id, {actionName: actionName, _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
     if (JSON.parse(data).error != undefined){
       displayError(JSON.parse(data).error)
       return

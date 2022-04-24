@@ -25,14 +25,14 @@ class Robot extends Model
 
     public static function fetchBannedActions(){
       return [
-        'make-BioMeds', 'make-NanoMeds', 'refine-oil', 'make-book', 'generate-electricity-with-plutonium',
+        'build', 'make-book', 'repair'
       ];
 
     }
 
-    public static function new($skillTypeID, $userID){
+    public static function new($actionTypeID, $userID){
       $robot = new \App\Robot;
-      $robot->skillTypeID = $skillTypeID;
+      $robot->actionTypeID = $actionTypeID;
       $robot->userID = $userID;
       $robot->num = count(\App\Robot::fetch()) + 1;
       $robot->save();
