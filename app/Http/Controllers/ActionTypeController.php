@@ -104,6 +104,8 @@ class ActionTypeController extends Controller
       $labor = \App\Labor::fetch();
       if (!$action->unlocked && $labor->availableSkillPoints > 0 ){
         $labor->availableSkillPoints--;
+        $labor->allocatedSkillPoints++;
+
         $labor->save();
         $action->unlocked = true;
         $action->save();

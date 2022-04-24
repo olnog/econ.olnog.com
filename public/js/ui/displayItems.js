@@ -2,6 +2,7 @@ function displayItems(){
   let html = ""
   for (i in items){
     let noQuantity = ""
+    let bookButton = ""
     let buttonCaption = " "
     let contractButtonCaption = ""
     let toolCaption = ""
@@ -77,6 +78,10 @@ function displayItems(){
       $("#robotsElectricity").html(items[i].quantity.toLocaleString())
     } else if (items[i].name == 'HerbMeds' || items[i].name == 'BioMeds' || items[i].name == 'NanoMeds'){
       $("#labor" + items[i].name).html(items[i].quantity.toLocaleString())
+    } else if (items[i].name == 'Books' && items[i].quantity >= labor.availableSkillPoints + labor.allocatedSkillPoints){
+      bookButton = "<button id='readBook' class='ms-3 btn btn-warning'>Read "
+        + Number(labor.availableSkillPoints + labor.allocatedSkillPoints) +
+        + " Books</button>"
     }
     let sellCaption = ""
     if (isThereABuyOrderForThis(items[i].itemTypeID, items[i].quantity)){
@@ -100,7 +105,7 @@ function displayItems(){
     }
     html += "<div class='mt-3 " + noQuantity + "'><div>"
       + dumpButton + items[i].name +  toolCaption
-    +  ": " + items[i].quantity.toLocaleString()  + buttonCaption + sellCaption
+    +  ": " + items[i].quantity.toLocaleString()  + buttonCaption + sellCaption + bookButton
     + contractButtonCaption
     + "</div><div>"
     + sellToContract + buyFromContract

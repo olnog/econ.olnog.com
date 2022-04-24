@@ -14,11 +14,32 @@ use Illuminate\Http\Request;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/read', function(){
+  $books = \App\Items::fetchByName('Books', \Auth::id());
+  $labor = \App\Labor::fetch();
+  $requiredBooks = ($labor->availableSkillPoints + $labor->allocatedSkillPoints);
+  if ($books->quantity < $requiredBooks){
+    echo json_encode(['error' => "You don't have enough Books (" . $requiredBooks
+      . ")to do this now. Sorry."]);
+    return;
+  }
+  $books->quantity -= $requiredBooks;
+  $books->save();
+  $labor->availableSkillPoints++;
+  $labor->save();
+  echo json_encode([
+    'items'   => \App\Items::fetch(),
+    'labor'   => \App\Labor::fetch(),
+    'status'  => "You used " . $requiredBooks
+    . " Books to give yourself a new point. You can now unlock a new action. ",
+  ]);
+});
+
 
 Route::get('/report', function(){
   $reports = \App\Report:: all();
   foreach ($reports as $report){
-    echo $report->report;
+    echo $report->report . "<BR>";
   }
 
 });

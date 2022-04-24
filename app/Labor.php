@@ -248,6 +248,7 @@ class Labor extends Model
       }
       \App\Actions::reset($legacy ||  $immortality);
       $labor->availableSkillPoints = $availableSkillPoints;
+      $labor->allocatedSkillPoints = 0;
       $labor->rebirth = false;
       $labor->save();
       $corpse = \App\Items::fetchByName('Corpse', Auth::id());

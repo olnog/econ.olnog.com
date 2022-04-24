@@ -304,6 +304,19 @@ function adjustSettings(soundSetting, eatFoodSetting, useHerbMedsSetting, useBio
   })
 }
 
+function readBook(){
+  $.get('/read', function(data){
+    if (JSON.parse(data).error != undefined){
+      displayError(JSON.parse(data).error)
+      return
+    }
+    items = JSON.parse(data).items
+    labor = JSON.parse(data).labor
+    status(JSON.parse(data).status)
+    refreshUI()
+  })
+}
+
 function startRobot(){
   $("#robotStart").addClass('d-none')
   $("#robotStop").removeClass('d-none')

@@ -79,6 +79,7 @@ class User extends Authenticatable
 
       $labor->equipped = null;
       $labor->availableSkillPoints = 4;
+      $labor->allocatedSkillPoints = 0;
       $labor->actions=0;
       $labor->actionsUntilSkill = 30;
       $labor->rebirth=false;

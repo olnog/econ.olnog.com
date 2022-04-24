@@ -1334,7 +1334,7 @@ class Actions extends Model
         }
         $book = Items::fetchByName('Books', $contractorID);
         $paper = Items::fetchByName('Paper', $contractorID);
-        $labor = \App\Labor::where('userID', $agentID)->first();
+        $labor = \App\Labor::where('userID', $contractorID)->first();
         if ($labor->availableSkillPoints < 1){
           return [
             'error' => $agentCaption . " do not have enough available skill points."

@@ -115,6 +115,9 @@ $(document).on('click', '#quitForcedSkillScreen', function(e) {
   refreshUI()
 })
 
+$(document).on('click', '#readBook', function(e) {
+  readBook()
+})
 
 $(document).on('click', '.reprogram', function(e) {
   reprogramRobot($("#reprogramList-" +  e.target.id.split('-')[1]).val(), e.target.id.split('-')[1])
