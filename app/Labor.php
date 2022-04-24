@@ -211,8 +211,11 @@ class Labor extends Model
       $labor->save();
     }
 
-    public static function rebirth($genius, $legacy, $legacySkillTypeID, $childProdigy){
+    public static function rebirth($legacy){
       $labor = \App\Labor::fetch();
+      if (!$labor->rebirth){
+        return;
+      }
       $tax = \App\Labor::fetchTax();
       $user = \App\User::find(\Auth::id());
       $estateTax = ceil($tax * $user->clacks);
@@ -221,51 +224,21 @@ class Labor extends Model
         $user->clacks = 0;
       }
       $user->save();
-      if (!$labor->rebirth){
-        return;
-      }
-      if ($legacySkillTypeID != null){
-        $skillType = \App\SkillTypes::find($legacySkillTypeID);
-        $legacySkillRank = \App\Skills::fetchByIdentifier($skillType->identifier, \Auth::id())->rank;
-      }
-      \App\Skills::reset();
       if ($legacy){
+
         $children = \App\Items::fetchByName('Children', \Auth::id());
         if ($children->quantity < 1){
           return;
         }
         $children->quantity--;
         $children->save();
-        $skill = \App\Skills::fetchByIdentifier($skillType->identifier, \Auth::id());
-        $skill->rank = $legacySkillRank;
-        $skill->save();
       }
-      if ($genius){
-        $books = \App\Items::fetchByName('Books', \Auth::id());
-        if ($books->quantity < $labor->maxSkillPoints){
-          return;
-        }
-        $books->quantity -= $labor->maxSkillPoints;
-        $books->save();
-        $labor->maxSkillPoints++;
-      }
-
-      if ($childProdigy){
-          if ($labor->maxSkillPoints < 25){
-            return;
-          }
-          $labor->maxSkillPoints -= 10;
-          $labor->startingSkillPoints++;
-      }
-
-
+      \App\Actions::reset($legacy);
       $labor->availableSkillPoints = 4;
       $labor->actions = 0;
       $labor->actionsUntilSkill = 30;
       $labor->rebirth = false;
       $labor->save();
-      \App\Actions::reset();
-
       $corpse = \App\Items::fetchByName('Corpse', Auth::id());
       $corpse->quantity++;
       $corpse->save();
@@ -281,8 +254,6 @@ class Labor extends Model
           . " clack(s). You now have " . number_format($user->clacks) . " clacks.");
         $labor->escrow = 0;
         $labor->save();
-
-
       }
     }
 

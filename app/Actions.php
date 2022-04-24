@@ -2946,12 +2946,14 @@ class Actions extends Model
       return $possibleActions;
     }
 
-    public static function reset(){
+    public static function reset($legacy){
       $actions = \App\Actions::where('userID', \Auth::id())->get();
       foreach($actions as $action){
-        $action->totalUses = 0;
-        $action->nextRank = 150;
-        $action->rank = 1;
+        if (!$legacy){
+          $action->totalUses = 0;
+          $action->nextRank = 150;
+          $action->rank = 1;
+        }
         $action->unlocked = false;
         $action->save();
       }

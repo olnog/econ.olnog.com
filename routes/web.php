@@ -166,12 +166,7 @@ Route::post('/rebirth', function(Request $request){
   if (!$labor->rebirth ){
     return redirect()->route('home');
   }
-  if ($request->legacy == "on" && $request->legacySkillTypeID == null){
-    echo "You have to select a skill if you want to do the Legacy perk.";
-    return;
-  }
-  \App\Labor::rebirth( $request->genius == "on", $request->legacy == "on", $request->legacySkillTypeID, $request->childProdigy == "on");
-
+  \App\Labor::rebirth($request->legacy == "on");
   return redirect()->route('home');
 
 });
