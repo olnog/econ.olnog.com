@@ -13,9 +13,8 @@ class ActionTypeController extends Controller
      */
     public function index()
     {
-      $actionTypes = \App\ActionTypes::all();
       return view('ActionTypes.index')->with([
-        'actionTypes' => $actionTypes,
+        'actionTypes' => \App\ActionTypes::orderBy("name")->get(),
         'labor'       => \App\Labor::fetch(),
         'availableActions'  => \App\Actions::available(\Auth::id()),
       ]);
@@ -41,17 +40,19 @@ class ActionTypeController extends Controller
      */
     public function store(Request $request)
     {
-      $actionType = new \App\ActionType;
+      $actionType = new \App\ActionTypes;
       $actionType->name = $request->actionName;
       $actionType->description = $request->actionDescription;
       $actionType->save();
       $users = \App\User::all();
       foreach ($users as $user){
         $action = new \App\Actions;
-        $action->userID = \Auth::id();
+        $action->userID = $user->id;
         $action->actionTypeID = $actionType->id;
         $action->save();
       }
+      return redirect()->route('actionTypes.create');
+
     }
 
     /**

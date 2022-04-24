@@ -15,10 +15,9 @@ function checkNewBuildings(){
 
 function displayAvailableBuildings(){ //11
   if (actions.buildings.length < 1){
-    $("#build").removeClass('btn-primary')
-    $("#build").addClass('btn-warning')
     return
   }
+  $("#build").removeClass('d-none')
   $('#buildingsThatCanBeBuilt').removeClass('d-none')
   html = "<option></option>"
   for (i in actions.buildings){
@@ -45,7 +44,7 @@ function displayBuiltBuildings(){ //30
     if (buildings.built[i].uses < buildings.built[i].totalUses){
       rebuildButton = "<button id='rebuild-" + buildings.built[i].id + "' class='rebuild m-3 btn btn-primary'>rebuild</button>"
     }
-    let buildingDiv = buildings.built[i].durabilityCaption + " " + buildings.built[i].name
+    let buildingDiv = buildings.built[i].name
     + " (" + ((buildings.built[i].uses / buildings.built[i].totalUses) * 100).toFixed(2)
     + "%)"
     if (buildings.built[i].farming){

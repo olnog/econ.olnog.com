@@ -9,16 +9,15 @@ class BuildingTypes extends Model
 {
   protected $table = 'buildingTypes';
 
-  public static function canTheyRepair($buildingName){
-    //change later
-    if ($buildingName == 'Warehouse'){
+  public static function canTheyRepair($buildingName, $agentID, $contractorID){
+    $action = \App\Actions::fetchByName($agentID, 'build');
+    if ($action->rank == 0 || !$action->unlocked){
       return false;
     }
-    $userID = Auth::id();
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
     foreach ($buildingCosts as $material=>$cost){
-      $item = \App\Items::fetchByName($material, $userID);
-      if ($item->quantity < ceil($cost * .1)){
+      $item = \App\Items::fetchByName($material, $contractorID);
+      if ($item->quantity < ceil($cost * ($action->rank * .5))){
         return false;
       }
     }

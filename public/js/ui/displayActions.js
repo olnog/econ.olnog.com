@@ -1,5 +1,6 @@
 function displayActions(){ //39
-  html = ""
+  let canTheyBuild = false
+  let html = ""
   /*
   if (skills.construction.rank > 0 ){
     html = "<button id='build' class='btn btn-primary whyNot'>build</button></span>"
@@ -33,6 +34,12 @@ function displayActions(){ //39
       whyNotEnd = '</span>'
     }
     */
+    if (actions.unlocked[i].name == 'build'){
+      canTheyBuild = true
+      continue
+    } else if (actions.unlocked[i].name == 'repair'){
+      continue
+    }
     let actionButton = "<button  id='action-" + actions.unlocked[i].name
       + "' class='m-2 action btn " + thisIsDisabled + " " + " btn-warning'>"
       + dedashify(actions.unlocked[i].name) + "</button>"
@@ -54,11 +61,12 @@ function displayActions(){ //39
 
     $("#lastAction").prop('disabled', true)
   }
-  /*
-  if (skills.construction.rank > 0){
+  $("#build").addClass('d-none')
+  $('#buildingsThatCanBeBuilt').addClass('d-none')
+  if (canTheyBuild){
     displayAvailableBuildings()
   }
-  */
+
   formatActions()
 }
 

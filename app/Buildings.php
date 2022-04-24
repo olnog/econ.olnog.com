@@ -12,6 +12,7 @@ class Buildings extends Model
   public static function build($buildingName, $agentID, $contractorID){
     $contractor = \App\User::find($contractorID);
     $labor = \App\Labor::where('userID', $agentID)->first();
+    $action = \App\Actions::fetchByName($agentID, 'build');
     if (\App\Buildings::doesItExist($buildingName, $contractorID)){
       return [
         'error' => "You've already built this."
@@ -20,45 +21,43 @@ class Buildings extends Model
       return [
         'error' => "You don't have enough building slots to build this. Either buy more land or explore."
       ];
-    } else if (!\App\Buildings::canYouBuild($buildingName)){
-      return ['error' => "You don't have the resources to build this." ];
-    } 
-    $constructionSkill = \App\Skills::fetchByIdentifier('construction', $agentID);
-    $numOfUses = pow(10, $constructionSkill->rank);
+    } else if (!\App\Buildings::canYouBuild($buildingName, $contractorID)){
+      return ['error' => "Not enough resources to build this." ];
+    } else if (!$action->unlocked || $action->rank == 0){
+      return ['error' => "You haven't unlocked the action yet." ];
+    }
+    $numOfUses = 100 * $action->rank;
     $status = "You built a " . $buildingName . ". You spent: ";
+    $contractorStatus = $status;
+    $agentStatus = $status;
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
 
     foreach ($buildingCosts as $material => $cost){
-      $buildingCost = \App\Items::fetchByName($material, Auth::id());
+      $buildingCost = \App\Items::fetchByName($material, $contractorID);
       $buildingCost->quantity -= $cost;
       $buildingCost->save();
-      $status .= number_format($cost) . " " . $material . " [" . number_format($buildingCost->quantity) . "] ";
-    }
 
+      $agentStatus .= number_format($cost) . " " . $material . " ";
+      $contractorStatus .= number_format($cost) . " " . $material . " ["
+        . number_format($buildingCost->quantity) . "] ";
+    }
     $buildingType = \App\BuildingTypes::fetchByName($buildingName);
-    if ($buildingType->name == 'Warehouse'){
-      $contractor->itemCapacity += 10000;
-      $contractor->save();
-    }
     $building = new \App\Buildings;
-
     $building->buildingTypeID = $buildingType->id;
     $building->userID = $contractorID;
     $building->uses = $numOfUses;
     $building->totalUses = $numOfUses;
     $building->repairedTo = $numOfUses;
-
-    $building->durabilityCaption = \App\BuildingTypes::fetchDurability($constructionSkill->rank);
     $building->save();
     $contractor->buildingSlots--;
     $contractor->save();
 
-    \App\History::new($contractorID, 'buildings', $status);
-    return ['status' => $status];
+    \App\History::new($contractorID, 'buildings', $contractorStatus);
+    return ['status' => $agentStatus];
   }
 
-  public static function canYouBuild($buildingName){
-    $userID = Auth::id();
+  public static function canYouBuild($buildingName, $userID){
+    //$userID = Auth::id();
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
     foreach ($buildingCosts as $material=>$cost){
       $item = \App\Items::fetchByName($material, $userID);
@@ -78,7 +77,6 @@ class Buildings extends Model
   }
 
   public static function canTheyRebuild($buildingID, $userID){
-    $constructionSkill = \App\Skills::fetchByIdentifier('construction', $userID);
     $building = \App\Buildings::find($buildingID);
     $durabilityPos = array_search($building->durabilityCaption, \App\BuildingTypes::fetchDurability(null));
     return $durabilityPos <= $constructionSkill->rank;
@@ -177,7 +175,7 @@ class Buildings extends Model
     ->select('buildings.id', 'name')->orderBy('name')->get();
     $repairableBuildings = [];
     foreach ($buildings as $building){
-      if (\App\BuildingTypes::canTheyRepair($building->name)){
+      if (\App\BuildingTypes::canTheyRepair($building->name, \Auth::id(), \Auth::id())){
         $repairableBuildings[] = $building->id;
       }
 
@@ -196,13 +194,11 @@ class Buildings extends Model
   }
 
   public static function rebuild($id, $agentID, $contractorID){
-
+    $action = \App\Actions::fetchByName($agentID, 'build');
     $building = \App\Buildings::find($id);
     $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
-    if (!\App\Buildings::canYouBuild($buildingType->name)){
+    if (!\App\Buildings::canYouBuild($buildingType->name, $contractorID)){
       return ['error' => "You don't have enough to rebuild this right now. (See what you're missing <a href='/buildingCosts'>here</a>)"];
-    } else if(!\App\Buildings::canTheyRebuild($id, $agentID)){
-      return ['error' => "You don't have a high enough Construction skill to rebuild this building. Sorry. Destroy it then build it again."];
     }
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingType->name);
     $materialCost = "";
@@ -213,38 +209,39 @@ class Buildings extends Model
       $materialCost .= $cost . " " . $material . " ";
     }
 
-    $building->uses = $building->totalUses;
-    $building->repairedTo = $building->totalUses;
+    $building->uses = $action * 100;
+    $building->totalUses = $action * 100;
+    $building->repairedTo = $action * 100;
     $building->save();
-    $status = 'You rebuilt your ' . $building->durabilityCaption . ' '
+    $status = 'You rebuilt your  '
       . $buildingType->name . " with " . $materialCost . ".";
     \App\History::new($contractorID, 'buildings', $status);
     return ['status' => $status];
   }
 
   public static function repair($id, $agentID, $contractorID){
+    $action = \App\Actions::fetchByName($agentID, 'repair');
     $building = \App\Buildings::find($id);
-    $constructionSkill = \App\Skills::fetchByIdentifier('construction', $agentID);
-    $repairArr = [null, .5, .6, .7, .8, .9];
-    $repairQuality = floor($repairArr[$constructionSkill->rank] * $building->repairedTo);
-    if ($repairQuality <= $building->uses){
+    $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
+    $repairCostMultiplier = $action->rank * .5;
+    if ($action->rank == 0 || !$action->unlocked){
       return [
-        'error' => "Your repair skill isn't high enough to repair it to a better condition.",
+        'error' => "You haven't unlocked Repair yet.",
+      ];
+    } else if (!\App\BuildingTypes::canTheyRepair($buildingType->name, $agentID, $contractorID)){
+      return [
+        'error' => "You don't have the necessary materials to repair this.",
       ];
     }
-
     $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
-    $status = "You repaired the " . $buildingType->name . " to "
-      . $repairQuality / $building->totalUses * 100    . "%. (Each repair will be worse and worse.)";
+    $status = "You repaired the " . $buildingType->name . " to 100%";
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingType->name);
-
     foreach($buildingCosts as $material => $cost){
-      $item = \App\Items::fetchByName($material, Auth::id());
-      $item->quantity -= ceil($cost*.1);
+      $item = \App\Items::fetchByName($material, $contractorID);
+      $item->quantity -= ceil($cost*$repairCostMultiplier);
       $item->save();
     }
-    $building->uses = $repairQuality;
-    $building->repairedTo = $repairQuality;
+    $building->uses = $building->totalUses;
     $building->save();
     return [ 'status' => $status ];
   }

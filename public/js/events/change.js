@@ -1,4 +1,5 @@
 $(document).on('change', '#buildingsThatCanBeBuilt', function(e) {
+  $("#build").attr('disabled', true)
   $("#buildingCosts").html('')
 
   if ($("#buildingsThatCanBeBuilt").val() != ""){

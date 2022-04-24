@@ -51,7 +51,7 @@ class EquipmentController extends Controller
 
       echo json_encode([
         'labor' => $labor,
-        'actions' => \App\Actions::available()
+        'actions' => \App\Actions::fetch(\Auth::id())
       ]);
 
     }

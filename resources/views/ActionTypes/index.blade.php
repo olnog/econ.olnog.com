@@ -38,7 +38,7 @@
         </div>
       @endif
     </div><div id='actionTypeDescription{{$actionType->id}}' class='d-none pb-3'>
-      {{$actionType->description}}
+      {!!$actionType->description!!}
     </div>
   @endforeach
 @endsection

@@ -48,7 +48,7 @@ class BuildingController extends Controller
         \App\History::new(Auth::id(), 'buildings', $msg['status']);
       }
       echo json_encode([
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'buildings' => \App\Buildings::fetch(),
         'history' => \App\History::fetch(),
         'items' => \App\Items :: fetch(),
@@ -106,7 +106,7 @@ class BuildingController extends Controller
         \App\History::new(Auth::id(), 'buildings', $msg['status']);
       }
       echo json_encode([
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'buildings' => \App\Buildings::fetch(),
         'history' => \App\History::fetch(),
         'items' => \App\Items::fetch(),
@@ -125,7 +125,7 @@ class BuildingController extends Controller
     {
       \App\Buildings::destroyBuilding($id);
       echo json_encode([
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'buildings' => \App\Buildings::fetch(),
         'itemCapacity' => \App\User::find(Auth::id()),
         'numOfItems' => \App\Items::fetchTotalQuantity(Auth::id()),

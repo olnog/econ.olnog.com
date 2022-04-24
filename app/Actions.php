@@ -14,8 +14,10 @@ class Actions extends Model
 
   public static function fetch($userID){
       return [
-        'unlocked'=>\App\Actions::fetchUnlocked($userID),
+        'buildings' => \App\Actions::fetchAvailableBuildings(),
         'possible'=>\App\Actions::available($userID),
+
+        'unlocked'=>\App\Actions::fetchUnlocked($userID),
       ];
   }
 

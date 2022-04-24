@@ -42,7 +42,7 @@ class SkillsController extends Controller
     {
       \App\Skills::increase($request->identifier);
         echo json_encode([
-          'actions' => \App\Actions::available(),
+          'actions' => \App\Actions::fetch(\Auth::id()),
           'labor' => \App\Labor::fetch(),
           'skills' => Skills::fetch(),
         ]);
@@ -82,7 +82,7 @@ class SkillsController extends Controller
     {
       \App\Skills::decrease($id);
         echo json_encode([
-          'actions' => \App\Actions::available(),
+          'actions' => \App\Actions::fetch(\Auth::id()),
           'labor' => \App\Labor::fetch(),
           'statusHistory' => \App\History::fetch(),
           'skills' => \App\Skills::fetch(),

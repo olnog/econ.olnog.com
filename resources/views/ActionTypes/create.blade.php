@@ -23,10 +23,11 @@
 </form>
 @foreach ($actionTypes as $actionType)
   <div id='' class='fw-bold'>
+    #{{$actionType->id}}
     <span id='actionTypeName{{$actionType->id}}'>{{$actionType->name}}</span>
     <button id='updateActionType-{{$actionType->id}}' class='updateActionType btn btn-link'>[ update ]</button>
   </div><div id='actionTypeDescription{{$actionType->id}}' class='mb-3'>
-    {{$actionType->description}}
+    {!!$actionType->description!!}
   </div>
 
 

@@ -37,7 +37,7 @@ class BuildingLeaseController extends Controller
         $contract = \App\Contracts::find($request->contractID);
         \App\BuildingLease::new($request->contractID, $contract->buildingID);
         echo json_encode([
-          'actions'         =>  \App\Actions::available(),
+          'actions'         =>  \App\Actions::fetch(\Auth::id()),
           'buildingLeases'  =>  \App\BuildingLease::fetch(),
           'contracts'       =>  \App\Contracts::fetch(),
         ]);
@@ -90,7 +90,7 @@ class BuildingLeaseController extends Controller
       $lease->active = 0;
       $lease->save();
       echo json_encode([
-        'actions'         =>  \App\Actions::available(),
+        'actions'         =>  \App\Actions::fetch(\Auth::id()),
         'buildingLeases'  =>  \App\BuildingLease::fetch(),
         'history'         =>  \App\History::fetch(),
         'contracts'       =>  \App\Contracts::fetch(),

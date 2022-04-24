@@ -80,7 +80,7 @@ class BuyOrderController extends Controller
         \App\History::new(Auth::id(), 'state', $status);
         echo json_encode([
           'status' => $status,
-          'actions' => \App\Actions::available(),
+          'actions' => \App\Actions::fetch(\Auth::id()),
           'buyOrders' => \App\BuyOrders::fetch(),
           'clacks' => Auth::user()->clacks,
           'history' => \App\History::fetch(),

@@ -178,6 +178,8 @@
       <a href='/actionTypes/'>[ list ] </a>
     </div><div id='actionsSection' class='ms-3'>
       <div id='newBuildingAvailable' class='fw-bold mt-2'>You've got a new building available to build!</div>
+      <select id='buildingsThatCanBeBuilt' class='d-none'></select>
+      <button id='build' class='btn btn-primary d-none' disabled>build</button>
       <div id='buildingCosts'>
 
       </div>

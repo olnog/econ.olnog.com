@@ -107,7 +107,7 @@ class RobotController extends Controller
       $robot->skillTypeID = $skillTypeID;
       $robot->save();
       echo json_encode([
-        'actions' => \App\Actions::available(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'robots' => \App\Robot::fetch(),
         'status' => $status,
       ]);
