@@ -10,8 +10,26 @@ class Equipment extends Model
 {
   protected $table = 'equipment';
 
-  public static function doTheyNeedToSwitch($itemName, $userID){
-    
+  public static function doTheyHave($itemName, $userID){
+    return \App\Equipment::fetchByName($itemName, $userID) != null;
+  }
+
+  public static function fetchByName($itemName, $userID){
+    $allEquipment = \App\Equipment::fetch();
+    foreach ($allEquipment as $equipment){
+      if (substr($equipment->name, 0, strlen($itemName)) == $itemName){
+        return $equipment;
+      }
+    }
+    return null;
+  }
+
+  public static function fetchFuel(){
+    return [
+      'electric' => 'Electricity',
+      'diesel' => 'Diesel Fuel',
+      'gasoline' => 'Gasoline',
+    ];
   }
 
   public static function fetchUses($material, $durability){
@@ -32,9 +50,12 @@ class Equipment extends Model
     return $this->hasOne('App\ItemTypes', 'id', 'itemTypeID');
   }
 
-  public static function useEquipped($userID){
+  public static function useEquipped($itemName, $userID){
+    $fuelArr = \App\Equipment::fetchFuel();
+    $fuelStatus = "";
+    $couldTheySwitch = \App\Labor::couldTheySwitch($itemName, $userID);
     $labor = Labor::where('userID', $userID)->first();
-    if ($labor->equipped == null){
+    if ($labor->equipped == null && !$couldTheySwitch){
       return false;
     }
     $selfCaption = " Their ";
@@ -43,17 +64,65 @@ class Equipment extends Model
     }
     $equipment = Equipment::find($labor->equipped);
     $itemType = ItemTypes::find($equipment->itemTypeID);
+    if (substr($itemType->name, 0, strlen($itemName)) != $itemName){
+      $switch = \App\Labor::switchEquipped($itemName, $userID);
+      $labor = \App\Labor::fetch(); // idk if these will automatically refresh
+      $equipment = Equipment::find($labor->equipped);
+      $itemType = ItemTypes::find($equipment->itemTypeID);
+
+      if (!$switch){
+        return false;
+      }
+    }
+    foreach ($fuelArr as $fueledBy => $fuelName){
+      if (!str_contains($itemName, $fueledBy)){
+        continue;
+      }
+
+      $fuel = \App\Items::fetchByName($fuelName, $userID);
+      if ($fuel->quantity < 100){
+        return false;
+      }
+      $fuel->quantity -= 100;
+      $fuel->save();
+      $fuelStatus = " You used 100 " . $fuelName . ". [" . number_format($fuel->quantity) . "]";
+    }
     $equipment->uses--;
     $equipment->save();
     if ($equipment->uses == 0){
-
       $status = $selfCaption . $itemType->name . " was destroyed in the process.";
       Equipment::destroy($labor->equipped);
       $labor->equipped = null;
       $labor->save();
-      return $status;
+      return $status . $fuelStatus;
     }
     return $selfCaption . $itemType->name . " is now at "
-      . number_format($equipment->uses / $equipment->totalUses * 100, 2 ) . "%. ";
+      . number_format($equipment->uses / $equipment->totalUses * 100, 2 ) . "%. " . $fuelStatus;
+  }
+
+
+  public static function whichOfTheseCanTheyUse($equipmentArr, $userID){
+    $fuelArr = \App\Equipment::fetchFuel();
+    $usableEquipArr = [];
+    foreach ($equipmentArr as $equipmentName){
+      $fuelRequired = false;
+      $enoughFuel = false;
+      if (!\App\Equipment::doTheyHave($equipmentName, $userID)){
+        continue;
+      }
+      foreach ($fuelArr as $fueledBy => $itemName){
+        if (!str_contains($equipmentName, $fueledBy)){
+          continue;
+        }
+        $fuelRequired = true;
+        if (\App\Items::fetchByName($itemName, $userID)->quantity >= 100){
+          $enoughFuel = true;
+        }
+      }
+      if (!$fuelRequired || ($fuelRequired && $enoughFuel)){
+        $usableEquipArr[] = $equipmentName;
+      }
+    }
+    return $usableEquipArr;
   }
 }

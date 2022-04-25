@@ -61,9 +61,9 @@ class Actions extends Model
       foreach ($possibleActions as $action){
         $actionName = $action->name;
         if ($actionName == 'chop-tree'
-        && ((!Labor::areTheyEquippedWith('Axe', Auth::id())
-        && !Labor::areTheyEquippedWith('Chainsaw (electric)', Auth::id())
-        && !Labor::areTheyEquippedWith('Chainsaw (gas)', Auth::id()))
+        && ((!Equipment::doTheyHave('Axe', Auth::id())
+        && !Equipment::doTheyHave('Chainsaw (electric)', Auth::id())
+        && !Equipment::doTheyHave('Chainsaw (gasoline)', Auth::id()))
           || !Land::doTheyHaveAccessTo('forest'))){
           continue;
         } else if ($actionName == 'cook-meat'
@@ -376,30 +376,30 @@ class Actions extends Model
         )){
           continue;
         } else if ($actionName == 'mill-flour'
-          && ((!Labor::areTheyEquippedWith('Handmill', Auth::id())
+          && ((!Equipment::doTheyHave('Handmill', Auth::id())
           && !\App\Buildings::didTheyAlreadyBuildThis('Gristmill', Auth::id()))
           || !Items::doTheyHave('Wheat', 1))){
           continue;
 
         } else if ($actionName == 'mill-log'
-          && (!Labor::areTheyEquippedWith('Saw', Auth::id())
+          && (!Equipment::doTheyHave('Saw', Auth::id())
             || !Items::doTheyHave('Logs', 1))
             && (!\App\Buildings::didTheyAlreadyBuildThis('Sawmill', Auth::id())
             || !Items::doTheyHave('Logs', 10))){
           continue;
         } else if (($actionName == 'mine-sand')
-          && ((!Labor::areTheyEquippedWith('Shovel', Auth::id())
-          && !Labor::areTheyEquippedWith('Bulldozer (gasoline)', Auth::id())
-          && !Labor::areTheyEquippedWith('Bulldozer (diesel)', Auth::id()))
+          && ((!Equipment::doTheyHave('Shovel', Auth::id())
+          && !Equipment::doTheyHave('Bulldozer (gasoline)', Auth::id())
+          && !Equipment::doTheyHave('Bulldozer (diesel)', Auth::id()))
           || !Land::doTheyHaveAccessTo('desert'))){
           continue;
 
         } else if (($actionName == 'mine-coal' || $actionName == 'mine-stone'
           || $actionName == 'mine-iron-ore' || $actionName == 'mine-copper-ore'
           || $actionName == 'mine-uranium-ore')
-          && ((!Labor::areTheyEquippedWith('Pickaxe', Auth::id())
-            && !Labor::areTheyEquippedWith('Jackhammer (electric)', Auth::id())
-            && !Labor::areTheyEquippedWith('Jackhammer (gas)', Auth::id()))
+          && ((!Equipment::doTheyHave('Pickaxe', Auth::id())
+            && !Equipment::doTheyHave('Jackhammer (electric)', Auth::id())
+            && !Equipment::doTheyHave('Jackhammer (gasoline)', Auth::id()))
             || !Land::doTheyHaveAccessTo('mountains'))){
           continue;
         } else if ($actionName == 'mine-uranium-ore' && !$wearingRadiationSuit){
@@ -501,30 +501,20 @@ class Actions extends Model
           'error' => "Sorry, you're doing this too often.",
         ];
       }
+
+
+
       if ($actionName == 'chop-tree'){
         $leaseStatus = '';
+        $equipmentCaption = 'empty';
         $landBonus = \App\Land::count('forest', $agentID);
         $electricity = Items::fetchByName('Electricity', $contractorID);
         $gas = Items::fetchByName('Gasoline', $contractorID);
-        if (($robot == null
-          && !Labor::areTheyEquippedWith('Axe', $agentID)
-          && !Labor::areTheyEquippedWith('Chainsaw (electric)', $agentID)
-          && !Labor::areTheyEquippedWith('Chainsaw (gas)', $agentID))
-          ||  ($robot != null
-          && !\App\Robot::areTheyEquippedWith('Axe', $robotID)
-          && !Labor::areTheyEquippedWith('Chainsaw (electric)', $agentID)
-          && !Labor::areTheyEquippedWith('Chainsaw (gas)', $agentID))
-          ){
+        $equipmentAvailable = \App\Equipment
+          ::whichOfTheseCanTheyUse(['Chainsaw (electric)', 'Chainsaw (gasoline)', 'Axe'], $agentID);
+        if (count($equipmentAvailable) == 0){
           return [
-            'error' => $agentCaption . " do not have anything equipped to chop down a tree."
-          ];
-        } else if (Labor::areTheyEquippedWith('Chainsaw (electric)', $agentID) && $electricity->quantity < 100){
-          return [
-            'error' => $agentCaption . " has an electric Chainsaw equipped but does not have enough Electricity to use it."
-          ];
-        } else if (Labor::areTheyEquippedWith('Chainsaw (gas)', $agentID) && $gas->quantity < 100){
-          return [
-            'error' => $agentCaption . " has a gas-powered Chainsaw equipped but does not have enough Gasoline to use it."
+            'error' => $agentCaption . " do not have any equipment that can be used to chop down a tree."
           ];
         }
         if (!\App\Land::doTheyOwn('forest', $agentID)){
@@ -541,41 +531,31 @@ class Actions extends Model
           }
         }
         $baseChop = 10;
-        if (($robot == null && \App\Labor::areTheyEquippedWith('Axe', $agentID))
+        if (($robot == null && $equipmentAvailable[0] == 'Axe')
           || ($robot != null && \App\Robot::areTheyEquippedWith('Axe', $robotID))){
           $baseChop = 1;
         }
         if ($robot == null){
-          $equipmentCaption = Equipment::useEquipped($agentID);
+          $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
+          if (!$equipmentCaption){
+            return [
+              'error' => "Something went wrong with an equipment check. Sorry."
+            ];
+          }
           $logsChopped = $action->rank * $baseChop * $landBonus;
         } else {
           $equipmentCaption = \App\Robot::useEquipped($robotID);
           $logsChopped = $baseChop;
         }
-        $fuelStatus = '';
         $landResource = \App\Land::takeResource('Logs',  $agentID, $logsChopped, true);
         if ($landResource != true){
           return $landResource;
         }
-        if (($robot == null && Labor::areTheyEquippedWith('Chainsaw (electric)', $agentID))
-          || ($robot != null && Robot::areTheyEquippedWith('Chainsaw (electric)', $agentID))
-      ){
-          $electricity->quantity -= 100;
-          $electricity->save();
-          $fuelStatus = "You used 100 Electricity. [" . number_format($electricity->quantity) . "]";
-        } else if (($robot == null && Labor::areTheyEquippedWith('Chainsaw (gas)', $agentID))
-            || ($robot != null && Robot::areTheyEquippedWith('Chainsaw (gas)', $agentID))
-        ){
-          $gas->quantity -= 100;
-          $gas->save();
-          $fuelStatus = "You used 100 Gasoline. [" . number_format($gas->quantity) . "]";
-        }
-
         $logs = Items::fetchByName('Logs', $contractorID);
         $logs->quantity += $logsChopped;
         $logs->save();
         $status = $agentCaption . " have chopped down " . $logsChopped
-          . " trees. "  . $fuelStatus . $equipmentCaption . $leaseStatus;
+          . " trees. "  . $equipmentCaption . $leaseStatus;
           if ($agentID == $contractorID){
             $status .= " You now have " . number_format($logs->quantity) . " logs. ";
           }
@@ -905,33 +885,14 @@ class Actions extends Model
 
 
       } else if ($actionName == 'explore'){
-        $diesel = \App\Items::fetchByName('Diesel Fuel', $contractorID);
-        $gasoline = \App\Items::fetchByName('Gasoline', $contractorID);
-        $fuelStatus = '';
         $equipmentCaption = '';
-        if (($robot == null
-          && Labor::areTheyEquippedWith('Car (diesel)', $agentID)
-          && $diesel->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Car (diesel)', $robotID)
-          && $diesel->quantity < 100)
-        ){
-          return ['error' =>'You have a diesel Car equipped but do not have enough Diesel Fuel (100 needed).'];
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Car (gasoline)', $agentID)
-          && $gasoline->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Car (gasoline)', $robotID)
-          && $gasoline->quantity < 100)
-        ){
-          return ['error' =>'You have a gasoline Car equipped but do not have enough Gasoline (100 needed).'];
-        }
+        $equipmentAvailable = \App\Equipment
+          ::whichOfTheseCanTheyUse(['Car (gasoline)', 'Car (diesel)'], $agentID);
         $land = \App\Land::all();
         $production = 1;
         if ($robot == null){
           $production = $action->rank;
         }
-
         $satellite = \App\Items::fetchByName('Satellite', $contractorID);
         $electricity = \App\Items::fetchByName('Electricity', $contractorID);
         $satStatus = "";
@@ -947,41 +908,17 @@ class Actions extends Model
             $satStatus .= " but it randomly malfunctioned and no longer works now";
           }
           $satStatus .= ".";
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Car (gasoline)', $agentID)
-          && $gasoline->quantity >= 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Car (gasoline)', $robotID)
-          && $gasoline->quantity >= 100)
-        ){
+        } else if (count($equipmentAvailable) > 0){
           $minChance = 10;
-          $gasoline->quantity -= 100;
-          $gasoline->save();
-          $fuelStatus = " You used 100 Gasoline. [" . number_format($gasoline->quantity) . "] ";
           if ($robot == null){
-            $equipmentCaption = \App\Equipment::useEquipped($agentID);
-          } else {
-            $equipmentCaption = \App\Robot::useEquipped($robotID);
-          }
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Car (diesel)', $agentID)
-          && $diesel->quantity >= 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Car (diesel)', $robotID)
-          && $diesel->quantity >= 100)
-        ){
-          $minChance = 10;
-          $diesel->quantity -= 100;
-          $diesel->save();
-          $fuelStatus = " You used 100 Diesel Fuel. [" . number_format($diesel->quantity) . "] ";
-          if ($robot == null){
-            $equipmentCaption = \App\Equipment::useEquipped($agentID);
+            $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $agentID);
+            if (!$equipmentCaption){
+              return ['error' => "Something technical went wrong with your car. Sorry."];
+            }
           } else {
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
         }
-
-
         $status .= $agentCaption . " explored but discovered no new land. (" . $minChance . " out of " . count($land) . " chance)";
         $landFound = " [ ";
         if (rand(1, count($land)+1) <= $minChance){
@@ -994,7 +931,7 @@ class Actions extends Model
           }
         }
         $landFound .= "]";
-        $status .= $landFound . $satStatus . $equipmentCaption . $fuelStatus;
+        $status .= $landFound . $satStatus . $equipmentCaption ;
 
 
 
@@ -1082,62 +1019,25 @@ class Actions extends Model
 
 
       } else if ($actionName == 'harvest-rubber'){
-        $diesel = Items::fetchByName('Diesel Fuel', $contractorID);
-        $equipmentCaption = "";
-        $fuelStatus = '';
-        $gasoline = Items::fetchByName('Gasoline', $contractorID);
+        $equipmentCaption = '';
         $howManyFields = 1;
         $totalRubberYield = 0;
-        $tractorUsed = false;
+        $equipmentAvailable = \App\Equipment
+          ::whichOfTheseCanTheyUse(['Tractor (gasoline)', 'Tractor (diesel)'], $agentID);
         if (!\App\Buildings::doesItExist('Rubber Plantation', $contractorID)
         || !\App\Buildings::canTheyHarvest('Rubber Plantation', $contractorID)){
           return ['error' => "You either do not have a Rubber Plantation or cannot harvest one right now. Sorry."];
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (diesel)', $agentID)
-          && $diesel->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (diesel)', $robotID)
-          && $diesel->quantity < 100)
-        ){
-          $fuelStatus = 'You have a diesel Tractor equipped but do not have enough Diesel Fuel (100 needed).';
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (gasoline)', $agentID)
-          && $gasoline->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (gasoline)', $robotID)
-          && $gasoline->quantity < 100)
-        ){
-          $fuelStatus = 'You have a gasoline Tractor equipped but do not have enough Gasoline (100 needed).';
         }
-
-        if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (gasoline)', $agentID))
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (gasoline)', $robotID))
-        ){
-          $tractorUsed = true;
-          $gasoline->quantity -= 100;
-          $gasoline->save();
-          $fuelStatus = " You used 100 Gasoline ["
-            . number_format($gasoline->quantity) . "]";
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (diesel)', $agentID))
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (diesel)', $robotID))
-        ){
-          $tractorUsed = true;
-          $diesel->quantity -= 100;
-          $diesel->save();
-          $fuelStatus = " You used 100 Diesel Fuel ["
-            . number_format($diesel->quantity) . "]";
-        }
-        if ($tractorUsed){
+        if (count($equipmentAvailable) > 0){
           $howManyFields = \App\Buildings::howManyFields('Rubber Plantation', $contractorID);
           if ($howManyFields > 10){
             $howManyFields = 10;
           }
           if ($robot == null){
-            $equipmentCaption = \App\Equipment::useEquipped($agentID);
+            $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $agentID);
+            if (!$equipmentCaption){
+              return ['error' => "Something technical happened with your equipment not working. Sorry."];
+            }
           } else {
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
@@ -1158,7 +1058,7 @@ class Actions extends Model
           $totalRubberYield += $rubberYield;
         }
         $status = $agentCaption . " harvested " . $rubberYield . " Rubber from "
-        . $howManyFields . " Rubber Plantation(s)." . $equipmentCaption . $fuelStatus;
+        . $howManyFields . " Rubber Plantation(s)." . $equipmentCaption;
         if ($agentID == $contractorID){
           $status .= " You now have " . number_format($rubber->quantity) . ".";
         }
@@ -1168,13 +1068,11 @@ class Actions extends Model
       } else if ($actionName == 'harvest-wheat'
         || $actionName == 'harvest-plant-x'
         || $actionName == 'harvest-herbal-greens'){
-        $diesel = Items::fetchByName('Diesel Fuel', $contractorID);
+        $equipmentAvailable = \App\Equipment
+          ::whichOfTheseCanTheyUse(['Tractor (gasoline)', 'Tractor (diesel)'], $agentID);
         $equipmentCaption = '';
-        $fuelStatus = '';
-        $gasoline = Items::fetchByName('Gasoline', $contractorID);
         $howManyFields = 1;
         $totalYield = 0;
-        $tractorUsed = false;
         $whichSkillName = [
           'harvest-wheat' => 'farmingWheat',
           'harvest-plant-x' => 'farmingPlantX',
@@ -1193,52 +1091,17 @@ class Actions extends Model
         if (!\App\Buildings::doesItExist($whichItemType[$actionName] . ' Field', $contractorID)
         || !\App\Buildings::canTheyHarvest($whichItemType[$actionName] . ' Field', $contractorID)){
           return ['error' => "You either do not have a " . $whichItemType[$actionName] . " Field or cannot harvest one right now. Sorry."];
-        }else if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (diesel)', $agentID)
-          && $diesel->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (diesel)', $robotID)
-          && $diesel->quantity < 100)
-        ){
-          return ['error' =>'You have a diesel Tractor equipped but do not have enough Diesel Fuel (100 needed).'];
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (gasoline)', $agentID)
-          && $gasoline->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (gasoline)', $robotID)
-          && $gasoline->quantity < 100)
-        ){
-          return ['error' =>'You have a gasoline Tractor equipped but do not have enough Gasoline (100 needed).'];
         }
-
-        if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (gasoline)', $agentID))
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (gasoline)', $robotID))
-        ){
-          $tractorUsed = true;
-          $gasoline->quantity -= 100;
-          $gasoline->save();
-          $fuelStatus = " You used 100 Gasoline ["
-            . number_format($gasoline->quantity) . "]";
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Tractor (diesel)', $agentID))
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Tractor (diesel)', $robotID))
-        ){
-          $tractorUsed = true;
-          $diesel->quantity -= 100;
-          $diesel->save();
-          $fuelStatus = " You used 100 Diesel Fuel ["
-            . number_format($diesel->quantity) . "]";
-        }
-        if ($tractorUsed){
+        if (count($equipmentAvailable) > 0 ){
           $howManyFields = \App\Buildings::howManyFields($whichItemType[$actionName] . ' Field', $contractorID);
           if ($howManyFields > 10){
             $howManyFields = 10;
           }
           if ($robot == null){
-            $equipmentCaption = \App\Equipment::useEquipped($agentID);
+            $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $agentID);
+            if (!$equipmentCaption){
+              return ['error' => "Something technical happened with your equipment not working. Sorry."];
+            }
           } else {
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
@@ -1260,7 +1123,7 @@ class Actions extends Model
         }
         $status = $agentCaption . " harvested " . $totalYield . " "
           . $whichItemType[$actionName] . " from " . $howManyFields . " "
-          . $whichItemType[$actionName] . " Field(s). "  . $equipmentCaption . $fuelStatus ;
+          . $whichItemType[$actionName] . " Field(s). "  . $equipmentCaption;
         if ($agentID == $contractorID){
           $status .= " You now have " . number_format($produce->quantity) . ".";
         }
@@ -1641,9 +1504,9 @@ class Actions extends Model
       $motors = Items::fetchByName(ucfirst(explode('-', $actionName)[1]) . ' Motors', $contractorID);
       $availableTools = [
         'make-electric-jackhammer'=>'Jackhammer (electric)',
-        'make-gas-jackhammer'     =>'Jackhammer (gas)',
+        'make-gas-jackhammer'     =>'Jackhammer (gasoline)',
         'make-electric-chainsaw'  =>'Chainsaw (electric)',
-        'make-gas-chainsaw'       =>'Chainsaw (gas)',
+        'make-gas-chainsaw'       =>'Chainsaw (gasoline)',
       ];
       $tool = Items::fetchByName($availableTools[$actionName], $contractorID);
       if ($steel->quantity < 10){
@@ -2154,6 +2017,11 @@ class Actions extends Model
           || ($robot != null && !\App\Robot::areTheyEquippedWith('Handmill', $robotID)))
           && !\App\Buildings::didTheyAlreadyBuildThis('Gristmill', $contractorID)){
           return ['error' => "You do not have a Handmill or Gristmill"];
+        } else if ((($robot == null && !Labor::areTheyEquippedWith('Handmill', $agentID))
+          || ($robot != null && !\App\Robot::areTheyEquippedWith('Handmill', $robotID)))
+          && \App\Buildings::didTheyAlreadyBuildThis('Gristmill', $contractorID)
+          && $wheat->quantity < 100){
+          return ['error' => "You have a Gristmill built but don't enough Wheat."];
         } else if ($wheat->quantity < 10){
           return ['error' => "You do not have enough wheat."];
         }
@@ -2164,7 +2032,7 @@ class Actions extends Model
           $buildingCaption = \App\Buildings::use('Gristmill', $contractorID);
         } else {
           if ($robot == null){
-            $equipmentCaption = Equipment::useEquipped($agentID);
+            $equipmentCaption = Equipment::useEquipped('Handmill', $agentID);
           } else {
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
@@ -2194,7 +2062,14 @@ class Actions extends Model
           || ($robot != null && !\App\Robot::areTheyEquippedWith('Saw', $robotID)))
           && !\App\Buildings::didTheyAlreadyBuildThis('Sawmill', $contractorID)){
           return ['error' => 'You either do not have a Saw equipped or do not have a Sawmill.'];
-        }
+        } else if ((($robot == null && !Labor::areTheyEquippedWith('Saw', $agentID))
+            || ($robot != null && !\App\Robot::areTheyEquippedWith('Saw', $robotID)))
+            && \App\Buildings::didTheyAlreadyBuildThis('Sawmill', $contractorID)
+            && $logs->quantity < 10){
+            return ['error' => "You have a Sawmill built but don't enough Logs (10)."];
+          } else if ($logs->quantity < 1){
+            return ['error' => "You do not have enough Logs."];
+          }
         $buildingCaption = '';
         $equipmentCaption = '';
         if (\App\Buildings::didTheyAlreadyBuildThis('Sawmill', $contractorID) && $logs->quantity >= 10){
@@ -2202,7 +2077,7 @@ class Actions extends Model
           $buildingCaption = \App\Buildings::use('Sawmill', $contractorID);
         } else {
           if ($robot == null){
-            $equipmentCaption = Equipment::useEquipped($agentID);
+            $equipmentCaption = Equipment::useEquipped('Saw', $agentID);
           } else {
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
@@ -2217,8 +2092,9 @@ class Actions extends Model
         $logs->save();
         $wood->quantity += $woodProduced ;
         $wood->save();
-        $status = $agentCaption . " milled " . $modifier   . " log(s) [" . number_format($logs->quantity) . "] into " . $woodProduced
-          . " wood. " . $equipmentCaption . $buildingCaption;
+        $status = $agentCaption . " milled " . $modifier   . " log(s) ["
+        . number_format($logs->quantity) . "] into "
+        . number_format($woodProduced) . " wood. " . $equipmentCaption . $buildingCaption;
         if ($agentID == $contractorID){
           $status .= " You now have " . number_format($wood->quantity) . " . ";
         }
@@ -2226,11 +2102,15 @@ class Actions extends Model
 
 
       } else if ($actionName == 'mine-sand'){
-        //add bulldozer allownace
+        $equipmentCaption = "";
         $leaseStatus = '';
         $landBonus = \App\Land::count('desert', $agentID);
-        $gasoline = Items::fetchByName('Gasoline', $contractorID);
-        $diesel = Items::fetchByName('Diesel Fuel', $contractorID);
+        $equipmentAvailable = \App\Equipment
+          ::whichOfTheseCanTheyUse(['Bulldozer (gasoline)', 'Bulldozer (diesel)',
+          'Shovel'], $agentID);
+        if (count($equipmentAvailable) < 1){
+          return ['error' => "You don't have any equipment to mine Sand."];
+        }
         if (!\App\Land::doTheyOwn('desert', $agentID)){
           $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('desert', $agentID);
           if ($currentlyLeasing){
@@ -2243,50 +2123,20 @@ class Actions extends Model
             ];
           }
         }
-        if (($robot == null && !Labor::areTheyEquippedWith('Shovel', $agentID)
-        && !Labor::areTheyEquippedWith('Bulldozer (gasoline)', $agentID)
-        && !Labor::areTheyEquippedWith('Bulldozer (diesel)', $agentID))
-          || ($robot != null
-          && !\App\Robot::areTheyEquippedWith('Shovel', $robotID)
-          && !\App\Robot::areTheyEquippedWith('Bulldozer (gasoline)', $robotID)
-          && !\App\Robot::areTheyEquippedWith('Bulldozer (diesel)', $robotID))
-        ){
-          return ['error' => 'You do not have anything equipped to mine sand.'];
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Bulldozer (diesel)', $agentID)
-          && $diesel->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Bulldozer (diesel)', $robotID)
-          && $diesel->quantity < 100)
-        ){
-          return ['error'
-            => 'You have a diesel Bulldozer equipped but do not have enough Diesel Fuel (100).'
-          ];
-        } else if (($robot == null
-          && Labor::areTheyEquippedWith('Bulldozer (gasoline)', $agentID)
-          && $gasoline->quantity < 100)
-          || ($robot != null
-          && \App\Robot::areTheyEquippedWith('Bulldozer (gasoline)', $robotID)
-          && $gasoline->quantity < 100)
-        ){
-          return ['error'
-            => 'You have a diesel Bulldozer equipped but do not have enough Diesel Fuel (100).'
-          ];
-        }
         $buildingCaption = "";
         $modifier = 10;
         if (\App\Buildings::didTheyAlreadyBuildThis('Mine', $contractorID)){
           $buildingCaption = \App\Buildings::use('Mine', $contractorID);
           $modifier = 100;
         }
-        if (($robot == null && !Labor::areTheyEquippedWith('Shovel', $agentID))
+        if (($robot == null && $equipmentAvailable[0] != 'Shovel')
           || ($robot != null
           && !\App\Robot::areTheyEquippedWith('Shovel', $robotID))){
           $modifier *= 10;
         }
         $production = $modifier;
         if ($robot == null){
-          $equipmentCaption = Equipment::useEquipped($agentID);
+          $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
           $production = $action->rank * ($modifier + $landBonus);
 
         } else {
@@ -2299,22 +2149,8 @@ class Actions extends Model
         $itemProduced = Items::fetchByName('Sand', $contractorID);
         $itemProduced->quantity += $production;
         $itemProduced->save();
-        $fuelStatus = "";
-        if (($robot == null && Labor::areTheyEquippedWith('Bulldozer (gasoline)', $agentID))
-          || ($robot != null
-          && !\App\Robot::areTheyEquippedWith('Bulldozer (gasoline)', $robotID))){
-          $gasoline->quantity -= 100;
-          $gasoline->save();
-          $fuelStatus = " You used 100 Gasoline. [" . number_format($gasoline->quantity) . "] ";
-        } else if (($robot == null && Labor::areTheyEquippedWith('Bulldozer (diesel)', $agentID))
-          || ($robot != null
-          && !\App\Robot::areTheyEquippedWith('Bulldozer (diesel)', $robotID))){
-          $diesel->quantity -= 100;
-          $diesel->save();
-          $fuelStatus = " You used 100 Diesel Fuel. [" . number_format($diesel->quantity) . "] ";
-        }
         $status = $agentCaption . " mined " . number_format($production) . " Sand. " . $leaseStatus
-        . $equipmentCaption . $fuelStatus . $buildingCaption;
+        . $equipmentCaption . $buildingCaption;
         if ($agentID == $contractorID){
           $status .= " You  now have " . number_format($itemProduced->quantity) . ". ";
         }
@@ -2324,9 +2160,13 @@ class Actions extends Model
       } else if ($actionName == 'mine-coal' || $actionName == 'mine-iron-ore'
         || $actionName == 'mine-stone' || $actionName == 'mine-copper-ore'
         || $actionName == 'mine-uranium-ore'){
+        $equipmentAvailable = \App\Equipment
+          ::whichOfTheseCanTheyUse(['Jackhammer (gasoline)', 'Jackhammer (electric)',
+          'Pickaxe'], $agentID);
+        if (count($equipmentAvailable) < 1){
+          return ['error' => "You don't have anything to mine right now."];
+        }
         $labor = \App\Labor::where('userID', $agentID)->first();
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $gas = Items::fetchByName('Gasoline', $contractorID);
         $leaseStatus = '';
         $landBonus = \App\Land::count('mountains', $agentID);
         if (!\App\Land::doTheyOwn('mountains', $agentID)){
@@ -2341,30 +2181,13 @@ class Actions extends Model
             ];
           }
         }
-
-        if (($robot == null && !Labor::areTheyEquippedWith('Pickaxe', $agentID)
-          && !Labor::areTheyEquippedWith('Jackhammer (electric)', $agentID)
-          && !Labor::areTheyEquippedWith('Jackhammer (gas)', $agentID))
-          || ($robot != null && !\App\Robot::areTheyEquippedWith('Pickaxe', $robotID)
-          && !\App\Robot::areTheyEquippedWith('Jackhammer (electric)', $robotID)
-          && !\App\Robot::areTheyEquippedWith('Jackhammer (gas)', $robotID)
-          )){
-          return ['error' => 'You do not have anything equipped to mine.'];
-        } else if (Labor::areTheyEquippedWith('Jackhammer (electric)', $agentID) && $electricity->quantity < 100){
-          return [
-            'error' => $agentCaption . " have an electric Jackhammer equipped but does not have enough Electricity to use it."
-          ];
-        } else if (Labor::areTheyEquippedWith('Jackhammer (gas)', $agentID) && $gas->quantity < 100){
-          return [
-            'error' => $agentCaption . " have a gas-powered Jackhammer equipped but does not have enough Gasoline to use it."
-          ];
-        } else if ($labor->alsoEquipped != null){
+        if ($labor->alsoEquipped != null){
           $equipment = \App\Equipment::find($labor->alsoEquipped);
           $itemType = \App\ItemTypes::find($equipment->itemTypeID);
           if ($itemType->name != 'Radiation Suit'
             && $actionName ==  'mine-uranium-ore'){
             return [
-              'error' => $agentCaption . " need a Radiation Suit in order to mine Uranium Ore."
+              'error' => $agentCaption . " need a Radiation Suit equipped in order to mine Uranium Ore."
             ];
           }
         }
@@ -2374,7 +2197,7 @@ class Actions extends Model
           $buildingCaption = \App\Buildings::use('Mine', $contractorID);
           $modifier = 100;
         }
-        if (($robot == null && !Labor::areTheyEquippedWith('Pickaxe', $agentID))
+        if (($robot == null && !$equipmentAvailable[0] != 'Pickaxe')
           || ($robot != null && !Robot::areTheyEquippedWith('Pickaxe', $agentID))
           ){
           $modifier *= 10;
@@ -2389,7 +2212,10 @@ class Actions extends Model
         ];
         $production = $modifier;
         if ($robot == null){
-          $equipmentCaption = Equipment::useEquipped($agentID);
+          $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
+          if (!$equipmentCaption){
+            return ['error' => 'Something technical happened with your equipment. Sorry'];
+          }
           $production = $action->rank * ($modifier + $landBonus);
 
         } else {
@@ -2399,27 +2225,11 @@ class Actions extends Model
         if ($landResource != true){
           return $landResource;
         }
-        $fuelStatus = '';
-        if (($robot == null && Labor::areTheyEquippedWith('Jackhammer (electric)', $agentID))
-          || ($robot != null && Robot::areTheyEquippedWith('Jackhammer (electric)', $agentID))
-          ){
-          $electricity->quantity -= 100;
-          $electricity->save();
-          $fuelStatus = "You used 100 Electricity. [" . number_format($electricity->quantity) . "]";
-        } else if (($robot == null && Labor::areTheyEquippedWith('Jackhammer (gas)', $agentID))
-          || ($robot != null && Robot::areTheyEquippedWith('Jackhammer (gas)', $agentID))
-          ){
-          $gas->quantity -= 100;
-          $gas->save();
-          $fuelStatus = "You used 100 Gasoline. [" . number_format($gas->quantity) . "]";
-        }
-
-
         $itemProduced = Items::fetchByName($miningArr[$actionName]['item'], $contractorID);
         $itemProduced->quantity += $production;
         $itemProduced->save();
         $status = $agentCaption . " mined " . number_format($production) . " " . $miningArr[$actionName]['item']
-          . ". " . $fuelStatus . $equipmentCaption . $buildingCaption . $leaseStatus;
+          . ". " . $equipmentCaption . $buildingCaption . $leaseStatus;
         if ($agentID == $contractorID){
           $status .= " You  now have " . number_format($itemProduced->quantity) . ". " ;
         }

@@ -11,7 +11,11 @@ class Labor extends Model
     protected $table = 'labor';
 
     public static function areTheyEquippedWith($itemName, $userID){
-      \App\Equipment::doTheyNeedToSwitch($itemName, $userID);
+      $couldTheySwitch = \App\Labor::couldTheySwitch($itemName, $userID);
+      if ($couldTheySwitch){
+        \App\History::new(\Auth::id(), 'land', 'they could switch');
+        return true;
+      }
       $labor = Labor::where('userID', $userID)->first();
       if ($labor->equipped == null){
         return false;
@@ -21,6 +25,16 @@ class Labor extends Model
         return true;
       }
       return false;
+    }
+
+    public static function couldTheySwitch($itemName, $userID){
+        $allEquipment = \App\Equipment::fetch();
+        foreach ($allEquipment as $equipment){
+          if (substr($equipment->name, 0, strlen($itemName)) == $itemName){
+            return true;
+          }
+        }
+        return false;
     }
 
     public static function defaultConsumption($userID){
@@ -268,6 +282,18 @@ class Labor extends Model
         $labor->save();
       }
     }
+
+    public static function switchEquipped($itemName, $userID){
+      $equipment = \App\Equipment::fetchByName($itemName, $userID);
+      $labor = \App\Labor::fetch();
+      if ($equipment == null){
+        return false;
+      }
+      $labor->equipped = $equipment->id;
+      $labor->save();
+      return true;
+    }
+
 
     public static function useMeds($userID){
       $medicated = false;
