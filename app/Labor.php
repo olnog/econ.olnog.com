@@ -265,6 +265,7 @@ class Labor extends Model
       $labor->allocatedSkillPoints = 0;
       $labor->rebirth = false;
       $labor->save();
+
       $corpse = \App\Items::fetchByName('Corpse', Auth::id());
       $corpse->quantity++;
       $corpse->save();
@@ -280,6 +281,17 @@ class Labor extends Model
           . " clack(s). You now have " . number_format($user->clacks) . " clacks.");
         $labor->escrow = 0;
         $labor->save();
+      }
+      $contracts = \App\Contracts::where('category', 'freelance')
+        ->where('userID', $user->id)->where('active', 1)->get();
+      foreach($contracts as $contract){
+        $contract->active = 0;
+        $contract->save();
+      }
+      if (count($contracts) > 0){
+        \App\History::new(Auth::id(), 'rebirth',
+          "Because of your rebirth, " . count($contracts)
+          . " of your freelance contracts were canceled.");
       }
     }
 
