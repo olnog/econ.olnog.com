@@ -189,10 +189,7 @@ class ContractController extends Controller
           echo "You already have a contract to freelance " . $request->action;
           return;
         }
-        $skillIdentifier = \App\Actions::list()[$request->action];
-        if ($skillIdentifier != null){
-          $contract->minSkillLevel = \App\Skills::fetchByIdentifier($skillIdentifier, \Auth::id())->rank;
-        }
+
         $contract->action = $request->action;
         $contract->until = $request->until;
         if ($request->until == 'finite'){
@@ -216,7 +213,6 @@ class ContractController extends Controller
           return;
         }
         $contract->buildingID = $request->buildingID;
-        $contract->minSkillLevel = $request->minSkillLevel;
         $contract->category = $request->category . $request->repairIf;
         $contract->until = $request->until;
         if ($request->until == 'finite'){
@@ -593,7 +589,8 @@ class ContractController extends Controller
         }  else {
           $status = "You paid " . $freelancer->name . " to "
             . $contract->action . " for " . number_format($contract->price)
-            . " clack(s). You now have " . number_format($user->clacks);
+            . " clack(s). (" . $msg['status'] . ") You now have "
+            . number_format($user->clacks) . " clack(s).";
         }
 
 
