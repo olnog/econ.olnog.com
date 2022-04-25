@@ -23,7 +23,9 @@ function destroyBuilding(buildingID){
     buildings = JSON.parse(data).buildings
     itemCapacity = JSON.parse(data).itemCapacity
     numOfItems = JSON.parse(data).numOfItems
+    status(JSON.parse(data).status)
     refreshUI()
+    
   })
 }
 

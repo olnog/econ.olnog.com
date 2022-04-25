@@ -15,8 +15,10 @@ function checkNewBuildings(){
 
 function displayAvailableBuildings(){ //11
   if (actions.buildings.length < 1){
+    $("#buildingCosts").addClass('d-none')
     return
   }
+
   $("#build").removeClass('d-none')
   $('#buildingsThatCanBeBuilt').removeClass('d-none')
   html = "<option></option>"

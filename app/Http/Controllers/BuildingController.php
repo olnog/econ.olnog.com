@@ -123,12 +123,16 @@ class BuildingController extends Controller
      */
     public function destroy($id)
     {
+      $building = \App\Buildings::find($id);
+      $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
       \App\Buildings::destroyBuilding($id);
       echo json_encode([
-        'actions' => \App\Actions::fetch(\Auth::id()),
-        'buildings' => \App\Buildings::fetch(),
-        'itemCapacity' => \App\User::find(Auth::id()),
-        'numOfItems' => \App\Items::fetchTotalQuantity(Auth::id()),
+        'actions'       => \App\Actions::fetch(\Auth::id()),
+        'buildings'     => \App\Buildings::fetch(),
+        'itemCapacity'  => \App\User::find(Auth::id()),
+        'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
+        'status'        => "You destroyed your " . $buildingType->name,
       ]);
+      
     }
 }
