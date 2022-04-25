@@ -10,26 +10,31 @@
     Show Only Actions You Can Do Now
   </div>
   @foreach($actionTypes as $actionType)
-    <div class="@if(in_array($actionType->name, $availableActions)) yesDo @else noDo d-none @endif">
+    <div class="@if(in_array($actionType->name, $availableActions)) yesDo @else noDo d-none @endif mt-3">
       <?php $action = \App\Actions::fetchByName(\Auth::id(), $actionType->name); ?>
       @if ($action->unlocked == false && $labor->availableSkillPoints > 0)
       <form method='POST' action="/actionTypes/{{$actionType->id}}">
       @csrf()
       {{ @method_field('PUT') }}
       <input type='hidden' name='whatWeDoing' value='notUpdating'>
-      <button id='incrementSkill-{{$actionType->id}}' class='btn btn-outline-success me-3'>+</button>
-      <span class='fw-bold'>{{$actionType->name}}</span>
-
       <a href='#' id='show-actionTypeDescription{{$actionType->id}}' class='ms-3 show  '>[ + ]</a>
       <a href='#' id='hide-actionTypeDescription{{$actionType->id}}' class='ms-3 hide d-none'>[ - ]</a>
+      <span class='fw-bold'>{{$actionType->name}}</span>
+
+      <button id='incrementSkill-{{$actionType->id}}' class='btn btn-outline-success me-3'>+</button>
+
       </form>
 
       @else
-        &#10003;
-        <span class='fw-bold'>{{$actionType->name}}</span>
-        {{$action->rank}}X
+
         <a href=# id='show-actionTypeDescription{{$actionType->id}}' class='ms-3 show  '>[ + ]</a>
         <a href='#' id='hide-actionTypeDescription{{$actionType->id}}' class='ms-3 hide d-none'>[ - ]</a>
+        <span class='fw-bold'>{{$actionType->name}}</span>
+        @if ($action->unlocked)
+          {{$action->rank}}X
+          &#10003;
+
+        @endif
       @endif
       @if ($action->unlocked == true)
         <div class="progress">

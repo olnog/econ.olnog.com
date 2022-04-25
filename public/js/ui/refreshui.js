@@ -11,6 +11,7 @@ function refreshUI(){
     return
   }
   */
+
   hideForcedSkillScreen()
   if(!doTheyOwnLand()){
     $(".payAllBribes").addClass('d-none')
@@ -27,6 +28,10 @@ function refreshUI(){
   $("#avgBribe").html(avgBribe)
   $("#clacks").html(clacks.toLocaleString())
   $("#availableSkillPoints").html(labor.availableSkillPoints)
+
+  if (labor.availableSkillPoints > 0){
+    $("#skillUnlocked").removeClass('d-none')
+  }
   $("#laborItems").html(numOfItems.toLocaleString())
   $("#headerAvailableSkillPoints").html(labor.availableSkillPoints.toLocaleString())
 

@@ -65,7 +65,9 @@ function displayItems(){
       $("#laborFood").html(items[i].quantity.toLocaleString())
     } else if (items[i].name == 'Contracts'){
       contractButtonCaption = "If you want to post an order on the market, you need to have a Contract. ";
+      $(".createContract").addClass('d-none')
       if ( items[i].quantity > 0){
+        $(".createContract").removeClass('d-none')
         contractButtonCaption = "<a href='/contracts/create' id='createContract' class='btn btn-link' >[ post on the market ]</a>"
       }
       $("#newContactInContracts").html(contractButtonCaption)

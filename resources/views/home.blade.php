@@ -174,7 +174,7 @@
           aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
 
-      <span id='skillUnlocked' class='ms-3'> You can unlock a new skill!</span>
+      <span id='skillUnlocked' class='ms-3  fw-bold d-none'> You can unlock a new skill!</span>
       <a href='/actionTypes/'>[ list ] </a>
     </div><div id='actionsSection' class='ms-3'>
       <div id='newBuildingAvailable' class='fw-bold mt-2'>You've got a new building available to build!</div>
@@ -194,7 +194,7 @@
       </div> <div id='hired' class=''>
         <div class=''>
           <span class='fw-bold'>hiring</span> (receive clacks)
-        </div><div id='hiredActions' class='ps-5'>
+        </div><div id='hiredActions' class='ps-3'>
         </div>
       </div>
       <div id='robots' class='d-none'>
