@@ -20,7 +20,10 @@
       <a href='#' id='show-actionTypeDescription{{$actionType->id}}' class='ms-3 show  '>[ + ]</a>
       <a href='#' id='hide-actionTypeDescription{{$actionType->id}}' class='ms-3 hide d-none'>[ - ]</a>
       <span class='fw-bold'>{{$actionType->name}}</span>
+      @if ($action->unlocked || $action->totalUses > 0)
+        {{$action->rank}}x
 
+      @endif
       <button id='incrementSkill-{{$actionType->id}}' class='btn btn-outline-success me-3'>+</button>
 
       </form>
@@ -31,12 +34,11 @@
         <a href='#' id='hide-actionTypeDescription{{$actionType->id}}' class='ms-3 hide d-none'>[ - ]</a>
         <span class='fw-bold'>{{$actionType->name}}</span>
         @if ($action->unlocked)
-          {{$action->rank}}X
+          {{$action->rank}}x
           &#10003;
-
         @endif
       @endif
-      @if ($action->unlocked == true)
+      @if ($action->unlocked == true || $action->totalUses > 0)
         <div class="progress">
           <div class="progress-bar" role="progressbar" style="width: {{round($action->totalUses / $action->nextRank * 100)}}%"
             aria-valuenow="{{$action->totalUses}}" aria-valuemin="0" aria-valuemax="{{$action->nextRank}}"></div>

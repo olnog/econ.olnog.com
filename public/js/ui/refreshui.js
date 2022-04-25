@@ -110,7 +110,7 @@ for (let i in meds){
     $("#startAutomation").prop('disabled', true)
   }
   $("#username").html(username)
-  if (skills.robotics.rank > 0 && doTheyHaveItemsQuant(fetchItemTypeIDByName('Robots'), 1)){
+  if (doTheyHaveThisActionUnlocked('program-robot') && doTheyHaveItemsQuant(fetchItemTypeIDByName('Robots'), 1)){
     displayRobotSkill()
   }
 }

@@ -44,20 +44,9 @@ function displayRobots (){
   let html = "<div>Electricity: <span id='robotsElectricity'></span> "
   for (let i in robots){
     let selectedOpt = ''
-    html += "<div>Robot #" + robots[i].num  + " (" + (robots[i].uses / 100 * 10)
+    html += "<div>Robot #" + robots[i].num  + " (" + (robots[i].uses / 100 * 10).toFixed(1)
       + "%) - <span class='fw-bold'>" + robots[i].name + "</span> "
-      + "<select id='robotAction" + robots[i].id + "'> <option value='nothing'></option>"
-
-    for (let n in actions.robots[robots[i].skillTypeID]){
-      if (actions.robots[robots[i].skillTypeID][n] == robots[i].defaultAction){
-        selectedOpt = ' selected '
-      }
-      html += "<option value='" + actions.robots[robots[i].skillTypeID][n]
-        + "' " + selectedOpt + ">"
-        + dedashify(actions.robots[robots[i].skillTypeID][n]) + '</option>'
-    }
-
-    html += "</select> <select id='reprogramList-" + robots[i].id
+      + "<select id='reprogramList-" + robots[i].id
       + "' class='reprogramList'></select>"
       + " <button id='reprogram-" + robots[i].id
       + "' class='reprogram btn btn-link'>reprogram</button></div>"
@@ -73,7 +62,7 @@ function displayRobots (){
 function displayRobotSkill(){
   let html = "<option value='null'></option>"
   let actionList = []
-  let badActionList = ['build', 'repair', 'make-book']
+  let badActionList = ['build', 'repair', 'make-book', 'program-robot']
   for (let i in actions.unlocked){
     if (actions.unlocked[i].rank > 0){
       actionList.push(actions.unlocked[i].name)

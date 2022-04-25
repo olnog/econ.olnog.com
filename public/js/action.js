@@ -35,3 +35,12 @@ function action (actionName){
     refreshUI()
   })
 }
+
+function doTheyHaveThisActionUnlocked(actionName){
+  for (let i in actions.unlocked){
+    if (actions.unlocked[i].name == actionName){
+      return true
+    }
+  }
+  return false
+}

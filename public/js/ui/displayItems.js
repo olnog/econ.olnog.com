@@ -71,8 +71,9 @@ function displayItems(){
         contractButtonCaption = "<a href='/contracts/create' id='createContract' class='btn btn-link' >[ post on the market ]</a>"
       }
       $("#newContactInContracts").html(contractButtonCaption)
-    } else if (items[i].name == 'Robots' && items[i].quantity > 0
-      && skills.robotics.rank > 0){
+
+    } else if (items[i].name == 'Robots' && items[i].quantity > 0 && doTheyHaveThisActionUnlocked('program-robot')){
+
       buttonCaption = "<button id='programRobot'class='btn btn-link ms-3'>[ program & activative ]</button> <select id='robotSkillList'></select>"
 
     } else if (items[i].name == 'Electricity' && items[i].quantity > 0){

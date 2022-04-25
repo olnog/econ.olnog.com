@@ -133,7 +133,7 @@
 
     </div>
   </div><div id='labor' class='otherPages ms-3'>
-    <div class='text-center'>
+    <div class='text-center mt-3'>
         <button id='show-laborSupplement' class='show btn btn-link'> [ MORE ]</button>
         <button id='hide-laborSupplement' class='hide btn btn-link d-none'> [ LESS ]</button>
     </div><div id='laborSupplement' class='d-none'>

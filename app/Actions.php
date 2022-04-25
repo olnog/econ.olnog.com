@@ -15,9 +15,9 @@ class Actions extends Model
   public static function fetch($userID){
       return [
         'buildings' => \App\Actions::fetchAvailableBuildings(),
-        'possible'=>\App\Actions::available($userID),
-
-        'unlocked'=>\App\Actions::fetchUnlocked($userID),
+        'possible'  =>\App\Actions::available($userID),
+        'robots'    => \App\Actions::fetchRobotActions(),
+        'unlocked'  =>\App\Actions::fetchUnlocked($userID),
       ];
   }
 
@@ -33,6 +33,7 @@ class Actions extends Model
     $actionType = \App\ActionTypes::where('name', $name)->first();
     return \App\Actions::where('actionTypeID', $actionType->id)
       ->where('userID', $userID)->first();
+
   }
 
     public static function available($userID){
@@ -554,7 +555,7 @@ class Actions extends Model
         $logs = Items::fetchByName('Logs', $contractorID);
         $logs->quantity += $logsChopped;
         $logs->save();
-        $status = $agentCaption . " have chopped down " . $logsChopped
+        $status = $agentCaption . " chopped down " . $logsChopped
           . " trees. "  . $equipmentCaption . $leaseStatus;
           if ($agentID == $contractorID){
             $status .= " You now have " . number_format($logs->quantity) . " logs. ";
@@ -2671,17 +2672,15 @@ class Actions extends Model
     public static function fetchRobotActions(){
       $bannedActions = \App\Robot::fetchBannedActions();
       $robots = \App\Robot::fetch();
-      $actionList = \App\Actions::list();
       $robotActions = [];
       foreach ($robots as $robot){
-        $skillType = \App\SkillTypes::find($robot->skillTypeID);
-        $skilledActions = [];
-        foreach (\App\Actions::list() as $actionName => $skillTypeIdentifier){
-          if ($skillTypeIdentifier == $skillType->identifier && !in_array($actionName, $bannedActions)){
-            $skilledActions [] = $actionName;
+        $actionType = \App\ActionTypes::find($robot->actionTypeID);
+        foreach ($robots as $robot){
+          if (!in_array($actionType->name, $bannedActions)){
+            $robotActions[$actionType->id] = $actionType->name;
           }
         }
-        $robotActions[$skillType->id] = $skilledActions;
+
       }
       return $robotActions;
     }

@@ -35,7 +35,7 @@ class RobotController extends Controller
     public function store(Request $request)
     {
       $robot = \App\Items::fetchByName('Robots', \Auth::id());
-      $bannedActions == \App\Robot::fetchBannedActions();
+      $bannedActions = \App\Robot::fetchBannedActions();
       $action = \App\Actions::fetchByName(\Auth::id(), $request->actionName);
       if ($robot->quantity < 1){
         echo json_encode(['error' => "You don't have any Robots."]);
@@ -51,7 +51,7 @@ class RobotController extends Controller
       $status = "You programmed a Robot with the " . $request->actionName . " skill.";
       $robot->quantity--;
       $robot->save();
-      \App\Robot::new($actionTypeID, \Auth::id());
+      \App\Robot::new($action->actionTypeID, \Auth::id());
       echo json_encode([
         'robots' => \App\Robot::fetch(),
         'status' => $status,
