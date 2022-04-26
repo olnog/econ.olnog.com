@@ -26,6 +26,8 @@ class Buildings extends Model
     } else if (!$action->unlocked || $action->rank == 0){
       return ['error' => "You haven't unlocked the action yet." ];
     }
+    doAction($agentID, $action->id);
+
     $numOfUses = 100 * $action->rank;
     $status = "You built a " . $buildingName . ". You spent: ";
     $contractorStatus = $status;
@@ -208,6 +210,8 @@ class Buildings extends Model
     if (!\App\Buildings::canYouBuild($buildingType->name, $contractorID)){
       return ['error' => "You don't have enough to rebuild this right now. (See what you're missing <a href='/buildingCosts'>here</a>)"];
     }
+    doAction($agentID, $action->id);
+
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingType->name);
     $materialCost = "";
     foreach ($buildingCosts as $material => $cost){
@@ -232,6 +236,7 @@ class Buildings extends Model
     $building = \App\Buildings::find($id);
     $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
     $repairCostMultiplier = $action->rank * .5;
+
     if ($action->rank == 0 || !$action->unlocked){
       return [
         'error' => "You haven't unlocked Repair yet.",
@@ -241,6 +246,8 @@ class Buildings extends Model
         'error' => "You don't have the necessary materials to repair this.",
       ];
     }
+    doAction($agentID, $action->id);
+
     $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
     $status = "You repaired the " . $buildingType->name . " to 100%";
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingType->name);
