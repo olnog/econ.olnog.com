@@ -75,7 +75,7 @@ function displayFreelanceActions(){
   let n = 0
 
   for (let i in contracts){
-    if (contracts[i].category == 'freelance' && clacks >= contracts[i].price){
+    if (contracts[i].category == 'freelance' && clacks >= contracts[i].price && contracts[i].userID != userID){
       html += "<button id='freelanceAction-" + contracts[i].id
         + "' class='freelance btn btn-danger'>" + contracts[i].action + " (-"
         + contracts[i].price + ") </button>"

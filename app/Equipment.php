@@ -15,9 +15,10 @@ class Equipment extends Model
   }
 
   public static function fetchByName($itemName, $userID){
-    $allEquipment = \App\Equipment::fetch();
+    $allEquipment = \App\Equipment::where('userID', $userID)->get();
     foreach ($allEquipment as $equipment){
-      if (substr($equipment->name, 0, strlen($itemName)) == $itemName){
+      $itemType = \App\ItemTypes::find($equipment->itemTypeID);
+      if (substr($itemType->name, 0, strlen($itemName)) == $itemName){
         return $equipment;
       }
     }
@@ -66,7 +67,7 @@ class Equipment extends Model
     $itemType = ItemTypes::find($equipment->itemTypeID);
     if (substr($itemType->name, 0, strlen($itemName)) != $itemName){
       $switch = \App\Labor::switchEquipped($itemName, $userID);
-      $labor = \App\Labor::fetch(); // idk if these will automatically refresh
+      $labor = \App\Labor::where('userID', $userID)->first(); // idk if these will automatically refresh
       $equipment = Equipment::find($labor->equipped);
       $itemType = ItemTypes::find($equipment->itemTypeID);
 

@@ -106,6 +106,7 @@ function fetchContracts(){
 function freelance(contractID){
   $.post( "/contracts/" + contractID, {type: 'freelance', _token: fetchCSRF(),
     _method: 'PUT' }).done(function(data){
+      console.log(data)
       if (JSON.parse(data).error != undefined){
         displayError(JSON.parse(data).error)
         fetchContracts()

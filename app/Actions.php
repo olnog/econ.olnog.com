@@ -513,17 +513,18 @@ class Actions extends Model
         $gas = Items::fetchByName('Gasoline', $contractorID);
         $equipmentAvailable = \App\Equipment
           ::whichOfTheseCanTheyUse(['Chainsaw (electric)', 'Chainsaw (gasoline)', 'Axe'], $agentID);
+
         if (count($equipmentAvailable) == 0){
           return [
             'error' => $agentCaption . " do not have any equipment that can be used to chop down a tree."
           ];
         }
-        if (!\App\Land::doTheyOwn('forest', $agentID)){
-          $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('forest', $agentID);
+        if (!\App\Land::doTheyOwn('forest', $contractorID)){
+          $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('forest', $contractorID);
           if ($currentlyLeasing){
 
             $landBonus = 1;
-            $leaseStatus = \App\Lease::use('forest', $agentID);
+            $leaseStatus = \App\Lease::use('forest', $contractorID);
           }
           if ($leaseStatus == false || !$currentlyLeasing){
             return [
