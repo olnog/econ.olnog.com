@@ -188,6 +188,12 @@ class Actions extends Model
           &&  (!\App\Items::doTheyHave('Paper', 100) || $labor->availableSkillPoints < 1)
         ){
           continue;
+        } else if ($actionName == 'make-clone'
+        && (!\App\Buildings::doesItExist('Clone Vat', Auth::id())
+        || !\App\Items::doTheyHave('Electricity', 100000)
+        || !\App\Items::doTheyHave('Genetic Material', 1000)
+        )){
+          continue;
 
         } else if ($actionName == 'make-contract'
           && (!\App\Items::doTheyHave('Paper', 1))){
@@ -415,6 +421,11 @@ class Actions extends Model
 
           && (\App\User::find(Auth::id())->buildingSlots<1)){
           continue;
+        } else if ($actionName == 'program-robot'
+          && !\App\Items::doTheyHave('Robots', 1)){
+          continue;
+
+
         } else if ($actionName == 'pump-oil'
           && (!\App\Buildings::didTheyAlreadyBuildThis('Oil Well', Auth::id())
           || !\App\Items::doTheyHave('Electricity', 10))){
