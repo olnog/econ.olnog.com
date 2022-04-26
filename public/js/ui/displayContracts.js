@@ -50,7 +50,8 @@ function displayContracts(){
         signContract = "<button id='reproduction-" + contracts[i].id
           + "' class='reproduction btn btn-success'>reproduce</button>"
       //}
-      html += " paying anyone " + contracts[i].price.toLocaleString() + " clack(s) to <span class='fw-bold'>create and raise a child</span> for them (you will <span class='fw-bold text-danger'>Rebirth</span> but will be paid your fee after - to avoid the estate tax)"
+      html += " paying anyone " + contracts[i].price.toLocaleString()
+      + " clack(s) to <span class='fw-bold'>create and raise a child</span> for them (you will <span class='fw-bold text-danger'>Rebirth</span> but will be paid your fee after [to avoid the estate tax])"
     } else if (contracts[i].category == 'sellOrder'){
       let itemName = fetchItemName(contracts[i].itemTypeID)
       if (clacks >= contracts[i].price){

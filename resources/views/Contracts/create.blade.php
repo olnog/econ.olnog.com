@@ -1,24 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-<div class='mb-5'>
-  <a href='{{ route('home') }}'>back</a>
+<div class='text-center'>
+  <a href='{{ route('home') }}'>[ home ]</a>
 </div>
 <div>
   What type of contract do you want to create?
 </div><div class='ms-3 mb-3'>
-  <input type='radio' class='contractCategory' name='category' value='hire'> Hire</input>
-  <input type='radio' class='contractCategory' name='category'
+  <div class='fw-bold'>Labor</div>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='hire'> Hire</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category'
     value='freelance' @if ($defaultCategory == 'freelance') checked @endif> Freelance</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='construction'>Construction & Repair</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='reproduction'>Reproduction</input>
 
-  <input type='radio' class='contractCategory' name='category' value='construction'>Available for Construction & Repair</input>
-  <input type='radio' class='contractCategory' name='category' value='buyOrder'> Buy Items</input>
-  <input type='radio' class='contractCategory' name='category' value='sellOrder'> Sell Items</input>
-  <input type='radio' class='contractCategory' name='category' value='buyLand' @if ($defaultCategory == 'buyLand') checked @endif>Buy Land</input>
-  <input type='radio' class='contractCategory' name='category' value='sellLand' @if ($defaultCategory == 'sellLand') checked @endif>Sell Land</input>
-  <input type='radio' class='contractCategory' name='category' value='reproduction'>Reproduction</input>
-  <input type='radio' class='contractCategory' name='category' value='lease'>Lease Land</input>
-  <input type='radio' class='contractCategory' name='category' value='leaseBuilding'>Lease Buildings</input>
+
+  <div class='fw-bold'>Items</div>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='buyOrder'> Buy Items</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='sellOrder'> Sell Items</input>
+
+  <div class='fw-bold'>Land</div>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='buyLand' @if ($defaultCategory == 'buyLand') checked @endif>Buy Land</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='sellLand' @if ($defaultCategory == 'sellLand') checked @endif>Sell Land</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='lease'>Lease Land</input>
+
+  <div class='fw-bold'>Buildings</div>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='leaseBuilding'>Lease Buildings</input>
 
 
 </div><div id='contractError' class='text-danger text-center'>
@@ -59,10 +66,10 @@
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
     <input type='hidden' name='category' value='reproduction' >
-    <div>
-      10% of your current starting work hours ({{ceil($labor->startingWorkHours * .1) }}) will be deducted from both <span class='fw-bold'>you and the contractor</span>. You and the contractor will both receive a child. Each child you own adds one more food upkeep requirement to each action you do. If you run out of food, your children will die.
-    </div><div>
-      Children can be redeemed at Rebirth as a Legacy perk so that you will start the next round with the same level of skill in one skill of your choice.
+    <div class='mb-1'>
+      Pay someone to create a Child for you. They will receive their payment after their Rebirth.
+    </div><div class='mb-1'>
+      <span class='fw-bold'>Children</span> can be used during Rebirth to preserve your rank progress on your actions.
     </div><div>
       You are willing to pay <input type='number' name='price' value='1'> clack(s).
     </div>

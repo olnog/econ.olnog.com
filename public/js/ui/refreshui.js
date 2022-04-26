@@ -19,12 +19,11 @@ function refreshUI(){
   if (currentskillPoints < labor.availableSkillPoints){
     playSkill()
   }
+  $("#numOfPoints").html(labor.availableSkillPoints + labor.allocatedSkillPoints)
+  $("#numOfParcels").html(numOfParcels)
   $("#autoActions").html(autoActions)
   $("#autoBribe").val(autoBribe)
   $("#autoWorkStart").addClass('d-none')
-  if (stopWorkHours > 0){
-    //$("#autoWorkStart").removeClass('d-none')
-  }
   $("#avgBribe").html(avgBribe)
   $("#clacks").html(clacks.toLocaleString())
   $("#availableSkillPoints").html(labor.availableSkillPoints)
@@ -43,7 +42,7 @@ function refreshUI(){
   $("#allocatedSkillPoints").html(labor.allocatedSkillPoints)
   $("#maxSkillPoints").html(labor.maxSkillPoints)
   $("#workHours").html(labor.workHours.toLocaleString())
-  $("#numOfContracts").html(contracts.length)
+  $("#numOfContracts").html(numOfContracts)
   $("#workHoursStop").html(stopWorkHours)
   if (hostileTakeover){
     $("#hostileTakeover").removeClass('d-none')
@@ -66,7 +65,17 @@ function refreshUI(){
   }
 
   $("#numOfBuildingSlots").html(buildingSlots)
-  $("#numOfItems").html(numOfItems.toLocaleString())
+  if (numOfItems < 1000){
+    $("#numOfItems").html(numOfItems.toLocaleString())
+  } else if (numOfItems < 1000000){
+    $("#numOfItems").html((numOfItems / 1000).toFixed(1).toLocaleString() + "k")
+
+  } else if (numOfItems < 1000000000){
+    $("#numOfItems").html((numOfItems / 1000000).toFixed(1).toLocaleString() + "m")
+
+  }
+
+
   checkNewBuildings()
   let percentCaption = ""
   displayRobots()

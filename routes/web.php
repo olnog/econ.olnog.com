@@ -138,7 +138,9 @@ Route::get('/ajax', function () {
       'items'         => \App\Items::fetch(),
       'itemTypes'     => \App\ItemTypes::all(),
       'land'          => \App\Land::fetch(),
+      'numOfContracts'=> \App\Contracts::where('userID', \Auth::id())->where('active', 1)->count(),
       'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
+      'numOfParcels'    => count(\App\Land::fetchMine()),
       'robots'        => \App\Robot::fetch(),
       'settings'      => [
         'sound'=>$user->soundSetting,

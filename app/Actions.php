@@ -480,8 +480,8 @@ class Actions extends Model
         $buildingUserID = $contractorID;
       }
       $status = "";
-      $contractorCaption = " They ";
-      $agentCaption = " They ";
+      $contractorCaption = " You ";
+      $agentCaption = " You ";
       $radiationPoisoning = false;
       $radStatus = '';
       if ($contractorID == Auth::id()){
@@ -2166,7 +2166,7 @@ class Actions extends Model
           ::whichOfTheseCanTheyUse(['Jackhammer (gasoline)', 'Jackhammer (electric)',
           'Pickaxe'], $agentID);
         if (count($equipmentAvailable) < 1){
-          return ['error' => "You don't have anything to mine right now."];
+          return ['error' => "You don't have any equipment to mine with right now."];
         }
         $labor = \App\Labor::where('userID', $agentID)->first();
         $leaseStatus = '';

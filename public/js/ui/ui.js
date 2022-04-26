@@ -12,19 +12,16 @@ function displayBuyOrders(){ //23
       + buyOrders[i].name + " to The State (+" + buyOrders[i].cost.toLocaleString() + " clacks)"
     sellCaption = "<button disabled id='sellToState-" + buyOrders[i].id
       + "' class='sellToState btn btn-link me-3'>[ sell ]</button>"
-    toolCaption = ""
     hideDiv = 'unfillableBuyOrders d-none'
     if (doTheyHaveItemsQuant(buyOrders[i].itemTypeID, buyOrders[i].quantity)){
       hideDiv = ''
       sellCaption = "<button id='sellToState-" + buyOrders[i].id
         + "' class='sellToState btn btn-link me-3'>[ sell ]</button>"
     }
-    if (buyOrders[i].material != null){
-      toolCaption = " (" + buyOrders[i].material + " / " + buyOrders[i].durability + ")"
-    }
+
     html += "<div class='stateBuyOrders stateItemType" + buyOrders[i].itemTypeID + " " + hideDiv + "'>" + sellCaption +  "The State wants to buy "
       + buyOrders[i].quantity.toLocaleString()  + " <span class='fw-bold'>"
-      + buyOrders[i].name + toolCaption + "</span> for " + buyOrders[i].cost.toLocaleString()
+      + buyOrders[i].name  + "</span> for " + buyOrders[i].cost.toLocaleString()
       + " clacks. (" + (buyOrders[i].cost / buyOrders[i].quantity).toFixed().toLocaleString() + " each - " + hoursOld + "h)</div>"
   }
   $("#stateBuyOrders").html(html)

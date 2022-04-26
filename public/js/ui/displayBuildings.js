@@ -32,7 +32,7 @@ function displayBuiltBuildings(){ //30
   if (!doTheyOwnLand()){
     $("#buildingWarning").html("You need to have land in order to build. (Explore to find land - or buy / lease some. Or launch a hostile takeover of a parcel.)")
   }
-  $("#builtBuildings").html(buildings.built.length)
+  $(".builtBuildings").html(buildings.built.length)
   let html = ""
   for (let i in buildings.built){
 

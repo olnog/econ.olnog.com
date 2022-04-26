@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class Contracts extends Model
 {
   protected $table = 'contracts';
+  
   public static function anyoneBuying($contractID){
     $sellContract = \App\Contracts::find($contractID);
     $buyContracts = \App\Contracts::where('itemTypeID', $sellContract->itemTypeID)

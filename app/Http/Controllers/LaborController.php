@@ -93,7 +93,8 @@ class LaborController extends Controller
         'actions' => \App\Actions::fetch(\Auth::id()),
         'labor' => \App\Labor::fetch(),
         'items' => Items::fetch(),
-        'equipment' => \App\Equipment::fetch()
+        'equipment' => \App\Equipment::fetch(),
+        'status'    => 'You equip a ' . $toolItem->name . ".",
       ]);
     }
 

@@ -5,7 +5,8 @@ function displayItems(){
     let bookButton = ""
     let buttonCaption = " "
     let contractButtonCaption = ""
-    let toolCaption = ""
+    let hideAndShow = ""
+    let hideAndShowClass = ""
     let sellingContract = isThereASellContract(items[i].itemTypeID)
     let buyFromContract = ''
     if (sellingContract != null && sellingContract.cost != null && clacks >= sellingContract.cost ){
@@ -44,9 +45,12 @@ function displayItems(){
     if (items[i].quantity == 0){
       noQuantity = "noQuantity d-none"
     }
-    if ((items[i].name == 'Pickaxe' || items[i].name == 'Axe'
-    || items[i].name == 'Saw' || items[i].name == 'Handmill'
-    || items[i].name == 'Shovel' || items[i].name == 'Radiation Suit'
+    if ((items[i].name.substring(0, 'Pickaxe'.length) == 'Pickaxe'
+    || items[i].name.substring(0, 'Axe'.length) == 'Axe'
+    || items[i].name.substring(0, 'Saw'.length) == 'Saw'
+    || items[i].name.substring(0, 'Handmill'.length) == 'Handmill'
+    || items[i].name.substring(0, 'Shovel'.length) == 'Shovel'
+    || items[i].name == 'Radiation Suit'
     || items[i].name.substring(0, 'Chainsaw'.length) == 'Chainsaw'
     || items[i].name.substring(0, 'Jackhammer'.length) == 'Jackhammer'
     || (items[i].name.substring(0, 'Car'.length) == 'Car'
@@ -58,9 +62,7 @@ function displayItems(){
       if(items[i].quantity > 0){
         buttonCaption = "<button id='equipItem-" + items[i].id + "' class='equipItem btn btn-info m-3'> equip </button> "
       }
-      if (items[i].material != null){
-        toolCaption = " (" + items[i].material + " / " + items[i].durability + ") "
-      }
+
     } else if (items[i].name == 'Food'){
       $("#laborFood").html(items[i].quantity.toLocaleString())
     } else if (items[i].name == 'Contracts'){
@@ -106,12 +108,21 @@ function displayItems(){
       dumpButton = ''
       sellCaption = ''
     }
+
+    if (sellCaption != "" || sellToContract != "" || buyFromContract != ""){
+      hideAndShow = "<button id='show-buyingAndSelling" + items[i].id
+      + "' class='show btn btn-link me-3'>+</button>"
+      + "<button id='hide-buyingAndSelling" + items[i].id
+      + "' class='hide btn btn-link d-none me-3'>-</button>"
+      hideAndShowClass = "d-none"
+    }
+
     html += "<div class='mt-3 " + noQuantity + "'><div>"
-      + dumpButton + items[i].name +  toolCaption
-    +  ": " + items[i].quantity.toLocaleString()  + buttonCaption + sellCaption + bookButton
+      + dumpButton + items[i].name
+    +  ": " + items[i].quantity.toLocaleString()  + hideAndShow + buttonCaption +  bookButton
     + contractButtonCaption
-    + "</div><div>"
-    + sellToContract + buyFromContract
+    + "</div><div id='buyingAndSelling" + items[i].id + "' class='" + hideAndShowClass + "'>"
+    + sellCaption + sellToContract + buyFromContract
 
     + "</div></div>"
   }

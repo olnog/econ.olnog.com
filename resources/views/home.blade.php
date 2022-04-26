@@ -4,17 +4,24 @@
 <div id='mainScreen'>
   <ul class="nav justify-content-center nav-tabs mt-5">
 
-    <li class="nav-item">
+    <li class="nav-item text-center">
       <a id='landNav' class="nav-link menu" href="#">land</a>
+      (<span id='numOfParcels'></span>)
+
     </li>
-    <li class="nav-item">
+    <li class="nav-item text-center">
       <a class="nav-link active menu" href="#">labor</a>
+      (<span id ='numOfPoints'></span>)
     </li>
-    <li class="nav-item">
+    <li class="nav-item text-center">
       <a class="nav-link menu" href="#">items</a>
+      (<span id='numOfItems'></span>)
+
     </li>
-    <li class="nav-item">
+    <li class="nav-item text-center">
       <a class="nav-link menu" href="#">buildings</a>
+      (<span class='builtBuildings'></span>)
+
     </li>
     <li class="nav-item text-center">
       <a class="nav-link menu" href="#">market</a>
@@ -159,23 +166,24 @@
         </div><div id='equipmentListings' class='ms-3 pb-3'>    </div>
       </div>
     </div><div class='row'>
-      <div class='col-lg-3 col-5'>
+      <div class='col-lg-3 '>
         <span class='fw-bold'>Actions</span>
+        <a href='/actionTypes/' class='me-3'>[ unlock ] </a>
         <a href='https://econ.olnog.com/help#actions'>[ help ]</a>
         <a href='/contracts/create?category=freelance' class='btn ms-3 createContract'>
           <img src='/img/icons8-sell-24.png'>
         </a>
-      </div><div class='col-lg-9 col-7'>
-        <input type='checkbox' id='hideImpossible' class='formatActions ms-3'> Hide unavailable actions?
-      </div>
-    </div><div class='ms-3'>
+      </div><div class='col-lg-9 '>
+        <input type='checkbox' id='hideImpossible' class='formatActions'> Hide unavailable actions?
+      </div><div>
+      <span id='skillUnlocked' class=' fw-bold d-none'> You can unlock a new action!</span>
+    </div>
+    </div><div class=''>
       <div class="progress">
         <div id='skillPointProgress' class="progress-bar" role="progressbar"
           aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
 
-      <span id='skillUnlocked' class='ms-3  fw-bold d-none'> You can unlock a new skill!</span>
-      <a href='/actionTypes/'>[ list ] </a>
     </div><div id='actionsSection' class='ms-3'>
       <div id='newBuildingAvailable' class='fw-bold mt-2'>You've got a new building available to build!</div>
       <select id='buildingsThatCanBeBuilt' class='d-none'></select>
@@ -205,55 +213,7 @@
         </div>
       </div>
     </div>
-    <!--
-    <div  class='mt-5'>
-      <div>
-        Skills
-        (<span id='headerAvailableSkillPoints'></span>)
-        <button id='hide-skillsSection' class='hide btn btn-link '>
-          -
-        </button>
-        <button id='show-skillsSection' class='show btn btn-link'>
-          +
-        </button>
-      </div><div class="progress">
-        <div id='skillPointProgress' class="progress-bar" role="progressbar"
-          aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-      </div>
-    </div>
-
-    <div id='skillsSection' class='ms-3 '>
-      <div class='row'>
-        <div class='col-lg-3'>
-          <span id='allocatedSkillPoints'></span>/<span id='maxSkillPoints'></span> pts
-          <span id='pendingMaxSkillPointsSection'>
-            (<span id='pendingMaxSkillPoints'></span>)
-          </span>
-          <span class='ms-5'>
-            Available Skill Points:
-            <span id='availableSkillPoints'></span>
-          </span>
-        </div><div class='col-lg-9'>
-          <input type='checkbox' id='hideEmptySkills' class=''> Hide skills with no points?
-        </div>
-
-      </div><div class='row '>
-        <div class='text-center col border p-1'>
-          Skills marked with <img src='/img/icons8-pacifier-24.png'/> are recommended for new players
-        </div><div class='text-center col border p-1'>
-
-          Skills marked with <img src='https://img.icons8.com/ios-glyphs/30/000000/landscape.png'/> require Land.
-        </div><div class='text-center col border p-1'>
-
-
-          Skills marked with <img src='https://img.icons8.com/ios-glyphs/30/000000/building--v1.png'/> require a Building.
-        </div>
-      </div>
-    <div id='skillListing' class='ms-3'>
-
-    </div>
-    -->
-    <div id='' class='fw-bold'>
+    <div id='' class='fw-bold mt-3'>
       Rebirth
       <button id='show-resetSection' class='show btn btn-link'>+</button>
       <button id='hide-resetSection' class='hide btn btn-link d-none'>-</button>

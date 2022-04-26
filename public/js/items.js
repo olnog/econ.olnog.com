@@ -21,6 +21,8 @@ function equipItem(itemID){
     items = JSON.parse(data).items
     equipment = JSON.parse(data).equipment
     labor = JSON.parse(data).labor
+    status(JSON.parse(data).status)
+
     refreshUI()
   })
 }

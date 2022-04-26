@@ -19,7 +19,9 @@ $.get('/ajax', function(data){
   currentskillPoints = labor.availableSkillPoints
   land          = obj.land
   leases        = obj.leases
+  numOfContracts= obj.numOfContracts
   numOfItems    = obj.numOfItems
+  numOfParcels  = obj.numOfParcels
   formatSkillsObjectFromDB(obj.skills)
   robots        = obj.robots
   settings      = obj.settings
