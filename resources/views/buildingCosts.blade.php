@@ -20,7 +20,7 @@ Why am I not able to build right now?
   @foreach($buildingTypes as $buildingType)
     <div class='fw-bold mt-3'>
       {{$buildingType->name}}
-      @if (\App\Buildings::doesItExist($buildingType->name, \Auth::id()))
+      @if (\App\Buildings::isItBuilt($buildingType->name, \Auth::id()))
         <span class='fw-bold text-decoration-underline'>(built)</span>
       @endif
       <button id='show-buildingInfo{{$buildingType->id}}' class='show btn btn-link'> [ + ] </button>

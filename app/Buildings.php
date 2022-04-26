@@ -117,6 +117,14 @@ class Buildings extends Model
     return true;
   }
 
+  public static function isItBuilt($buildingName, $userID){
+    $building = \App\Buildings::fetchByName($buildingName, $userID);
+    if ($building == null){
+      return false;
+    }
+
+    return true;
+  }
   public static function doesItExist($buildingName, $userID){
     if (\App\BuildingLease::areTheyLeasingThis($buildingName, $userID)){
       return true;
