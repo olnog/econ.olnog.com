@@ -120,7 +120,9 @@
       <select name='action'><option></option>
 
         @foreach($freelanceActions as $action)
-          <option>{{ $action->name }}</option>
+          @if (!in_array($action->name, \App\Robot::fetchBannedActions()))
+            <option>{{ $action->name }}</option>
+          @endif
         @endforeach
 
       </select>
@@ -154,7 +156,9 @@
     Action:
     <select name='action'> <option></option>
       @foreach($hireableActions as $action)
-        <option value='{{ $action }}'>{{ $action->name }}</option>
+        @if (!in_array($action->name, \App\Robot::fetchBannedActions()))
+          <option value='{{ $action }}'>{{ $action->name }}</option>
+        @endif
       @endforeach
     </select>
   </div><div>

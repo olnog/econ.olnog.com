@@ -26,7 +26,7 @@ class Robot extends Model
 
     public static function fetchBannedActions(){
       return [
-        'build', 'make-book', 'repair'
+        'build', 'make-book', 'repair', 'program-robot'
       ];
 
     }
