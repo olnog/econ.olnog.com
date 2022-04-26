@@ -57,7 +57,7 @@ function displayBuiltBuildings(){ //30
 
     let buildingDiv = buildings.built[i].name
     + " (" + ((buildings.built[i].uses / buildings.built[i].totalUses) * 100).toFixed(2)
-    + "%)" + leaseBuilding
+    + "%)"
     if (buildings.built[i].farming){
       fieldsClass = " fields "
       buildingDiv = buildings.built[i].name
@@ -70,11 +70,18 @@ function displayBuiltBuildings(){ //30
       }
     }
     html += "<div class='mt-3" + fieldsClass + "'><div>"
-    + buildingDiv +  "</div>"
-    +"<div><button id='destroyBuilding-"
-    + buildings.built[i].id
-    + "' class='destroyBuilding m-3 btn btn-warning me-3'>destroy</button>"
-    + repairButton + rebuildButton + "</div></div>"
+      + buildingDiv +  "<button id='show-buildingButtons" + buildings.built[i].id
+      + "' class='show btn btn-link'>+</button><button id='hide-buildingButtons"
+      + buildings.built[i].id
+      + "' class='hide btn btn-link d-none'>-</button>"
+      if (!buildings.built[i].farming){
+        html += leaseBuilding
+      }
+      html += "</div>"
+      + "<div id='buildingButtons" + buildings.built[i].id + "' class='d-none'><button id='destroyBuilding-"
+      + buildings.built[i].id
+      + "' class='destroyBuilding m-3 btn btn-warning me-3'>destroy</button>"
+      + repairButton + rebuildButton + "</div></div>"
   }
   $("#buildingListings").html(html)
   formatBuildings()

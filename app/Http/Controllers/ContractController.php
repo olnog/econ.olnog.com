@@ -38,6 +38,7 @@ class ContractController extends Controller
         'parcelType'      => $request->parcelType,
         'parcelID'        => $request->parcelID,
         'itemTypes' => \App\ItemTypes::orderBy('name')->get(),
+        'itemID'          => $request->itemID,
         'items' => \App\Items::fetchInventory(),
         'buildings' => \App\Buildings::fetchBuilt(),
         'constructionSkill' => \App\Skills::fetchByIdentifier('construction', \Auth::id()),

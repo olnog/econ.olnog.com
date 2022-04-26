@@ -11,13 +11,17 @@
   <input type='radio' class='contractCategory ms-3 me-1' name='category' value='hire'> Hire</input>
   <input type='radio' class='contractCategory ms-3 me-1' name='category'
     value='freelance' @if ($defaultCategory == 'freelance') checked @endif> Freelance</input>
-  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='construction'>Construction & Repair</input>
+  <!--<input type='radio' class='contractCategory ms-3 me-1' name='category' value='construction'>Construction & Repair</input>-->
   <input type='radio' class='contractCategory ms-3 me-1' name='category' value='reproduction'>Reproduction</input>
 
 
   <div class='fw-bold'>Items</div>
-  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='buyOrder'> Buy Items</input>
-  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='sellOrder'> Sell Items</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category'
+    value='buyOrder' @if ($defaultCategory == 'buyOrder') checked @endif>
+    Buy Items</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category'
+    value='sellOrder' @if ($defaultCategory == 'sellOrder') checked @endif>
+    Sell Items</input>
 
   <div class='fw-bold'>Land</div>
   <input type='radio' class='contractCategory ms-3 me-1' name='category' value='buyLand' @if ($defaultCategory == 'buyLand') checked @endif>Buy Land</input>
@@ -241,7 +245,8 @@
       <button class='form-select btn-primary'>create contract</button>
     </div>
   </form>
-</div><div id='buyOrderSection' class='ms-3 contractSection d-none'>
+</div><div id='buyOrderSection' class='ms-3 contractSection
+  @if ($defaultCategory != 'buyOrder') d-none @endif'>
   <div>
     <form method='POST' action={{ route('contracts.store')}}>
       @csrf()
@@ -249,7 +254,8 @@
       Buying: <select name='itemTypeID'>
       <option></option>
       @foreach($itemTypes as $itemType)
-        <option value='{{$itemType->id}}'>{{ $itemType->name }}
+        <option value='{{$itemType->id}}'
+          @if($itemTypeID = $itemType->id) selected @endif >{{ $itemType->name }}
           @if ($itemType->material != null)
             ({{ $itemType->material }} / {{ $itemType->durability }})
           @endif
@@ -272,7 +278,8 @@
       <button id='createContract' class='btn btn-primary form-control' >Create Contract</button>
     </div>
   </form>
-</div><div id='sellOrderSection' class='ms-3 contractSection d-none'>
+</div><div id='sellOrderSection' class='ms-3 contractSection
+  @if ($defaultCategory != 'sellOrder') d-none @endif'>
   <div>
     <form method='POST' action={{ route('contracts.store')}}>
       @csrf()
@@ -281,12 +288,10 @@
       <option></option>
       @foreach($items as $item)
         @if ($item->name != 'Nuclear Waste')
-        <option value='{{$item->itemTypeID}}'>
-          {{$item->quantity}}
+        <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif>
+          {{number_format($item->quantity)}}
           {{ $item->name }}
-          @if ($item->material != null)
-            ({{ $item->material }} / {{ $item->durability }})
-          @endif
+
         </option>
         @endif
       @endforeach

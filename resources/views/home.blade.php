@@ -242,8 +242,6 @@
       <div id='buildingWarning' class='text-decoration-underline text-center'></div>
       <input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?
     </div><div id='buildingListings' class='p-3'>
-
-
     </div>
   </div><div id='items' class='d-none otherPages ms-3'>
       <span class='fw-bold'>items</span>

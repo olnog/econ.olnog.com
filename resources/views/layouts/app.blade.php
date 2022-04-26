@@ -34,6 +34,9 @@
       .mountains{
         border:2px DarkRed solid ;
       }
+      .noQuantity{
+        background-color:whitesmoke;
+      }
       .plains {
         border:2px DarkKhaki solid;
       }

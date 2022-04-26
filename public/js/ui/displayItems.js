@@ -9,6 +9,8 @@ function displayItems(){
     let hideAndShowClass = ""
     let sellingContract = isThereASellContract(items[i].itemTypeID)
     let buyFromContract = ''
+    let notEmptyClass = ''
+    let sellItemContract = ''
     if (sellingContract != null && sellingContract.cost != null && clacks >= sellingContract.cost ){
       buyFromContract = "<button id='buyFromSellOrder-" + sellingContract.id + "-1"
       + "' class='buyFromSellOrder btn btn-danger m-2'>buy (-" + sellingContract.cost.toLocaleString()
@@ -43,7 +45,7 @@ function displayItems(){
     }
 
     if (items[i].quantity == 0){
-      noQuantity = "noQuantity d-none"
+      noQuantity = " noQuantity d-none"
     }
     if ((items[i].name.substring(0, 'Pickaxe'.length) == 'Pickaxe'
     || items[i].name.substring(0, 'Axe'.length) == 'Axe'
@@ -96,20 +98,23 @@ function displayItems(){
     }
     dumpButton = ""
     if (items[i].quantity >= 1){
-      dumpButton += "<button id='dump-" + items[i].id + "-1' class='btn btn-danger me-2 d-none dump'>dump 1x</button>"
+      sellItemContract = "<a href='/contracts/create?category=sellOrder&itemID="
+      + items[i].itemTypeID + "' class='btn createContract'>"
+      + "<img src='/img/icons8-sell-24.png'></a>"
+      dumpButton += "<button id='dump-" + items[i].id + "-1' class='btn btn-danger m-2 d-none dump'>dump 1x</button>"
     }
     if (items[i].quantity >= 10){
-      dumpButton += "<button id='dump-" + items[i].id + "-10' class='btn btn-danger me-2 d-none dump'>10x</button>"
+      dumpButton += "<button id='dump-" + items[i].id + "-10' class='btn btn-danger m-2 d-none dump'>10x</button>"
     }
     if (items[i].quantity >= 100){
-      dumpButton += "<button id='dump-" + items[i].id + "-100' class='btn btn-danger me-2 d-none dump'>100x</button>"
+      dumpButton += "<button id='dump-" + items[i].id + "-100' class='btn btn-danger m-2 d-none dump'>100x</button>"
     }
     if (items[i].name == 'Nuclear Waste'){
       dumpButton = ''
       sellCaption = ''
     }
 
-    if (sellCaption != "" || sellToContract != "" || buyFromContract != ""){
+    if (sellCaption != "" || sellToContract != "" || buyFromContract != "" || sellItemContract != ""){
       hideAndShow = "<button id='show-buyingAndSelling" + items[i].id
       + "' class='show btn btn-link me-3'>+</button>"
       + "<button id='hide-buyingAndSelling" + items[i].id
@@ -117,10 +122,14 @@ function displayItems(){
       hideAndShowClass = "d-none"
     }
 
-    html += "<div class='mt-3 " + noQuantity + "'><div>"
-      + dumpButton + items[i].name
+    html += "<div class='mt-3 " + noQuantity + " '><div>"
+    + "<a href='/contracts/create?category=buyOrder&itemID="
+    + items[i].itemTypeID + "' class='btn createContract'>"
+    + "<img src='/img/icons8-buy-24.png'></a>"
+    + sellItemContract + items[i].name
     +  ": " + items[i].quantity.toLocaleString()  + hideAndShow + buttonCaption +  bookButton
-    + contractButtonCaption
+    + "</div><div>"
+    + dumpButton
     + "</div><div id='buyingAndSelling" + items[i].id + "' class='" + hideAndShowClass + "'>"
     + sellCaption + sellToContract + buyFromContract
 
