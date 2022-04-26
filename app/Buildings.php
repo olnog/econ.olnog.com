@@ -150,6 +150,8 @@ class Buildings extends Model
       'repairable' => \App\Buildings::fetchRepairable(),
       'possible' => \App\BuildingTypes::all(),
       'costs' => \App\BuildingTypes::fetchBuildingCost(null),
+      'leases'  => \App\Contracts::where('userID', \Auth::id())
+        ->where('active', 1)->where('category', 'leaseBuilding')->get(),
     ];
   }
   public static function fetchBuilt(){

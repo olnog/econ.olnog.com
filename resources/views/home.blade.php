@@ -231,7 +231,7 @@
     <div>
       <span class='fw-bold'>
         buildings
-        (<span id='builtBuildings'></span>)
+        (<span class='builtBuildings'></span>)
       </span> -
       <span id='numOfBuildingSlots'></span>
       free building slots
@@ -337,6 +337,7 @@
       <a target="_blank" href="">Sell</a> icon by <a target="_blank" href="">Icons8</a>
       <a href='https://icons8.com/icon/84998/buy'>Thanks for this buy icon too</a>
       <a target="_blank" href="https://icons8.com/icon/Qpt0cBZAp1GC/pacifier">Pacifier</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+      <a target="_blank" href="https://icons8.com/icon/61247/rent">Rent</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
     </div><div>
       <a href='https://freesound.org/people/suzenako/sounds/320905/'>The Ding</a>
       <a href='https://freesound.org/people/InspectorJ/sounds/415510/'>Bell, Counter,</a>

@@ -25,12 +25,14 @@
   <input type='radio' class='contractCategory ms-3 me-1' name='category' value='lease'>Lease Land</input>
 
   <div class='fw-bold'>Buildings</div>
-  <input type='radio' class='contractCategory ms-3 me-1' name='category' value='leaseBuilding'>Lease Buildings</input>
+  <input type='radio' class='contractCategory ms-3 me-1' name='category'
+    value='leaseBuilding'
+    @if ($defaultCategory == 'leaseBuilding') checked @endif>Lease Buildings</input>
 
 
 </div><div id='contractError' class='text-danger text-center'>
 
-</div><div id='leaseBuildingSection' class='ms-3 contractSection mb-5 d-none '>
+</div><div id='leaseBuildingSection' class='ms-3 contractSection mb-5 @if ($defaultCategory != 'leaseBuilding') d-none @endif '>
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
     <input type='hidden' name='category' value='leaseBuilding' >
@@ -39,7 +41,7 @@
       <select name='buildingID'>
         <option></option>
         @foreach($buildings as $building)
-          <option value='{{$building->id}}'>{{$building->name}}</option>
+          <option value='{{$building->id}}' @if($buildingID == $building->id) selected @endif )>{{$building->name}}</option>
         @endforeach
 
       </select>

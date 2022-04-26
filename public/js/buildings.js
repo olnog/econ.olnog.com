@@ -1,3 +1,12 @@
+function areTheyLeasingBuilding(buildingID){
+  for (let i in buildings.leases){
+    if (building.leases.buildingID == buildingID){
+      return true
+    }
+  }
+  return false
+}
+
 function buildBuilding(buildingName){
   $.post( "/buildings", {buildingName: buildingName, _token: fetchCSRF() }).done(function(data){
     if (JSON.parse(data).error != undefined){
@@ -25,7 +34,7 @@ function destroyBuilding(buildingID){
     numOfItems = JSON.parse(data).numOfItems
     status(JSON.parse(data).status)
     refreshUI()
-    
+
   })
 }
 

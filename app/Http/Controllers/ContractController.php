@@ -33,6 +33,7 @@ class ContractController extends Controller
       }
       $defaultCategory = $request->category;
       return view('Contracts.create', [
+        'buildingID'      => $request->buildingID,
         'defaultCategory' => $defaultCategory,
         'parcelType'      => $request->parcelType,
         'parcelID'        => $request->parcelID,
