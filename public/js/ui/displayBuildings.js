@@ -39,11 +39,13 @@ function displayBuiltBuildings(){ //30
     let repairButton = ""
     let rebuildButton = ''
     let fieldsClass = ''
-    if (buildings.built[i].uses < buildings.built[i].totalUses && buildings.repairable.includes(buildings.built[i].id)){
+    if (buildings.built[i].uses < buildings.built[i].totalUses
+        && buildings.repairable.includes(buildings.built[i].id)
+      && doTheyHaveThisActionUnlocked('repair')){
       repairButton = "<button id='repair-" + buildings.built[i].id
         + "' class='m-3 repair btn btn-info'>repair</button>"
     }
-    if (buildings.built[i].uses < buildings.built[i].totalUses){
+    if (buildings.built[i].uses < buildings.built[i].totalUses && doTheyHaveThisActionUnlocked('build')){
       rebuildButton = "<button id='rebuild-" + buildings.built[i].id + "' class='rebuild m-3 btn btn-primary'>rebuild</button>"
     }
     let buildingDiv = buildings.built[i].name

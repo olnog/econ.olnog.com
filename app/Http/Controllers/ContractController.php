@@ -772,6 +772,7 @@ class ContractController extends Controller
       echo json_encode([
         'status' => $status,
         'clacks' => $clacks,
+        'buildingSlots' => \App\User::find(\Auth::id())->buildingSlots,
         'history' => \App\History::fetch(),
         'items' => \App\Items::fetch(),
         'labor' => \App\Labor::fetch(),

@@ -90,7 +90,7 @@ class LaborController extends Controller
 
       $labor->save();
       echo json_encode([
-        'actions' => \App\Actions::fetch(),
+        'actions' => \App\Actions::fetch(\Auth::id()),
         'labor' => \App\Labor::fetch(),
         'items' => Items::fetch(),
         'equipment' => \App\Equipment::fetch()

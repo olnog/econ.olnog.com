@@ -24,6 +24,7 @@ function buyLand(contractID){
       fetchContracts()
       return
     }
+    buildingSlots = JSON.parse(data).buildingSlots
     status(JSON.parse(data).status)
     clacks = JSON.parse(data).clacks
     history = JSON.parse(data).history
@@ -255,6 +256,7 @@ function sellLand(contractID){
       fetchContracts()
       return
     }
+    buildingSlots = JSON.parse(data).buildingSlots
     status(JSON.parse(data).status)
     clacks = JSON.parse(data).clacks
     history = JSON.parse(data).history
