@@ -3,7 +3,6 @@
 @section('content')
 <div id='mainScreen'>
   <ul class="nav justify-content-center nav-tabs mt-5">
-
     <li class="nav-item text-center">
       <a id='landNav' class="nav-link menu" href="#">land</a>
       (<span id='numOfParcels'></span>)
@@ -29,8 +28,10 @@
     </li>
 
   </ul>
-  <div id='status' class='p-1 text-center fixed-top bg-secondary bg-opacity-100'>&nbsp;</div>
-  <div id='error' class='p-1 text-center text-danger'>&nbsp;</div>
+  <div class='fixed-top bg-opacity-100'>
+    <div id='status' class='p-1 text-center bg-secondary '>&nbsp;</div>
+    <div id='error' class='p-1 text-center text-danger'>&nbsp;</div>
+  </div>
   <span id='csrf'>@csrf()</span>
   <div class='ms-2 row'>
     <div class='col-lg-3'>
