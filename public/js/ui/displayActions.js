@@ -1,18 +1,12 @@
 function displayActions(){ //39
   let canTheyBuild = false
   let html = ""
-  /*
-  if (skills.construction.rank > 0 ){
-    html = "<button id='build' class='btn btn-primary whyNot'>build</button></span>"
-      + "<select id='buildingsThatCanBeBuilt' class='d-none me-3'><option selected></option></select>"
-  }
-  */
   if (lastAction != null || lastContractAction != null){
     $("#lastAction").prop('disabled', false)
     $("#startAutomation").prop('disabled', false)
   }
-  /*
-  if (!actions.available.includes(lastAction) && lastContractAction == null){
+
+  if (!actions.possible.includes(lastAction) && lastContractAction == null){
     lastAction = null
     $("#startAutomation").prop('disabled', true)
     if (automation != null){
@@ -20,20 +14,12 @@ function displayActions(){ //39
     }
 
   }
-  */
+
   for (i in actions.unlocked){
     let thisIsDisabled = 'btn-primary'
     let impossibleActionClass = ''
     let whyNotStart = ''
     let whyNotEnd = ''
-    /*
-    if (!actions.available.includes(actions.possible[i])){
-      thisIsDisabled = ' btn-warning whyNot'
-      impossibleActionClass = ' impossible '
-      whyNotStart = "<span id='whyNot-" + actions.possible[i] + "' class='whyNot'>"
-      whyNotEnd = '</span>'
-    }
-    */
     if (actions.unlocked[i].name == 'build'){
       canTheyBuild = true
       continue

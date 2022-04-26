@@ -31,7 +31,8 @@ $(document).on('click', '#startAutomation', function(e) {
   $(".action").prop('disabled', true)
   $("#startAutomation").addClass('d-none')
   $("#workHoursCent").prop('disabled', true)
-
+  $("build").prop('disabled', true)
+  $("#buildingsThatCanBeBuilt").prop('disabled', true)
   automation = setInterval(function(){
     if (lastAction != null){
       action(lastAction)
@@ -65,6 +66,8 @@ function stopAutomation(){
   }
   clearInterval(automation)
   automation = null
+  $("#buildingsThatCanBeBuilt").prop('disabled', true)
+  $("build").prop('disabled', false)
   $("#stopAutomation").addClass('d-none')
   $("#lastAction").prop('disabled', false)
   $(".action:not('.impossible')").prop('disabled', false)
