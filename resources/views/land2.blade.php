@@ -29,7 +29,15 @@
     <div id='parcel{{$parcel['id']}}' class=' p-3 mt-3 {{$ownerClass}}
       {{$takeoverClass}} {{$parcel->type}} " parcel ownedBy{{$parcel->name}}'>
       <div>
-      Parcel #{{$parcel['id']}} - Type: {{$parcel->type}} - Value: {{ number_format($parcel->valuation) }}
+      Parcel #{{$parcel['id']}} - Type: {{$parcel->type}} -
+      Value: {{ number_format($parcel->valuation) }}
+      <a href='/contracts/create?category=buyLand' class='btn ms-3 createContract'>
+        <img src='/img/icons8-buy-24.png'>
+      </a>
+      <a href='/contracts/create?category=sellLand' class='btn ms-3 createContract'>
+        <img src='/img/icons8-sell-24.png'>
+      </a>
+
       </div><div class='ms-3'>
         Oil: {{number_format($parcel->oil)}}
 

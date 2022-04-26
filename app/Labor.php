@@ -297,7 +297,7 @@ class Labor extends Model
 
     public static function switchEquipped($itemName, $userID){
       $equipment = \App\Equipment::fetchByName($itemName, $userID);
-      $labor = \App\Labor::fetch();
+      $labor = \App\Labor::where('userID', $userID)->first();
       if ($equipment == null){
         return false;
       }
