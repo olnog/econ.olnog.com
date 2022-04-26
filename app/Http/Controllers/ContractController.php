@@ -34,6 +34,8 @@ class ContractController extends Controller
       $defaultCategory = $request->category;
       return view('Contracts.create', [
         'defaultCategory' => $defaultCategory,
+        'parcelType'      => $request->parcelType,
+        'parcelID'        => $request->parcelID,
         'itemTypes' => \App\ItemTypes::orderBy('name')->get(),
         'items' => \App\Items::fetchInventory(),
         'buildings' => \App\Buildings::fetchBuilt(),

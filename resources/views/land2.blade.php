@@ -31,12 +31,20 @@
       <div>
       Parcel #{{$parcel['id']}} - Type: {{$parcel->type}} -
       Value: {{ number_format($parcel->valuation) }}
-      <a href='/contracts/create?category=buyLand' class='btn ms-3 createContract'>
+      <a href='/contracts/create?category=buyLand&parcelType={{$parcel->type}}' class='btn ms-3 createContract'>
         <img src='/img/icons8-buy-24.png'>
       </a>
-      <a href='/contracts/create?category=sellLand' class='btn ms-3 createContract'>
+      @if ($parcel->userID == \Auth::id())
+      <a href='/contracts/create?category=sellLand&parcelID={{$parcel->id}}' class='btn ms-3 createContract'>
         <img src='/img/icons8-sell-24.png'>
       </a>
+      @endif
+      <?php $buyLandContract = \App\Contracts::fetchHighestBuyLandContract($parcel->type); ?>
+      @if ($buyLandContract != null && $parcel->userID == \Auth::id())
+        <button id='buyLand-"{{$buyLandContract->id}}"'
+          class='buyLand btn btn-success'>sell
+          (+{{number_format($buyLandContract->price)}} clacks)</button>
+      @endif
 
       </div><div class='ms-3'>
         Oil: {{number_format($parcel->oil)}}

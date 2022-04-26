@@ -86,12 +86,12 @@
       <option></option>
 
       @foreach($land as $parcel)
-        <option value='{{$parcel->id}}'> Parcel #{{$parcel->id}} - {{$parcel->type}}</option>
+        <option value='{{$parcel->id}}' @if ($parcelID == $parcel->id) selected @endif > Parcel #{{$parcel->id}} - {{$parcel->type}}</option>
       @endforeach
     </select>
     <button class='btn btn-primary form-select mt-5'>create contract</button>
   </form>
-</div><div id='buyLandSection' class='ms-3 contractSection @if ($defaultCategory != 'sellLand') d-none @endif'>
+</div><div id='buyLandSection' class='ms-3 contractSection @if ($defaultCategory != 'buyLand') d-none @endif'>
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
     <input type='hidden' name='category' value='buyLand' >
@@ -100,10 +100,10 @@
       to buy
       <select name='landType'>
         <option></option>
-        <option>forest</option>
-        <option>mountains</option>
-        <option>plains</option>
-        <option>jungle</option>
+        <option @if($parcelType == 'forest') selected @endif >forest</option>
+        <option @if($parcelType == 'mountains') selected @endif >mountains</option>
+        <option @if($parcelType == 'plains') selected @endif >plains</option>
+        <option @if($parcelType == 'jungle') selected @endif >jungle</option>
 
       </select>
     </div><div>

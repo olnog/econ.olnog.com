@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class Contracts extends Model
 {
   protected $table = 'contracts';
-  
+
   public static function anyoneBuying($contractID){
     $sellContract = \App\Contracts::find($contractID);
     $buyContracts = \App\Contracts::where('itemTypeID', $sellContract->itemTypeID)
@@ -136,5 +136,10 @@ class Contracts extends Model
       'userID', 'condition', 'conditionFulfilled', 'users.name as username',
       'buildingTypeID', 'buildingID', 'action', 'minSkillLevel', 'landID', 'landType', 'buildingName')
       ->where('active', true)->orderBy('contracts.created_at', 'desc')->get();
+  }
+
+  public static function fetchHighestBuyLandContract($type){
+    return \App\Contracts::where('active', 1)->where('category', 'buyLand')
+      ->where('landType', $type)->orderBy('price', 'desc')->orderBy('created_at', 'desc')->first();
   }
 }
