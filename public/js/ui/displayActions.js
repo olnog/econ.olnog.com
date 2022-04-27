@@ -23,7 +23,7 @@ function displayActions(){ //39
     if (actions.unlocked[i].name == 'build'){
       canTheyBuild = true
       continue
-    } else if (actions.unlocked[i].name == 'repair'){
+    } else if (actions.unlocked[i].name == 'repair' || actions.unlocked[i].name == 'program-robot'){
       continue
     }
     let actionButton = "<button  id='action-" + actions.unlocked[i].name

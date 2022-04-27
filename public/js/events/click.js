@@ -12,6 +12,12 @@ $(document).on('click', '.bid', function(e) {
   bid(e.target.id.split('-')[1], $("#bidAmount").val())
 })
 
+
+$(document).on('click', '#cancelFeedback', function(e) {
+  $(".main").removeClass('d-none')
+  $("#feedbackScreen").addClass('d-none')
+})
+
 $(document).on('click', '#chatSend', function(e) {
   sendChat($("#chatContent").val())
   $("#chatContent").val('')
@@ -45,6 +51,12 @@ $(document).on('click', '.equipEquipment', function(e) {
 $(document).on('click', '.equipLabor', function(e) {
   equipEquipment(e.target.id.split('-')[1])
 })
+
+$(document).on('click', '.feedback', function(e) {
+  $(".main").addClass('d-none')
+  $("#feedbackScreen").removeClass('d-none')
+})
+
 $(document).on('click', '.filterByOwner', function(e) {
   $("#landOwnerFilter").val($(this).html())
   formatLand()

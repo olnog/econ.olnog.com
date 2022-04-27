@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div id='mainScreen'>
+<div class='main'>
   <ul class="nav justify-content-center nav-tabs mt-5">
     <li class="nav-item text-center">
       <a id='landNav' class="nav-link menu" href="#">land</a>
@@ -28,9 +28,13 @@
     </li>
 
   </ul>
-  <div class='fixed-top bg-opacity-100'>
-    <div id='status' class='p-1 text-center bg-secondary '>&nbsp;</div>
-    <div id='error' class='p-1 text-center text-danger'>&nbsp;</div>
+  <div class='fixed-top bg-opacity-100 row bg-secondary'>
+    <div class='col-1'>
+      <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
+    </div><div class='col-11'>
+      <div id='status' class='p-1 text-center  '></div>
+      <div id='error' class='p-1 text-center text-danger'></div>
+    </div>
   </div>
   <span id='csrf'>@csrf()</span>
   <div class='ms-2 row'>
@@ -273,45 +277,44 @@
       </div>
     </div>
   </div><div id='market'  class='d-none otherPages ms-3'>
-  <div>
-    <ul class="nav nav-tabs">
-      <li class="nav-item ">
-              <a class="nav-link active market" href="#">land</a>
-      </li>
-      <li class="nav-item ">
-        <a class="nav-link market" href="#">labor</a>
-      </li>
-      <li class="nav-item ">
-        <a class="nav-link market" href="#">items</a>
-      </li>
-      <li class="nav-item ">
-        <a class="nav-link market" href='#'>buildings</a>
-      </li>
-      <li class="nav-item ">
-        <a class="nav-link market" href='#'>mine</a>
-      </li>
-    </ul>
-  </div>
+    <div>
+      <ul class="nav nav-tabs">
+        <li class="nav-item ">
+                <a class="nav-link active market" href="#">land</a>
+        </li>
+        <li class="nav-item ">
+          <a class="nav-link market" href="#">labor</a>
+        </li>
+        <li class="nav-item ">
+          <a class="nav-link market" href="#">items</a>
+        </li>
+        <li class="nav-item ">
+          <a class="nav-link market" href='#'>buildings</a>
+        </li>
+        <li class="nav-item ">
+          <a class="nav-link market" href='#'>mine</a>
+        </li>
+      </ul>
+    </div>
 
-  <div id='contractItemFilterDiv'>
-    Filter By Item: <select id='contractItemFilter'></select>
-    <input type='checkbox' class='contractFilterByCategory ms-3' value='buyOrder' checked> buying
-    <input type='checkbox' class='contractFilterByCategory ms-3' value='sellOrder' checked> selling
-  </div><div id='contractLandFilterDiv'>
-    Filter By Land Type:
-    <select id='contractLandFilter'>
-      <option></option>
-      <option>desert</option>
-      <option>forest</option>
-      <option>jungle</option>
-      <option>mountains</option>
-      <option>plains</option>
-    </select>
-  </div>
-  <div id='newContactInContracts' class='text-center'></div>
+    <div id='contractItemFilterDiv'>
+      Filter By Item: <select id='contractItemFilter'></select>
+      <input type='checkbox' class='contractFilterByCategory ms-3' value='buyOrder' checked> buying
+      <input type='checkbox' class='contractFilterByCategory ms-3' value='sellOrder' checked> selling
+    </div><div id='contractLandFilterDiv'>
+      Filter By Land Type:
+      <select id='contractLandFilter'>
+        <option></option>
+        <option>desert</option>
+        <option>forest</option>
+        <option>jungle</option>
+        <option>mountains</option>
+        <option>plains</option>
+      </select>
+    </div>
+    <div id='newContactInContracts' class='text-center'></div>
 
-  <div id='contractListings'></div>
-
+    <div id='contractListings'></div>
   </div><div id='chat'  class='d-none otherPages ms-3'>
     <div class='text-center mt-2'>
       We also have a <a href='https://discord.gg/Ve7PjNBc'>Discord</a> if you need to contact me quickly.
@@ -326,7 +329,7 @@
         <button id='chatSend' class='btn-primary btn'>send</button>
       </div>
     </div>
-  </div><div class='mt-5 pt-5 text-center'>
+  </div><div class='mt-5 pt-5 text-center main'>
     <div>
       Thanks To:
     </div><div>
@@ -336,6 +339,8 @@
       <a href='https://icons8.com/icon/84998/buy'>Thanks for this buy icon too</a>
       <a target="_blank" href="https://icons8.com/icon/Qpt0cBZAp1GC/pacifier">Pacifier</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
       <a target="_blank" href="https://icons8.com/icon/61247/rent">Rent</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+      <a target="_blank" href="https://icons8.com/icon/hCFmpYC60qKc/feedback">Feedback</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+
     </div><div>
       <a href='https://freesound.org/people/suzenako/sounds/320905/'>The Ding</a>
       <a href='https://freesound.org/people/InspectorJ/sounds/415510/'>Bell, Counter,</a>
@@ -344,33 +349,50 @@
       <a href='https://discord.gg/CjETTDYKdU'>[ Discord ]</a>
       <a href='/changes'>[ changelist ]</a>
       <a href='/help'> [ help ] </a>
+    </div><div>
+
+      <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
+    </div><div>
+      We'd love to hear from you. You can always let us know what you think from this button. (It's also always available in the top left corner.)
+
     </div>
+    @if (\Auth::id() == 5)
+      <div class='text-center mb-3 mt-5'>
+        <a href='/actionTypes/create' class='m-3'>Action Types</a>
+
+        <a href='/skillTypes' class='m-3'>Skill Types</a>
+        <a href='/itemTypes' class='m-3'>Item Types</a>
+        <a href='/buildingTypes' class='m-3'>Building Types</a>
+      </div>
+    @endif
   </div>
 
-  @if (\Auth::id() == 5)
-    <div class='mainScreen text-center mb-3 mt-5'>
-      <a href='/actionTypes/create' class='m-3'>Action Types</a>
 
-      <a href='/skillTypes' class='m-3'>Skill Types</a>
-      <a href='/itemTypes' class='m-3'>Item Types</a>
-      <a href='/buildingTypes' class='m-3'>Building Types</a>
+
+</div><div id='feedbackScreen' class='d-none'>
+  <form method='POST' action='/feedback'>
+    @csrf()
+    <div class='fw-bold'>Feedback:</div>
+    <div><textarea name='whatTheySaid' class='form-control' row=3 placeholder="feedback here"></textarea></div>
+    <div class='fw-bold text-center'>Feels</div>
+    <div class='row border'>
+      <div class='col text-center text-success'>
+        <input type='radio' name='feedbackFeeling' value='bad' class='me-1'>
+        bad
+      </div><div class='col text-center'>
+        <input type='radio' name='feedbackFeeling' value='neutral' class='me-1' checked>
+        neutral
+      </div><div class='col text-center text-danger'>
+        <input type='radio' name='feedbackFeeling' value='good' class='me-1'>
+        good
+      </div>
+    </div><div class='row mt-5'>
+      <div class='col'>
+        <input type='button' id='cancelFeedback' class='btn btn-outline-danger form-control' value='Cancel'>
+      </div><div class='col'>
+        <button class='btn btn-outline-primary form-control'>Submit</button>
+      </div>
     </div>
-  @endif
-
-</div>
-<div class='forcedSkillScreen'>
-  <div class='text-center fw-bold fs-3'>
-    Please pick which skills you want.
-  </div>  <div class='text-center mb-5'>
-    You can always reset this later
-    <a href='https://econ.olnog.com/help#rebirth'>(Rebirth)</a>,
-    but you'll have to spend about 50% of your money. (Money is called clacks.)
-  </div>
-  <div id='forcedSkillListing'></div>
-  <div class='forcedSkillScreen fixed-bottom'>
-    <button id='quitForcedSkillScreen' class='btn btn-danger btn-lg form-control'>
-      I'll do this later
-    </button>
-  </div>
+  </form>
 </div>
 @endsection

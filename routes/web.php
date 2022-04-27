@@ -212,6 +212,8 @@ Route::resources([
   'chat'            => 'ChatController',
   'contracts'       => 'ContractController',
   'equipment'       => 'EquipmentController',
+  'feedback'        => 'FeedbackController',
+
   'history'         => 'HistoryController',
   'labor'           => 'LaborController',
   'land'            => 'LandController',
