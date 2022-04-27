@@ -1,6 +1,6 @@
 @foreach ($land as $parcel)
   <?php
-  $landForSale = \App\Land::aretheySellingThis($land->id);
+  $landForSale = \App\Land::aretheySellingThis($parcel->id);
   $ownerClass = '';
   $bribeButtons = '';
   $takeoverButton = '';

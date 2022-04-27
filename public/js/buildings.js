@@ -1,6 +1,6 @@
 function areTheyLeasingBuilding(buildingID){
   for (let i in buildings.leases){
-    if (building.leases.buildingID == buildingID){
+    if (buildings.leases[i].buildingID == buildingID){
       return true
     }
   }
