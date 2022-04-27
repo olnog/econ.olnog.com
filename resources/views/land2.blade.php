@@ -1,5 +1,6 @@
 @foreach ($land as $parcel)
   <?php
+  $landForSale = \App\Land::aretheySellingThis($land->id);
   $ownerClass = '';
   $bribeButtons = '';
   $takeoverButton = '';
@@ -45,7 +46,11 @@
           class='buyLand btn btn-success'>sell
           (+{{number_format($buyLandContract->price)}} clacks)</button>
       @endif
-
+      @if ($landForSale != null)
+        <button id='sellLand-{{$landForSale->id}}' class='sellLand btn btn-danger'>
+          buy (-{{$landForSale->price}} clacks)
+        </button>
+      @endif
       </div><div class='ms-3'>
         Oil: {{number_format($parcel->oil)}}
 

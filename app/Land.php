@@ -10,6 +10,10 @@ class Land extends Model
 {
     protected $table = 'land';
 
+    public static function aretheySellingThis($landID){
+      return \App\Contracts::where('active', 1)->where('category', 'sellLand')->where('landID', $landID)->first();
+    }
+
     public static function autoBribe(){
       $users = \App\User::all();
       foreach($users as $user){
@@ -18,6 +22,7 @@ class Land extends Model
         }
       }
     }
+
 
     public static function averageBribe(){
       if (ceil(\App\Land::avg('bribe')) == 0){

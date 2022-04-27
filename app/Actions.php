@@ -2210,7 +2210,7 @@ class Actions extends Model
           $buildingCaption = \App\Buildings::use('Mine', $contractorID);
           $modifier = 100;
         }
-        if (($robot == null && !$equipmentAvailable[0] != 'Pickaxe')
+        if (($robot == null && $equipmentAvailable[0] != 'Pickaxe')
           || ($robot != null && !Robot::areTheyEquippedWith('Pickaxe', $agentID))
           ){
           $modifier *= 10;
