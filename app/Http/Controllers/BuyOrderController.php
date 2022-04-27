@@ -67,6 +67,7 @@ class BuyOrderController extends Controller
         $newBuyOrder = new \App\BuyOrders;
         $newBuyOrder->quantity = $buyOrder->quantity * 2;
         $newBuyOrder->cost = $buyOrder->cost * 1.75;
+        $newBuyOrder->unitCost = round($newBuyOrder->cost / $newBuyOrder->quantity);
         $newBuyOrder->itemTypeID = $buyOrder->itemTypeID;
         $newBuyOrder->save();
 
@@ -81,7 +82,7 @@ class BuyOrderController extends Controller
         echo json_encode([
           'status' => $status,
           'actions' => \App\Actions::fetch(\Auth::id()),
-          'buyOrders' => \App\BuyOrders::fetch(),
+          'buyOrders' => \App\BuyOrders::fetch(null),
           'clacks' => Auth::user()->clacks,
           'history' => \App\History::fetch(),
           'items' => \App\Items::fetch()
