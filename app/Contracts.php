@@ -142,4 +142,10 @@ class Contracts extends Model
     return \App\Contracts::where('active', 1)->where('category', 'buyLand')
       ->where('landType', $type)->orderBy('price', 'desc')->orderBy('created_at', 'desc')->first();
   }
+
+  public static function fetchHighestHireContract($actionName){
+    return \App\Contracts::where('active', 1)->where('category', 'hire')
+      ->where('action', $actionName)->orderBy('price', 'desc')
+      ->orderBy('created_at', 'desc')->first();
+  }
 }
