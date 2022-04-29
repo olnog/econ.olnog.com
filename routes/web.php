@@ -77,7 +77,7 @@ Route::post('/autobribe', function (Request $request){
   ]);
 });
 Route::get('/test', function(){
-  var_dump(\App\Actions::fetchByName(\Auth::id(), 'build'));
+
 });
 
 Route::get('/changes', function(){

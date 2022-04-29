@@ -307,9 +307,15 @@ function robotAnimation(){
 
 function status(text){
   $("#status").addClass('fw-bold')
+  $('.fn').addClass('text-danger')
   setTimeout(function(){
     $("#status").removeClass('fw-bold')
+
+
   }, 1000)
+  setTimeout(function(){
+    //$('.fn').removeClass('fn')
+  },1000)
   $("#status").html(text)
   $("#error").html('&nbsp;')
 }

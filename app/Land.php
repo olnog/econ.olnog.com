@@ -197,7 +197,7 @@ class Land extends Model
       $user->itemCapacity+= 1000;
       $land->save();
       $user->save();
-      return $land->type;
+      return ucfirst($land->type);
     }
 
     static public function payAllBribes($amount){

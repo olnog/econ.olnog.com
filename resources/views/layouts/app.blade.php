@@ -28,6 +28,9 @@
 
     <!-- Styles -->
     <style>
+      .actionInput{
+        color: LightGray;
+      }
       .forest{
         border:2px DarkGreen solid;
       }
@@ -36,6 +39,12 @@
       }
       .noQuantity{
         background-color:whitesmoke;
+      }
+      .fn {
+        color:LightCoral;
+      }
+      .fp {
+        color:LightGreen;
       }
       .plains {
         border:2px DarkKhaki solid;

@@ -59,10 +59,7 @@ class Equipment extends Model
     if ($labor->equipped == null && !$couldTheySwitch){
       return false;
     }
-    $selfCaption = " Their ";
-    if ($userID == Auth::id()){
-      $selfCaption = " Your ";
-    }
+
     $equipment = Equipment::find($labor->equipped);
     $itemType = ItemTypes::find($equipment->itemTypeID);
     if (substr($itemType->name, 0, strlen($itemName)) != $itemName){
@@ -86,19 +83,20 @@ class Equipment extends Model
       }
       $fuel->quantity -= 100;
       $fuel->save();
-      $fuelStatus = " You used 100 " . $fuelName . ". [" . number_format($fuel->quantity) . "]";
+      $fuelStatus = $fuelName . ": <span class='fn'> -100 </span> ["
+        . number_format($fuel->quantity) . "]";
     }
     $equipment->uses--;
     $equipment->save();
     if ($equipment->uses == 0){
-      $status = $selfCaption . $itemType->name . " was destroyed in the process.";
+      $status =  $itemType->name . ": &empty;";
       Equipment::destroy($labor->equipped);
       $labor->equipped = null;
       $labor->save();
       return $status . $fuelStatus;
     }
-    return $selfCaption . $itemType->name . " is now at "
-      . number_format($equipment->uses / $equipment->totalUses * 100, 2 ) . "%. " . $fuelStatus;
+    return $itemType->name . ": <span class='fn'>"
+      . number_format($equipment->uses / $equipment->totalUses * 100, 2 ) . "%</span> " . $fuelStatus;
   }
 
 

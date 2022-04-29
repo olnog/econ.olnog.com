@@ -286,10 +286,7 @@ class Buildings extends Model
     }
     $building->uses--;
     $building->save();
-    if ($building->uses < 1){
-      return "Your building is no longer usable. Repair it in order to keep using it.";
-    }
-    return "You used your " . $buildingName . ". It's now at "
-      . ($building->uses / $building->totalUses * 100) . "%.";
+    return $buildingName . ": <span class='fn'>"
+      . ($building->uses / $building->totalUses * 100) . "%</span>";
   }
 }

@@ -50,6 +50,6 @@ class Lease extends Model
     $contractor->save();
     $leasor->clacks -= $contract->price;
     $leasor->save();
-    return "   You spent " . $contract-> price . " clack(s) on your lease to access " . $lease->landType . ". ";
+    return ucfirst($lease->landType) . ": <span class='fn'>-" . $contract-> price . "</span> Clack(s)";
   }
 }

@@ -494,7 +494,6 @@ class Actions extends Model
       $contractorCaption = " You ";
       $agentCaption = " You ";
       $radiationPoisoning = false;
-      $radStatus = '';
       if ($contractorID == Auth::id()){
         $contractorCaption = " You ";
       }
@@ -518,10 +517,8 @@ class Actions extends Model
 
       if ($actionName == 'chop-tree'){
         $leaseStatus = '';
-        $equipmentCaption = 'empty';
+        $equipmentCaption = '';
         $landBonus = \App\Land::count('forest', $agentID);
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $gas = Items::fetchByName('Gasoline', $contractorID);
         $equipmentAvailable = \App\Equipment
           ::whichOfTheseCanTheyUse(['Chainsaw (electric)', 'Chainsaw (gasoline)', 'Axe'], $agentID);
 
@@ -555,23 +552,20 @@ class Actions extends Model
               'error' => "Something went wrong with an equipment check. Sorry."
             ];
           }
-          $logsChopped = $action->rank * $baseChop * $landBonus;
+          $production = $action->rank * $baseChop * $landBonus;
         } else {
           $equipmentCaption = \App\Robot::useEquipped($robotID);
-          $logsChopped = $baseChop;
+          $production = $baseChop;
         }
-        $landResource = \App\Land::takeResource('Logs',  $agentID, $logsChopped, true);
+        $landResource = \App\Land::takeResource('Logs',  $agentID, $production, true);
         if ($landResource != true){
           return $landResource;
         }
-        $logs = Items::fetchByName('Logs', $contractorID);
-        $logs->quantity += $logsChopped;
-        $logs->save();
-        $status = $agentCaption . " chopped down " . $logsChopped
-          . " trees. "  . $equipmentCaption . $leaseStatus;
-          if ($agentID == $contractorID){
-            $status .= " You now have " . number_format($logs->quantity) . " logs. ";
-          }
+        $output = \App\Items::make('Logs', $production, $contractorID, $agentID);
+        if ($agentID == $contractorID){
+          $status = "<span class='actionInput'>" . $equipmentCaption . $leaseStatus . "</span> &rarr; ";
+        }
+        $status .= $output;
 
 
 
@@ -584,33 +578,21 @@ class Actions extends Model
           return [
             'error' => "You need to have a Clone Vat to do this.",
           ];
-        } else if ($corpse->quantity < 1 ){
-          return [
-            'error' => "You don't have enough Corpse (1) to do this.",
-          ];
-        } else if ($electricity->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Electricity  (1000) to do this.",
-          ];
         }
         $production = 100;
         if ($robot == null){
           $production = $action->rank * 100;
         }
         $buildingCaption = \App\Buildings::use('Clone Vat', $contractorID);
-        $corpse->quantity -= 1;
-        $corpse->save();
-        $electricity->quantity -= 1000;
-        $electricity->save();
-        $geneticMaterial = \App\Items::fetchByName('Genetic Material', $contractorID);
-        $geneticMaterial->quantity += $production;
-        $geneticMaterial->save();
-        $status = $agentCaption . " used 1 Corpse [" . number_format($corpse->quantity)
-        . "] and 1000 Electricity [" . number_format($electricity->quantity). "] to create "
-          . ($production) . " Genetic Material. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($geneticMaterial->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Genetic Material', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -641,30 +623,17 @@ class Actions extends Model
           return [
             'error' => "You need to have a Bio Lab to do this.",
           ];
-        } else if ($inputItem->quantity < $req ){
-          return [
-            'error' => "You don't have enough " . $itemName . " (" . $req . " needed) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity  (100) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Bio Lab', $contractorID);
-        $inputItem->quantity -= $req;
-        $inputItem->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $bioMaterial = \App\Items::fetchByName('Bio Material', $contractorID);
-        $bioMaterial->quantity += $production;
-        $bioMaterial->save();
-        $status = $agentCaption .  " used " . $req . " " . $itemName . " [" . number_format($inputItem->quantity)
-        . "] and 100 Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " Bio Material. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($inputItem->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-
+        $output = \App\Items::make('Bio Material', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -680,29 +649,17 @@ class Actions extends Model
           return [
             'error' => "You need to have a Chem Lab to do this.",
           ];
-        } else if ($sand->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Sand (1000) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity  (100) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Chem Lab', $contractorID);
-        $sand->quantity -= 1000;
-        $sand->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $silicon = \App\Items::fetchByName('Silicon', $contractorID);
-        $silicon->quantity += $production;
-        $silicon->save();
-        $status = $agentCaption .  " used 1,000 Sand [" . number_format($sand->quantity)
-        . "] and 100 Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " Silicon. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($silicon->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Silicon', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -719,29 +676,17 @@ class Actions extends Model
           return [
             'error' => "You need to have a Chem Lab to do this.",
           ];
-        } else if ($wood->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Wood (1000) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity  (100) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Chem Lab', $contractorID);
-        $wood->quantity -= 1000;
-        $wood->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $coal->quantity += $production;
-        $coal->save();
-        $status = $agentCaption .  " used 1,000 Wood "
-          . " [" . number_format($wood->quantity) . "] and 100 Electricity ["
-          . number_format($electricity->quantity) . "] to create "
-          . $production . " Coal. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($coal->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Coal', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -763,32 +708,17 @@ class Actions extends Model
           return [
             'error' => "You need to have a Chem Lab to do this.",
           ];
-        } else if ($itemInput->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Wood or Coal (1000) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity  (100) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Chem Lab', $contractorID);
-        $itemInput->quantity -= 1000;
-        $itemInput->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $carbonNanotubes = \App\Items::fetchByName('Carbon Nanotubes', $contractorID);
-        $carbonNanotubes->quantity += $production;
-        $carbonNanotubes->save();
-        $status = $agentCaption .  " used 1,000 " . $possibleInputs[$actionName]
-          . " [" . number_format($itemInput->quantity) . "] and 100 Electricity ["
-          . number_format($electricity->quantity) . "] to create "
-          . $production . " Carbon Nanotubes. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($carbonNanotubes->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-
-
+        $output = \App\Items::make('Carbon Nanotubes', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -797,63 +727,37 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank * 10;
         }
-        $uranium = \App\Items::fetchByName('Uranium Ore', $contractorID);
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
         $buildingCaption = "";
         if (!\App\Buildings::didTheyAlreadyBuildThis('Centrifuge', $contractorID)){
           return [
             'error' => "You need to have a Centrifuge to do this.",
           ];
-        } else if ($uranium->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Uranium Ore (1000) to do this.",
-          ];
-        } else if ($electricity->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Electricity  (1000) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Centrifuge', $contractorID);
-        $uranium->quantity -= 1000;
-        $uranium->save();
-        $electricity->quantity -= 1000;
-        $electricity->save();
-        $plutonium = \App\Items::fetchByName('Plutonium', $contractorID);
-        $plutonium->quantity += $production;
-        $plutonium->save();
-        $status = $agentCaption . " used 1,000 Uranium Ore [" . number_format($uranium->quantity)
-        . "] and 1000 Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " Plutonium. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($plutonium->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-
-
+        $output = \App\Items::make('Plutonium', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
       } else if ($actionName == 'cook-meat' || $actionName == 'cook-flour'){
-        $foodSource = Items::fetchByName(ucfirst(explode('-', $actionName)[1]), $contractorID);
-        $food = Items::fetchByName('Food', $contractorID);
-        $wood = Items::fetchByName('Wood', $contractorID);
-        $electricity = Items::fetchByName('Electricity', $contractorID);
         if (!\App\Buildings::didTheyAlreadyBuildThis('Campfire', $contractorID)
           && !\App\Buildings::didTheyAlreadyBuildThis('Kitchen', $contractorID)
           && !\App\Buildings::didTheyAlreadyBuildThis('Food Factory', $contractorID)
         ){
           return ['error' => "You don't have the necessary building."];
-        } else if ($foodSource->quantity < 1
-          || (\App\Buildings::didTheyAlreadyBuildThis('Food Factory', $contractorID)
-          && $foodSource->quantity < 100)){
-          return ['error' => "You don't have enough Meat or Flour."];
-        } else if (\App\Buildings::didTheyAlreadyBuildThis('Food Factory', $contractorID) && $electricity->quantity < 100){
-          return ['error' => "You don't have enough Electricity. (1000 needed)"];
-        } else if (!\App\Buildings::didTheyAlreadyBuildThis('Food Factory', $contractorID) && $wood->quantity < 1){
-          return ['error' => "You don't have enough Wood."];
         }
         $buildingName = 'Campfire';
         $modifier = 1;
-        $woodUsed = 1;
+        $foodSource = \App\Items::fetchByName(ucfirst(explode('-', $actionName)[1]), $contractorID);
+        $wood = \App\Items::fetchByName('Wood', $contractorID);
+        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
         if (\App\Buildings::didTheyAlreadyBuildThis('Food Factory', $contractorID)
           && $electricity->quantity >= 100 && $foodSource->quantity >= 100){
           $buildingName='Food Factory';
@@ -862,38 +766,24 @@ class Actions extends Model
           && \App\Buildings::didTheyAlreadyBuildThis('Kitchen', $contractorID)){
           $buildingName='Kitchen';
           $modifier = 10;
-          $woodUsed = 5;
         } else if (!\App\Buildings::didTheyAlreadyBuildThis('Campfire', $contractorID)){
           $buildingName='Kitchen';
-
+          $modifier = 10;
         }
         $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
         $foodCooked = 2 * $modifier;
         if ($robot == null){
           $foodCooked = $action->rank * 2 * $modifier;
         }
-
-        $foodSource->quantity -= $modifier;
-        $foodSource->save();
-        $food->quantity += $foodCooked;
-        $food->save();
-        if (!\App\Buildings::didTheyAlreadyBuildThis('Food Factory', $contractorID)){
-          $wood->quantity -= $woodUsed;
-          $wood->save();
-          $status = "Using " . $woodUsed . " Wood, [" . number_format($wood->quantity) . "]"
-            . $agentCaption . " cooked " .  $modifier .  " "
-            . ucfirst(explode('-', $actionName)[1]) . " [" . number_format($foodSource->quantity) . "] into " . $foodCooked . " food. ".  $buildingCaption;
-        } else {
-          $electricity->quantity -= $woodUsed;
-          $electricity->save();
-          $status = "Using 100 Electricity, [" . number_format($electricity->quantity) . "] "
-            . $agentCaption . " cooked " .  $modifier .  " "
-            . ucfirst(explode('-', $actionName)[1]) . " [" . number_format($foodSource->quantity) . "] into " . $foodCooked . " Food. ".  $buildingCaption;
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName.$buildingName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($food->quantity) . ". ";
-        }
+        $output = \App\Items::make('Food', $foodCooked, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -914,13 +804,13 @@ class Actions extends Model
           $minChance = 100;
           $electricity->quantity -= 100;
           $electricity->save();
-          $satStatus = " Using 100 Electricity, you used your Satellite to increase your chances";
+          $satStatus = "<span class='fn'>-100</span> Electricity (Satellite) ["
+          . number_format($electricity->quantity) . "] " ;
           if (rand(1, 1000) == 1){
             $satellite->quantity--;
             $satellite->save();
-            $satStatus .= " but it randomly malfunctioned and no longer works now";
+            $satStatus .= " <span class='fn'>-1</span> Satellite";
           }
-          $satStatus .= ".";
         } else if (count($equipmentAvailable) > 0){
           $minChance = 10;
           if ($robot == null){
@@ -932,70 +822,51 @@ class Actions extends Model
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
         }
-        $status .= $agentCaption . " explored but discovered no new land. (" . $minChance . " out of " . count($land) . " chance)";
-        $landFound = " [ ";
+        $status .= "[&empty;] (" . $minChance . ":" . count($land) . ")";
+        $landFound = " [";
         if (rand(1, count($land)+1) <= $minChance){
           for ($i=0; $i < $production; $i++){
-            $landFound .=  \App\Land::new($contractorID) . " ";
-          }
-          $status = $agentCaption . " explored and discovered a new piece of land.";
-          if ($production > 1){
-            $status = $agentCaption . " explored and discovered " . $exploringSkill->rank . " new pieces of land.";
+            $landFound .=  "+" . \App\Land::new($contractorID) . " ";
           }
         }
-        $landFound .= "]";
-        $status .= $landFound . $satStatus . $equipmentCaption ;
+        $landFound .= "] " . $minChance . ":" . count($land) . ")";
+        if ($satStatus != "" || $equipmentCaption != ""){
+          $status = "<span class='actionInput'>" . $satStatus . $equipmentCaption
+            . "</span> &rarr; " . $landFound;
+        }
+
 
 
 
       } else if ($actionName == 'gather-stone'){
-        $stoneTypeID = ItemTypes::where('name', 'Stone')->first()->id;
-        $stone = Items::where('userID', $contractorID)->where('itemTypeID', $stoneTypeID)->first();
-        $stone->quantity++;
-        $stone->save();
-        $status = $agentCaption . " gathered 1 stone. ";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($stone->quantity) . ".";
-        }
+        $status = \App\Items::make('Stone', 1, $contractorID, $agentID);
 
 
 
       } else if ($actionName == 'gather-wood'){
-        $woodTypeID = ItemTypes::where('name', 'Wood')->first()->id;
-        $wood = Items::where('userID', $contractorID)->where('itemTypeID', $woodTypeID)->first();
-        $wood->quantity += 10;
-        $wood->save();
-        $status = $agentCaption . " gathered 10 wood. " ;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($wood->quantity) . ".";
-        }
+        $status = \App\Items::make('Wood', 10, $contractorID, $agentID);
 
 
 
       } else if ($actionName == 'generate-electricity-with-coal'){
         $buildingCaption = "";
-        $coal = Items::fetchByName('Coal', $contractorID);
         if (!\App\Buildings::doesItExist('Coal Power Plant', $agentID)){
           return ['error' => 'You do not have a Coal Power Plant. Build one first please. '];
-        } else if ($coal->quantity < 1000){
-          return ['error' => 'You do not have enough Coal. You need 1000. '];
         }
         $buildingCaption = \App\Buildings::use('Coal Power Plant', $contractorID);
         $production = 1000;
         if ($robot == null){
           $production = $action->rank * 1000;
         }
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $coal->quantity -= 1000;
-        $coal->save();
-        $electricity->quantity += $production;
-        $electricity->save();
-        $status = $agentCaption . " used 1000 Coal [ "
-          . number_format($coal->quantity) . " ] to generate "
-          . number_format($production) . " Electricity. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($electricity->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Electricity', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1004,30 +875,21 @@ class Actions extends Model
           return;
         }
         $buildingCaption = "";
-        $plutonium = Items::fetchByName('Plutonium', $contractorID);
         if (!\App\Buildings::doesItExist('Nuclear Power Plant', $agentID)){
           return ['error' => 'You do not have a Nuclear Power Plant. Build one first please. '];
-        } else if ($plutonium->quantity < 1000){
-          return ['error' => 'You do not have enough Plutonium. You need 1000. '];
         }
         $buildingCaption = \App\Buildings::use('Nuclear Power Plant', $contractorID);
         $electricityProduced = $action->rank * 1000000;
-
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $plutonium->quantity -= 1000;
-        $plutonium->save();
-        $electricity->quantity += $electricityProduced;
-        $electricity->save();
-        $nuclearWaste = Items::fetchByName('Nuclear Waste', $contractorID);
-        $nuclearWaste->quantity += 1000;
-        $nuclearWaste->save();
-        $status = $agentCaption . " used 1,000 Plutonium [ " . number_format($plutonium->quantity)
-          . " ] to generate " . number_format($electricityProduced)
-          . " Electricity. This process created 1,000 Nuclear Waste. ["
-          . number_format($nuclearWaste->quantity) . "] " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($electricity->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Electricity', $electricityProduced, $contractorID, $agentID);
+        $waste = \App\Items::make('Nuclear Waste', 1000, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output . " " . $waste;
 
 
 
@@ -1070,10 +932,10 @@ class Actions extends Model
           $rubber->save();
           $totalRubberYield += $rubberYield;
         }
-        $status = $agentCaption . " harvested " . $rubberYield . " Rubber from "
-        . $howManyFields . " Rubber Plantation(s)." . $equipmentCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($rubber->quantity) . ".";
+        $status = "<span class='fp'>+" . $rubberYield . "</span> Rubber";
+        if ($equipmentCaption != ""){
+          $status = "<span class='actionInput'>" . $equipmentCaption
+            . "</span> &rarr; <span class='fp'>+" . $rubberYield . "</span> Rubber";
         }
 
 
@@ -1134,12 +996,11 @@ class Actions extends Model
           $produce->save();
           $totalYield += $yield;
         }
-        $status = $agentCaption . " harvested " . $totalYield . " "
-          . $whichItemType[$actionName] . " from " . $howManyFields . " "
-          . $whichItemType[$actionName] . " Field(s). "  . $equipmentCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($produce->quantity) . ".";
-        }
+          $status = "<span class='actionInput'>" . $whichItemType[$actionName]
+            . " Field: <span class='fn'>-" . $howManyFields . "</span> "
+            . $equipmentCaption
+            . "</span> &rarr; " . $whichItemType[$actionName]
+            . ": <span class='fp'>+" . $totalYield . "</span>";
 
 
 
@@ -1148,13 +1009,7 @@ class Actions extends Model
         if ($robot == null){
           $meatHunted = $action->rank * 2;
         }
-        $meat = Items::fetchByName('Meat', $contractorID);
-        $meat->quantity += $meatHunted;
-        $meat->save();
-        $status = $agentCaption . " hunted " . $meatHunted . " meat. ";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($meat->quantity) . ".";
-        }
+        $status = \App\Items::make('Meat', $meatHunted, $contractorID, $agentID);
 
 
 
@@ -1170,37 +1025,17 @@ class Actions extends Model
           return [
             'error' => "You need to have a Bio Lab to do this.",
           ];
-        } else if ($herbMeds->quantity < 10 ){
-          return [
-            'error' => "You don't have enough HerbMeds (10 needed) to do this.",
-          ];
-        } else if ($bioMaterial->quantity < 10 ){
-          return [
-            'error' => "You don't have enough Bio Material (10 needed) to do this.",
-          ];
-        } else if ($electricity->quantity < 10 ){
-          return [
-            'error' => "You don't have enough Electricity (10 needed) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Bio Lab', $contractorID);
-        $herbMeds->quantity -= 10;
-        $herbMeds->save();
-        $electricity->quantity -= 10;
-        $electricity->save();
-        $bioMaterial->quantity -= 10;
-        $bioMaterial->save();
-        $bioMeds = \App\Items::fetchByName('BioMeds', $contractorID);
-        $bioMeds->quantity += $production;
-        $bioMeds->save();
-        $status = $agentCaption . " used 10 Bio Material [" . number_format($bioMaterial->quantity)
-        . "],  10 HerbMeds [" . number_format($herbMeds->quantity)
-        . "], and 10 Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " BioMeds. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($bioMeds->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-
+        $output = \App\Items::make('BioMeds', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1208,30 +1043,24 @@ class Actions extends Model
         if ($robot != null){
           return;
         }
-        $book = Items::fetchByName('Books', $contractorID);
-        $paper = Items::fetchByName('Paper', $contractorID);
         $labor = \App\Labor::where('userID', $contractorID)->first();
         if ($labor->availableSkillPoints < 1){
           return [
             'error' => $agentCaption . " do not have enough available skill points."
           ];
-        } else if ($paper->quantity < 100 ){
+        }
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
           return [
-            'error' => $agentCaption . " do not have enough paper."
+            'error' => $itemCaption['error'],
           ];
         }
-        $paper->quantity -= 100;
-        $paper->save();
-        $book->quantity += $action->rank;
-        $book->save();
         $labor->availableSkillPoints--;
         $labor->save();
-        $status = "Using 1 available skill point [" . $labor->availableSkillPoints
-          . "] and 100 Paper [" . number_format($paper->quantity) . "], you created "
-          . $education->rank . " book(s).";
-          if ($agentID == $contractorID){
-            $status .= " You now have " . number_format($book->quantity) . ".";
-          }
+        $output = \App\Items::make('Books', $action->rank, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . " <span class='fn'>-1</span> Skill Point "
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1240,35 +1069,22 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $geneticMaterial = Items::fetchByName('Genetic Material', $contractorID);
-        $clones = Items::fetchByName('Clones', $contractorID);
-        if ($geneticMaterial->quantity < 1000){
-          return [
-            'error' => $agentCaption . " do not have enough Genetic Material. (1,000 needed)",
-          ];
-        } else if ($electricity->quantity < 1){
-          return [
-            'error' => $agentCaption . " do not have enough Electricity. (100,000 needed)",
-          ];
-        } else if (!\App\Buildings::didTheyAlreadyBuildThis('Clone Vat', $contractorID)){
+        if (!\App\Buildings::didTheyAlreadyBuildThis('Clone Vat', $contractorID)){
           return [
             'error' => "You need to have a Clone Vat to do this.",
           ];
         }
-        $electricity->quantity -= 100000;
-        $electricity->save();
-        $geneticMaterial->quantity -= 1000;
-        $geneticMaterial->save();
-        $clones += $production;
-        $clones->save();
-        $status = $agentCaption . " created " . $production
-          . " Clone(s) from 1,000 Genetic Material. ["
-          . number_format($geneticMaterial->quantity) . "] and 100,000 Electricity ["
-          . number_format($electricity->quantity) . "].";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($clones->quantity) . ".";
+        $buildingCaption = \App\Buildings::use('Clone Vat', $contractorID);
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Clones', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
+
 
 
 
@@ -1277,22 +1093,15 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-        $paper = Items::fetchByName('Paper', $contractorID);
-        if ($paper->quantity < 1){
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
           return [
-            'error' => $agentCaption . " do not have enough Paper. (1 needed)",
+            'error' => $itemCaption['error'],
           ];
         }
-        $paper->quantity--;
-        $paper->save();
-        $contract = Items::fetchByName('Contracts', $contractorID);
-        $contract->quantity += $production;
-        $contract->save();
-        $status = $agentCaption . " created " . $production
-          . " contract(s) from 1 Paper. [" . number_format($paper->quantity) . "] ";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($contract->quantity) . ".";
-        }
+        $output = \App\Items::make('Contracts', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1301,119 +1110,48 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-
-        $silicon = \App\Items::fetchByName('Silicon', $contractorID);
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $copper = \App\Items::fetchByName('Copper Ingots', $contractorID);
         if (!\App\Buildings::didTheyAlreadyBuildThis('CPU Fabrication Plant', $contractorID)){
           return [
             'error' => "You need to have a CPU Fabrication Plant to do this.",
           ];
-        } else if ($electricity->quantity < 1000 ){
+        }
+        $buildingCaption = \App\Buildings::use('CPU Fabrication Plant', $contractorID);
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
           return [
-            'error' => "You don't have enough Electricity (1000) to do this.",
-          ];
-        } else if ($silicon->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Silicon  (100) to do this.",
-          ];
-        } else if ($copper->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Copper Ingots (100) to do this.",
+            'error' => $itemCaption['error'],
           ];
         }
-        $silicon->quantity -= 100;
-        $silicon->save();
-        $copper->quantity -= 100;
-        $copper->save();
-        $electricity->quantity-=1000;
-        $electricity->save();
-        $CPU = \App\Items::fetchByName('CPU', $contractorID);
-        $CPU->quantity += $production;
-        $CPU->save();
-        $status = $agentCaption . " used 1000 Electricity ["
-          . number_format($electricity->quantity) . "], 100 Silicon [" . number_format($silicon->quantity)
-          . "] and 100 Copper [" . number_format($copper->quantity) . "] to create "
-          . $production . " CPUs. ";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($CPU->quantity) . ".";
-        }
+        $output = \App\Items::make('CPU', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
+
 
 
       } else if ($actionName == 'make-diesel-bulldozer' || $actionName == 'make-gasoline-bulldozer'
         || $actionName == 'make-diesel-car' || $actionName == 'make-gasoline-car'
         || $actionName == 'make-diesel-tractor' || $actionName == 'make-gasoline-tractor'){
-        $steel = \App\Items::fetchByName('Steel Ingots', $contractorID);
-        $copper = \App\Items::fetchByName('Copper Ingots', $contractorID);
-        $tires = \App\Items::fetchByName('Tires', $contractorID);
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $engines = \App\Items::fetchByName(ucfirst(explode('-', $actionName)[1]) . ' Engines', $contractorID);
-        $vehicles = \App\Items::fetchByName(ucfirst(explode('-', $actionName)[2]) . " (" . explode('-', $actionName)[1] . ")", $contractorID);
-        $requirements = [
-          'car' => ['steel' => 50, 'copper'=> 10],
-          'bulldozer' => ['steel' => 250, 'copper'=> 50],
-          'tractor' => ['steel' => 100, 'copper'=> 20],
-        ];
         if (!\App\Buildings::didTheyAlreadyBuildThis('Garage', $contractorID)){
           return [
             'error' => $agentCaption . " do not have a Garage built."
           ];
-        } else if ($steel->quantity < $requirements[explode('-', $actionName)[2]]['steel']){
-          return [
-            'error' => $agentCaption . " do not have enough Steel to create this vehicle."
-          ];
-        } else if ($copper-> quantity < $requirements[explode('-', $actionName)[2]]['copper']){
-          return [
-            'error' => $agentCaption . " do not have enough Copper to create this vehicle."
-          ];
-        } else if (explode('-', $actionName)[2] != 'bulldozer' && $tires-> quantity < 4){
-          return [
-            'error' => $agentCaption . " do not have enough Tires to create this vehicle."
-          ];
-        } else if ($engines-> quantity < 1){
-          return [
-            'error' => $agentCaption . " do not have the right engine to create this vehicle."
-          ];
-        } else if ($electricity-> quantity < 1000){
-          return [
-            'error' => $agentCaption . " do not have enough Electricity (1000) to create this vehicle."
-          ];
         }
-        $quantity = 1;
+        $production = 1;
         if ($robot == null){
-          $quantity = $action->rank;
+          $production = $action->rank;
         }
         $buildingCaption = \App\Buildings::use('Garage', $contractorID);
-
-        $electricity->quantity -= 1000;
-        $electricity->save();
-        $steel->quantity -= $requirements[explode('-', $actionName)[2]]['steel'];
-        $steel->save();
-        $copper->quantity -= $requirements[explode('-', $actionName)[2]]['copper'];
-        $copper->save();
-        $engines->quantity--;
-        $engines->save();
-        $vehicles->quantity += $quantity;
-        $vehicles->save();
-        $tireCaption = "";
-        if (explode('-', $actionName)[2] != 'bulldozer'){
-          $tires->quantity -= 4;
-          $tires->save();
-          $tireCaption = " 4 Tires [" . number_format($tires->quantity) . "], ";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-        $status = $agentCaption . " used 1000 Electricity ["
-          . number_format($electricity->quantity) . "], " . $requirements[explode('-', $actionName)[2]]['steel']
-          . " Steel [ " . number_format($steel->quantity) . "], " . $tireCaption
-          . $requirements[explode('-', $actionName)[2]]['copper'] . " Copper ["
-          . number_format($copper->quantity) . "] and 1 " . explode('-', $actionName)[1]
-          . " engine to create " . $quantity . " "
-          . ucfirst(explode('-', $actionName)[2]) . " (" . explode('-', $actionName)[1] . ") " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . $vehicles->quantity . ".";
-        }
-
-
-
+        $output = \App\Items::make(ucfirst(explode('-', $actionName)[2])
+          . " (" . explode('-', $actionName)[1] . ")", $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1438,27 +1176,16 @@ class Actions extends Model
           ];
         }
         $buildingCaption = \App\Buildings::use('Machine Shop', $contractorID);
-
-        $engineType = $engines[$actionName];
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $steel->quantity -= 40;
-        $steel->save();
-        $iron->quantity -= 40;
-        $iron->save();
-        $copper->quantity -= 20;
-        $copper->save();
-        $enginesBeingCreated = \App\Items::fetchByName($engineType, $contractorID);
-        $enginesBeingCreated->quantity += $production;
-        $enginesBeingCreated->save();
-        $status = $agentCaption . " used 100 Electricity ["
-        . number_format($electricity->quantity) . "], 40 Steel [" . number_format($steel->quantity)
-          . "], 40 Iron [" . number_format($iron->quantity) . "] and 20 Copper ["
-          . number_format($copper->quantity) . "] to create " . $production . " "
-          . $engineType . ". " .  $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($enginesBeingCreated->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make($engines[$actionName], $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1467,12 +1194,10 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-
         $steel = \App\Items::fetchByName('Steel Ingots', $contractorID);
         $iron = \App\Items::fetchByName('Iron Ingots', $contractorID);
         $copper = \App\Items::fetchByName('Copper Ingots', $contractorID);
         $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-
         $engines = ['make-electric-motor' => 'Electric Motors', 'make-gas-motor'=>'Gas Motors'];
         if ($steel->quantity < 10 || $iron->quantity < 10
           || $copper->quantity < 5 || $electricity->quantity < 25){
@@ -1485,26 +1210,16 @@ class Actions extends Model
           ];
         }
         $buildingCaption = \App\Buildings::use('Machine Shop', $contractorID);
-
-        $engineType = $engines[$actionName];
-        $electricity->quantity -= 25;
-        $electricity->save();
-        $steel->quantity -= 10;
-        $steel->save();
-        $iron->quantity -= 10;
-        $iron->save();
-        $copper->quantity -= 5;
-        $copper->save();
-        $enginesBeingCreated = \App\Items::fetchByName($engineType, $contractorID);
-        $enginesBeingCreated->quantity += $production;
-        $enginesBeingCreated->save();
-        $status = $agentCaption . " used 10 Steel [" . number_format($steel->quantity)
-          . "], 10 Iron [" . number_format($iron->quantity) . "] and 5 Copper ["
-          . number_format($copper->quantity) . "] to create " . $production . " " . $engineType . ". " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($enginesBeingCreated->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-
+        $output = \App\Items::make($engines[$actionName], $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1512,41 +1227,27 @@ class Actions extends Model
       || $actionName == 'make-gas-jackhammer'
       || $actionName == 'make-electric-chainsaw'
       || $actionName == 'make-gas-chainsaw'){
-
-      $steel = Items::fetchByName('Steel Ingots', $contractorID);
-      $motors = Items::fetchByName(ucfirst(explode('-', $actionName)[1]) . ' Motors', $contractorID);
       $availableTools = [
         'make-electric-jackhammer'=>'Jackhammer (electric)',
         'make-gas-jackhammer'     =>'Jackhammer (gasoline)',
         'make-electric-chainsaw'  =>'Chainsaw (electric)',
         'make-gas-chainsaw'       =>'Chainsaw (gasoline)',
       ];
-      $tool = Items::fetchByName($availableTools[$actionName], $contractorID);
-      if ($steel->quantity < 10){
-        return [
-          'error' => $agentCaption . " do not have enough Steel (need 10) to create this tool."
-        ];
-      } else if ($motors-> quantity < 1){
-        return [
-          'error' => $agentCaption . " do not have a motor (need 1) to create this tool."
-        ];
-      }
-      $quantity = 1;
+      $production = 1;
       if ($robot == null){
-        $quantity = $action->rank;
+        $production = $action->rank;
       }
-      $steel->quantity -= 10;
-      $steel->save();
-      $motors->quantity -= 1;
-      $motors->save();
-      $tool->quantity += $quantity;
-      $tool->save();
-      $status = $agentCaption . " used 10 Steel & 1 "
-        . explode('-', $actionName)[1] . " motor to make " . $quantity . " "
-        . $availableTools[$actionName] . ".";
-      if ($agentID == $contractorID){
-        $status .= " You now have " . number_format($tool->quantity) . ".";
+      $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return [
+          'error' => $itemCaption['error'],
+        ];
       }
+      $output = \App\Items::make($availableTools[$actionName], $production,
+        $contractorID, $agentID);
+      $status =  "<span class='actionInput'>" . $itemCaption['status']
+        . "</span> &rarr; " . $output;
+
 
 
       } else if ($actionName == 'make-HerbMed'){
@@ -1554,23 +1255,15 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-
-        $greens = Items::fetchByName('Herbal Greens', $contractorID);
-        if ($greens->quantity < 10 ){
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
           return [
-            'error' => $agentCaption . " do not have enough Herbal Greens (10 needed) to create HerbMed."
+            'error' => $itemCaption['error'],
           ];
         }
-        $greens->quantity -= 10;
-        $greens->save();
-        $herbMed = Items::fetchByName('HerbMeds', $contractorID);
-        $herbMed->quantity += $production;
-        $herbMed->save();
-        $status = $agentCaption . " created " . $production
-          . " HerbMed(s) from 10 Herbal Greens. [" . number_format($greens->quantity) . "] ";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($herbMed->quantity) . ".";
-        }
+        $output = \App\Items::make('HerbMeds', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1583,40 +1276,21 @@ class Actions extends Model
         || $actionName == 'make-steel-shovel' || $actionName == 'make-iron-shovel'
         || $actionName == 'make-stone-shovel'
       ){
-
-        $material = ucfirst(explode('-', $actionName)[1]);
-        $toolType = ItemTypes::where('material', explode('-', $actionName)[1])
-          ->where('name', ucfirst(explode('-', $actionName)[2]) . " ("
-            . explode('-', $actionName)[1] . ")")->first();
-        $item = Items::where('itemTypeID', $toolType->id)
-          ->where('userID', $contractorID)->first();
-        if ($material != 'Stone'){
-          $material .= " Ingots";
+        $production = 1;
+        if ($robot == null){
+          $production = $action->rank;
         }
-        $buildMaterial = Items::fetchByName($material, $contractorID);
-        $wood = Items::fetchByName('Wood', $contractorID);
-        if ($buildMaterial->quantity < 1){
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
           return [
-            'error' => "You do not have enough " . $material . " (1 needed)." . $buildMaterial->id,
-          ];
-        } else if ($wood->quantity < 1){
-          return [
-            'error' => "You do not have enough Wood. (1 needed).",
+            'error' => $itemCaption['error'],
           ];
         }
-        $item->quantity += $action->rank;
-        $item->save();
-        $buildMaterial->quantity -= 1;
-        $buildMaterial->save();
-        $wood->quantity -= 1;
-        $wood->save();
-        $status = $agentCaption . " used 1 " . explode('-', $actionName)[1] . " [" . number_format($buildMaterial->quantity) . "]"
-          . " and 1 wood [" . number_format($wood->quantity) . "] to make " . $action->rank . " "
-          . explode('-', $actionName)[1] . " " . explode('-', $actionName)[2]
-          . ". <button id='statusEquipItem-" . $item->id . "' class='equipItem btn btn-link'>[ equip item ]</button>";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($item->quantity) . ".";
-        }
+        $output = \App\Items::make(ucfirst(explode('-', $actionName)[2]) . " ("
+          . explode('-', $actionName)[1] . ")", $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1625,44 +1299,24 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $silicon = \App\Items::fetchByName('Silicon', $contractorID);
-        $carbonNanotubes = \App\Items::fetchByName('Carbon Nanotubes', $contractorID);
         if (!\App\Buildings::didTheyAlreadyBuildThis('Nano Lab', $contractorID)){
           return [
             'error' => "You need to have a Nano Lab to do this.",
           ];
-        } else if ($electricity->quantity < 1000 ){
-          return [
-            'error' => "You don't have enough Electricity (1000) to do this.",
-          ];
-        } else if ($silicon->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Silicon  (100) to do this.",
-          ];
-        } else if ($carbonNanotubes->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Carbon Nanotubes (100) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Nano Lab', $contractorID);
-        $silicon->quantity -= 100;
-        $silicon->save();
-        $carbonNanotubes->quantity -= 100;
-        $carbonNanotubes->save();
-        $electricity->quantity -= 1000;
-        $electricity->save();
-        $nanites = \App\Items::fetchByName('Nanites', $contractorID);
-        $nanites->quantity += $production;
-        $nanites->save();
-        $status = $agentCaption . " used 100 Silicon [" . number_format($silicon->quantity)
-          . "], 100 Carbon Nanotubes [" . number_format($carbonNanotubes->quantity)
-          . "] and 1000 Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " Nanites " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($nanites->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Nanites', $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
+
+
 
 
 
@@ -1670,121 +1324,57 @@ class Actions extends Model
         if ($robot != null){
           return;
         }
-
-        $production = $action->rank;
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $bioMeds = \App\Items::fetchByName('BioMeds', $contractorID);
-        $nanites = \App\Items::fetchByName('Nanites', $contractorID);
+        $production = 1;
+        if ($robot == null){
+          $production = $action->rank;
+        }
         if (!\App\Buildings::didTheyAlreadyBuildThis('Nano Lab', $contractorID)){
           return [
             'error' => "You need to have a Nano Lab to do this.",
           ];
-        } else if ($bioMeds->quantity < 10 ){
-          return [
-            'error' => "You don't have enough HerbMeds (10 needed) to do this.",
-          ];
-        } else if ($nanites->quantity < 10 ){
-          return [
-            'error' => "You don't have enough Bio Material (10 needed) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity (10 0needed) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Nano Lab', $contractorID);
-        $bioMeds->quantity -= 10;
-        $bioMeds->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $nanites->quantity -= 10;
-        $nanites->save();
-        $nanoMeds = \App\Items::fetchByName('NanoMeds', $contractorID);
-        $nanoMeds->quantity += $production;
-        $nanoMeds->save();
-        $status = $agentCaption . " used 10 Nanites [" . number_format($nanites->quantity)
-        . "],  10 BioMeds [" . number_format($bioMeds->quantity)
-        . "], and 100 Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " NanoMeds. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($nanoMeds->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('NanoMeds', $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
 
 
       } else if ($actionName == 'make-robot'){
-
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $cpu = \App\Items::fetchByName('CPU', $contractorID);
-        $copper = \App\Items::fetchByName('Copper Ingots', $contractorID);
-        $steel = \App\Items::fetchByName('Steel Ingots', $contractorID);
-        $electricMotors = \App\Items::fetchByName('Electric Motors', $contractorID);
         $production = 1;
         if ($robot == null){
           $production = $action->rank;
         }
         if (!\App\Buildings::didTheyAlreadyBuildThis('Robotics Lab', $contractorID)){
           return [
-            'error' => "You need to have a Propulsion Lab to do this.",
-          ];
-        } else if ($cpu->quantity < 10 ){
-          return [
-            'error' => "You don't have enough CPUs (10 needed) to do this.",
-          ];
-        } else if ($copper->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Copper Ingots (100 needed) to do this.",
-          ];
-        } else if ($steel->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Steel Ingots (100 needed) to do this.",
-          ];
-        } else if ($electricity->quantity < 100000 ){
-          return [
-            'error' => "You don't have enough Electricity (100,000 needed) to do this.",
-          ];
-        } else if ($electricMotors->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electric Motors (100 needed) to do this.",
+            'error' => "You need to have a Robotics Lab to do this.",
           ];
         }
         $buildingCaption = \App\Buildings::use('Robotics Lab', $contractorID);
-        $cpu->quantity -= 10;
-        $cpu->save();
-        $electricity->quantity -= 100000;
-        $electricity->save();
-        $copper->quantity -= 100;
-        $copper->save();
-        $steel->quantity -= 100;
-        $steel->save();
-        $electricMotors->quantity -= 100;
-        $electricMotors->save();
-
-        $robots = \App\Items::fetchByName('Robots', $contractorID);
-        $robots->quantity += $production;
-        $robots->save();
-        $status = $agentCaption . "  used 100 CPUs [" . number_format($cpu->quantity)
-        . "],  100 Copper Ingots [" . number_format($copper->quantity)
-        . "], 100 Steel Ingots [" . number_format($steel->quantity)
-        . "], 1000 Electricity [" . number_format($electricity->quantity)
-        . "], and 100 Electric Motors [" . number_format($electricMotors->quantity)
-        . "] to create "
-          . $production . " Robots. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($robots->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Robots', $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
 
     } else if ($actionName == 'make-rocket-engine'){
-
-      $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-      $jetFuel = \App\Items::fetchByName('Jet Fuel', $contractorID);
-      $iron = \App\Items::fetchByName('Iron Ingots', $contractorID);
-      $steel = \App\Items::fetchByName('Steel Ingots', $contractorID);
       $production = 1;
       if ($robot == null){
         $production = $action->rank;
@@ -1793,43 +1383,20 @@ class Actions extends Model
         return [
           'error' => "You need to have a Propulsion Lab to do this.",
         ];
-      } else if ($jetFuel->quantity < 1000 ){
-        return [
-          'error' => "You don't have enough Jet Fuel (1000 needed) to do this.",
-        ];
-      } else if ($iron->quantity < 1000 ){
-        return [
-          'error' => "You don't have enough Iron Ingots (1000 needed) to do this.",
-        ];
-      } else if ($steel->quantity < 1000 ){
-        return [
-          'error' => "You don't have enough Steel Ingots (1000 needed) to do this.",
-        ];
-      } else if ($electricity->quantity < 1000 ){
-        return [
-          'error' => "You don't have enough Electricity (1000 needed) to do this.",
-        ];
       }
       $buildingCaption = \App\Buildings::use('Propulsion Lab', $contractorID);
-      $jetFuel->quantity -= 1000;
-      $jetFuel->save();
-      $electricity->quantity -= 1000;
-      $electricity->save();
-      $iron->quantity -= 1000;
-      $iron->save();
-      $steel->quantity -= 1000;
-      $steel->save();
-      $rocketEngines = \App\Items::fetchByName('Rocket Engines', $contractorID);
-      $rocketEngines->quantity += $production;
-      $rocketEngines->save();
-      $status = $agentCaption . " used 1000 Jet Fuel [" . number_format($jetFuel->quantity)
-      . "],  1000 Iron Ingots [" . number_format($iron->quantity)
-      . "], 1000 Steel Ingots [" . number_format($steel->quantity)
-      . "], and 100 Electricity [" . number_format($electricity->quantity) . "] to create "
-        . $production . " Rocket Engines. " . $buildingCaption;
-      if ($agentID == $contractorID){
-        $status .= " You now have " . number_format($rocketEngines->quantity) . ".";
+      $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return [
+          'error' => $itemCaption['error'],
+        ];
       }
+      $output = \App\Items::make('Robots', $production,
+        $contractorID, $agentID);
+      $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+        . "</span> &rarr; " . $output;
+
+
 
 
 
@@ -1838,42 +1405,27 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-        $rubber = \App\Items::fetchByName('Rubber', $contractorID);
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $req = 10;
         $itemName = 'Tires';
         $buildingCaption = "";
         if ($actionName == 'make-radiation-suit'){
-          $req = 100;
           $itemName = 'Radiation Suit';
         }
         if (!\App\Buildings::didTheyAlreadyBuildThis('Chem Lab', $contractorID)){
           return [
             'error' => "You need to have a Chem Lab to do this.",
           ];
-        } else if ($rubber->quantity < $req ){
-          return [
-            'error' => "You don't have enough Rubber (" . $req . ") to do this.",
-          ];
-        } else if ($electricity->quantity < $req ){
-          return [
-            'error' => "You don't have enough Electricity  (" . $req . ") to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Chem Lab', $contractorID);
-        $rubber->quantity -= $req;
-        $rubber->save();
-        $electricity->quantity -= $req;
-        $electricity->save();
-        $itemProduced = \App\Items::fetchByName($itemName, $contractorID);
-        $itemProduced->quantity += $production;
-        $itemProduced->save();
-        $status = $agentCaption . "  used " . $req . " Rubber [" . number_format($rubber->quantity)
-          . "] and " . $req . " Electricity [" . number_format($electricity->quantity) . "] to create "
-          . $production . " " . $itemName . ". " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($itemProduced->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make($itemName, $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1882,17 +1434,15 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank * 10;
         }
-        $wood = Items::fetchByName('Wood', $contractorID);
-        $wood->quantity--;
-        $wood->save();
-        $paper = Items::fetchByName('Paper', $contractorID);
-        $paper->quantity += $production;
-        $paper->save();
-        $status = $agentCaption . " created " . $production
-          . " paper from 1 wood. [" . number_format($wood->quantity) . "]";
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($paper->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Paper', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1902,69 +1452,21 @@ class Actions extends Model
         if ($robot == null){
           $production = $action->rank;
         }
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
-        $cpu = \App\Items::fetchByName('CPU', $contractorID);
-        $copper = \App\Items::fetchByName('Copper Ingots', $contractorID);
-        $steel = \App\Items::fetchByName('Steel Ingots', $contractorID);
-        $solarPanels = \App\Items::fetchByName('Solar Panels', $contractorID);
-        $rocketEngines = \App\Items::fetchByName('Rocket Engines', $contractorID);
-
         if (!\App\Buildings::didTheyAlreadyBuildThis('Propulsion Lab', $contractorID)){
           return [
             'error' => "You need to have a Propulsion Lab to do this.",
           ];
-        } else if ($cpu->quantity < 1 ){
-          return [
-            'error' => "You don't have enough CPUs (1 needed) to do this.",
-          ];
-        } else if ($copper->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Copper Ingots (100 needed) to do this.",
-          ];
-        } else if ($steel->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Steel Ingots (100 needed) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity (100 needed) to do this.",
-          ];
-        } else if ($solarPanels->quantity < 5 ){
-          return [
-            'error' => "You don't have enough Solar Panels (5 needed) to do this.",
-          ];
-        } else if ($rocketEngines->quantity < 1){
-          return [
-            'error' => "You don't have enough Rocket Engines (1 needed) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Propulsion Lab', $contractorID);
-        $cpu->quantity -= 1;
-        $cpu->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $copper->quantity -= 100;
-        $copper->save();
-        $steel->quantity -= 100;
-        $steel->save();
-        $solarPanels->quantity -= 5;
-        $solarPanels->save();
-        $rocketEngines->quantity -= 1;
-        $rocketEngines->save();
-        $satellites = \App\Items::fetchByName('Satellite', $contractorID);
-        $satellites->quantity += $production;
-        $satellites->save();
-        $status = $agentCaption . " used 10 CPUs [" . number_format($cpu->quantity)
-        . "],  100 Copper Ingots [" . number_format($copper->quantity)
-        . "], 100 Steel Ingots [" . number_format($steel->quantity)
-        . "], 100 Electricity [" . number_format($electricity->quantity)
-        . "], 5 Solar Panels [" . number_format($solarPanels->quantity)
-        . "], and 1 Rocket Engines [" . number_format($rocketEngines->quantity)
-        . "] to create "
-          . $production . " Satellites. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($satellites->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Satellite', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -1983,49 +1485,22 @@ class Actions extends Model
           return [
             'error' => "You need to have a Solar Panel Fabrication Plant to do this.",
           ];
-        } else if ($steel->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Steel (100) to do this.",
-          ];
-        } else if ($copper->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Copper (100) to do this.",
-          ];
-        } else if ($silicon->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Silicon (100) to do this.",
-          ];
-        } else if ($electricity->quantity < 100 ){
-          return [
-            'error' => "You don't have enough Electricity  (100) to do this.",
-          ];
         }
         $buildingCaption = \App\Buildings::use('Solar Panel Fabrication Plant', $contractorID);
-        $steel->quantity -= 100;
-        $steel->save();
-        $copper->quantity -= 100;
-        $copper->save();
-        $silicon->quantity -= 100;
-        $silicon->save();
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $solarPanels = \App\Items::fetchByName('Solar Panels', $contractorID);
-        $solarPanels->quantity += $production;
-        $solarPanels->save();
-        $status = $agentCaption . " used 100 Electricity [" . number_format($electricity->quantity)
-          . "], 1000 Silicon [" . number_format($silicon->quantity) . "], 100 Steel ["
-          . number_format($steel->quantity) . "] and 100 Copper [" . number_format($copper->quantity) . "] to create "
-          . $production . " Solar Panel(s). " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($solarPanels->quantity) . ".";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Solar Panels', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
       } else if ($actionName == 'mill-flour'){
         $wheat = Items::fetchByName('Wheat', $contractorID);
-        $flour = Items::fetchByName('Flour', $contractorID);
-
         if ((($robot == null && !Labor::areTheyEquippedWith('Handmill', $agentID))
           || ($robot != null && !\App\Robot::areTheyEquippedWith('Handmill', $robotID)))
           && !\App\Buildings::didTheyAlreadyBuildThis('Gristmill', $contractorID)){
@@ -2035,14 +1510,14 @@ class Actions extends Model
           && \App\Buildings::didTheyAlreadyBuildThis('Gristmill', $contractorID)
           && $wheat->quantity < 100){
           return ['error' => "You have a Gristmill built but don't enough Wheat."];
-        } else if ($wheat->quantity < 10){
-          return ['error' => "You do not have enough wheat."];
         }
         $buildingCaption = '';
         $equipmentCaption = '';
+        $buildingName = '';
         if (\App\Buildings::didTheyAlreadyBuildThis('Gristmill', $contractorID) && $wheat->quantity >= 100){
           $modifier = 100;
-          $buildingCaption = \App\Buildings::use('Gristmill', $contractorID);
+          $buildingName = 'Gristmill';
+          $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
         } else {
           if ($robot == null){
             $equipmentCaption = Equipment::useEquipped('Handmill', $agentID);
@@ -2051,26 +1526,25 @@ class Actions extends Model
           }
           $modifier = 10;
         }
-        $flourProduced = $modifier * .5;
+        $production = $modifier * .5;
         if ($robot == null){
-          $flourProduced = $action->rank * ($modifier * .5);
+          $production = $action->rank * ($modifier * .5);
         }
-        $wheat->quantity -= $modifier;
-        $wheat->save();
-        $flour->quantity += $flourProduced ;
-        $flour->save();
-        $status = $agentCaption . " milled " . $modifier   . " Wheat [" . number_format($wheat->quantity) . "] into " . $flourProduced
-          . " Flour. " . $equipmentCaption . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($flour->quantity) . " . ";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName . $buildingName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Flour', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . $buildingCaption . $equipmentCaption
+          . "</span> &rarr; " . $output;
 
 
 
       } else if ($actionName == 'mill-log'){
         $logs = Items::fetchByName('Logs', $contractorID);
-        $wood = Items::fetchByName('Wood', $contractorID);
-
         if (( ($robot == null && !Labor::areTheyEquippedWith('Saw', $agentID))
           || ($robot != null && !\App\Robot::areTheyEquippedWith('Saw', $robotID)))
           && !\App\Buildings::didTheyAlreadyBuildThis('Sawmill', $contractorID)){
@@ -2080,37 +1554,36 @@ class Actions extends Model
             && \App\Buildings::didTheyAlreadyBuildThis('Sawmill', $contractorID)
             && $logs->quantity < 10){
             return ['error' => "You have a Sawmill built but don't enough Logs (10)."];
-          } else if ($logs->quantity < 1){
-            return ['error' => "You do not have enough Logs."];
-          }
+        }
         $buildingCaption = '';
         $equipmentCaption = '';
+        $buildingName = '';
         if (\App\Buildings::didTheyAlreadyBuildThis('Sawmill', $contractorID) && $logs->quantity >= 10){
           $modifier = 10;
-          $buildingCaption = \App\Buildings::use('Sawmill', $contractorID);
+          $buildingName = 'Sawmill';
+          $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
         } else {
           if ($robot == null){
             $equipmentCaption = Equipment::useEquipped('Saw', $agentID);
           } else {
             $equipmentCaption = \App\Robot::useEquipped($robotID);
           }
-
           $modifier = 1;
         }
-        $woodProduced = 100 * $modifier;
+        $production = 100 * $modifier;
         if ($robot == null){
-          $woodProduced = $action->rank * 100 * $modifier;
+          $production = $action->rank * 100 * $modifier;
         }
-        $logs->quantity -= $modifier;
-        $logs->save();
-        $wood->quantity += $woodProduced ;
-        $wood->save();
-        $status = $agentCaption . " milled " . $modifier   . " log(s) ["
-        . number_format($logs->quantity) . "] into "
-        . number_format($woodProduced) . " wood. " . $equipmentCaption . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($wood->quantity) . " . ";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName . $buildingName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Wood', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . $buildingCaption . $equipmentCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -2159,14 +1632,13 @@ class Actions extends Model
         if ($landResource != true){
           return $landResource;
         }
-        $itemProduced = Items::fetchByName('Sand', $contractorID);
-        $itemProduced->quantity += $production;
-        $itemProduced->save();
-        $status = $agentCaption . " mined " . number_format($production) . " Sand. " . $leaseStatus
-        . $equipmentCaption . $buildingCaption;
+        $output = \App\Items::make('Sand', $production, $contractorID, $agentID);
+        $status = "<span class='actionInput'>";
         if ($agentID == $contractorID){
-          $status .= " You  now have " . number_format($itemProduced->quantity) . ". ";
+          $status .= $equipmentCaption . $leaseStatus;
         }
+        $status .= $buildingCaption . "</span> &rarr; " . $output;
+
 
 
 
@@ -2221,7 +1693,6 @@ class Actions extends Model
           'mine-stone'=> ['item' => 'Stone', 'skill' => 'miningStone'],
           'mine-copper-ore' => ['item'=>'Copper Ore', 'skill' => 'miningCopper'],
           'mine-uranium-ore' => ['item'=>'Uranium Ore', 'skill' => 'miningUranium'],
-
         ];
         $production = $modifier;
         if ($robot == null){
@@ -2238,14 +1709,6 @@ class Actions extends Model
         if ($landResource != true){
           return $landResource;
         }
-        $itemProduced = Items::fetchByName($miningArr[$actionName]['item'], $contractorID);
-        $itemProduced->quantity += $production;
-        $itemProduced->save();
-        $status = $agentCaption . " mined " . number_format($production) . " " . $miningArr[$actionName]['item']
-          . ". " . $equipmentCaption . $buildingCaption . $leaseStatus;
-        if ($agentID == $contractorID){
-          $status .= " You  now have " . number_format($itemProduced->quantity) . ". " ;
-        }
         if ($actionName ==  'mine-uranium-ore' && $robot == null
           && $labor->alsoEquipped != null){
             $equipment->uses--;
@@ -2256,7 +1719,21 @@ class Actions extends Model
               $labor->alsoEquipped = null;
               $labor->save();
             }
+            $equipmentCaption .= " Radiation Suit: <span class='fn'>"
+              . number_format($equipment->uses / $equipment->totalUses * 100, 2 )
+              . "%</span> ";
         }
+        $output = \App\Items::make($miningArr[$actionName]['item'], $production, $contractorID, $agentID);
+        if ($buildingCaption != ""){
+          $status .=  "<span class='actionInput'>";
+        }
+        if ($agentID == $contractorID){
+          $status .= $equipmentCaption  . $leaseStatus;
+        }
+        if ($buildingCaption != ""){
+          $status .= " " . $buildingCaption . "</span> &rarr; ";
+        }
+        $status .= $output;
 
 
 
@@ -2295,7 +1772,13 @@ class Actions extends Model
         $wheatField->rubber = $production;
         $wheatField->harvestAfter = date("Y-m-d H:i:s", strtotime('+24 hours'));
         $wheatField->save();
-        $status = $agentCaption . " planted a Rubber Plantation. " . $leaseStatus;
+        $status = "<span class='actionInput'>";
+        if ($contractorID == $agentID){
+          $status .= $leaseStatus;
+        }
+        $status .= "Building Slots: <span class='fn'>-1</span> ["
+          . number_format($contractor->buildingSlots)
+          . "]</span> &rarr; Rubber Plantation: <span class='fp'>+1</span>";
 
 
 
@@ -2332,99 +1815,86 @@ class Actions extends Model
         $field[$whichVarName[$actionName]] = $production;
         $field->harvestAfter = date("Y-m-d H:i:s", strtotime('+24 hours'));
         $field->save();
-        $status = $agentCaption . " planted a " . $whichItemType[$actionName] . " Field.";
+        $status = "<span class='actionInput'>Building Slots: <span class='fn'>-1</span> ["
+          . number_format($contractor->buildingSlots) . "]</span> &rarr; "
+          . $whichItemType[$actionName] . " Field: <span class='fp'>+1</span>";
 
 
 
       } else if ($actionName == 'pump-oil'){
-        $electricity = \App\Items::fetchByName('Electricity', $contractorID);
         if (!\App\Buildings::didTheyAlreadyBuildThis('Oil Well', $agentID)){
           return ['error' => "You do not have an Oil Well. Please build one first."];
-        } else if ($electricity->quantity < 10){
-          return ['error' => "You need to have at least 10 Electricity to pump oil."];
         }
         $buildingCaption = \App\Buildings::use('Oil Well', $contractorID);
-        $oilProduced = 10;
+        $production = 10;
         if ($robot == null){
-          $oilProduced = $action->rank * 10;
+          $production = $action->rank * 10;
         }
-        $landResource = \App\Land::takeResource('Oil',  $agentID, $oilProduced, true);
+        $landResource = \App\Land::takeResource('Oil',  $agentID, $production, true);
         if ($landResource != true){
           return $landResource;
         }
-        $electricity->quantity -= 10;
-        $electricity->save();
-        $oil = \App\Items::fetchByName ('Oil', $contractorID);
-        $oil->quantity += $oilProduced;
-        $oil->save();
-        $status = $agentCaption . " used 10 Electricity [" . number_format($electricity->quantity)
-        . "] to pump " . $oilProduced . " Oil. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($oil->quantity) . ". ";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $output = \App\Items::make('Oil', $production, $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . $buildingCaption . "</span> &rarr; " . $output;
 
 
 
       } else if ($actionName == 'refine-oil'){
+        $production = 1;
         if ($robot == null){
-          return;
+          $production = $action->rank;
         }
         $electricity = \App\Items::fetchByName('Electricity', $contractorID);
         $oil = \App\Items::fetchByName ('Oil', $contractorID);
 
         if (!\App\Buildings::didTheyAlreadyBuildThis('Oil Refinery', $contractorID)){
           return ['error' => "You do not have an Oil Refinery. Please build one first."];
-        } else if ($electricity->quantity < 100){
-          return ['error' => "You need to have at least 100 Electricity to refine oil."];
-        } else if ($oil->quantity < 100){
-          return ['error' => "You need to have at least 100 Oil to refine oil."];
         }
         $buildingCaption = \App\Buildings::use('Oil Refinery', $contractorID);
-
-        $refineryYield = $action->rank;
-        $electricity->quantity -= 100;
-        $electricity->save();
-        $oil->quantity -= 100;
-        $oil->save();
-        $jetFuel  = \App\Items::fetchByName ('Jet Fuel', $contractorID);
-        $jetFuel->quantity += 1 *$refineryYield;
-        $jetFuel->save();
-        $gasoline = \App\Items::fetchByName ('Gasoline', $contractorID);
-        $gasoline->quantity += 5 * $refineryYield;
-        $gasoline->save();
-        $diesel   = \App\Items::fetchByName ('Diesel Fuel', $contractorID);
-        $diesel->quantity += 4 * $refineryYield;
-        $diesel->save();
-        $status = $agentCaption . " used 100 Electricity [" . number_format($electricity->quantity)
-          . "] and 100 Oil [" . number_format($oil->quantity) . "] to refine " . ( 1 * $refineryYield )
-          . " Jet Fuel, " . (4 * $refineryYield ) . " Diesel Fuel,  and "
-          . (5 * $refineryYield) . " Gasoline. " . $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($jetFuel->quantity) . " Jet Fuel, "
-            . number_format($gasoline->quantity) . " Gasoline and " . number_format($diesel->quantity) . " Diesel.";
+        $output = \App\Items::make('Jet Fuel', 1 * $production, $contractorID, $agentID);
+        $output .= \App\Items::make('Gasoline', 5 * $production, $contractorID, $agentID);
+        $output .= \App\Items::make('Diesel Fuel', 4 * $production, $contractorID, $agentID);
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . $buildingCaption . "</span> &rarr; " . $output;
 
 
 
-      } else if ($actionName == 'smelt-copper'){
+      } else if ($actionName == 'smelt-copper' || $actionName == 'smelt-iron'
+        || $actionName == 'smelt-steel'){
+        $itemInputArr = ['smelt-copper' => 'Copper Ore',
+          'smelt-iron' => 'Iron Ore', 'smelt-steel' => 'Iron Ingots'];
+        $itemOutputArr = ['smelt-copper' => 'Copper Ingots',
+          'smelt-iron' => 'Iron Ingots', 'smelt-steel' => 'Steel Ingots'];
         $coal = Items::fetchByName('Coal', $contractorID);
         $electricity = Items::fetchByName('Electricity', $contractorID);
-
-        $copperOre = Items::fetchByName('Copper Ore', $contractorID);
+        $input = Items::fetchByName($itemInputArr[$actionName], $contractorID);
         if (!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
           && !\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
           && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)){
           return ['error' => "You don't have a Small Furnace, Large Furnace or Electric Arc Furnace."];
-        } else if ($copperOre->quantity < 10){
+        } else if ($input->quantity < 10){
           return ['error' => "You don't have enough Copper Ore."];
         } else if(!\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
         && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)
         && \App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        && ($electricity->quantity < 1000 || $copperOre->quantity < 1000)){
+        && ($electricity->quantity < 1000 || $input->quantity < 1000)){
           return ['error' => "You have an Electric Arc Furnace but don't have enough Electricity or Copper Ore."];
         } else if ((!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
         || (\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        && ($copperOre->quantity < 1000 || $electricity->quantity < 1000)))
+        && ($input->quantity < 1000 || $electricity->quantity < 1000)))
         && (\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
         || \App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)) && $coal->quantity < 10){
           return ['error' => "You have a Small Furnace  or Large Furnace but don't have enough Coal."];
@@ -2436,12 +1906,12 @@ class Actions extends Model
         $modifier = 10;
         $productionModifier = 1;
         if (\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-          && $electricity->quantity >= 1000 && $copperOre->quantity >= 1000){
+          && $electricity->quantity >= 1000 && $input->quantity >= 1000){
             $modifier = 1000;
             $productionModifier = 100;
             $buildingName = 'Electric Arc Furnace';
         } else if (\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)){
-          if ($copperOre->quantity >= 100 && $coal->quantity >= 100){
+          if ($input->quantity >= 100 && $coal->quantity >= 100){
             $modifier = 100;
             $productionModifier = 10;
             $buildingName = 'Large Furnace';
@@ -2455,169 +1925,17 @@ class Actions extends Model
           $production = $action->rank  * $productionModifier;
         }
         $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
-        $copperOre->quantity -= $modifier;
-        $copperOre->save();
-        $copperIngots->quantity += $production;
-        $copperIngots->save();
-        if ($buildingName == 'Electric Arc Furnace'){
-          $electricity->quantity -= $modifier;
-          $electricity->save();
-          $status = $agentCaption . " used " . $modifier . " Electricity [" . number_format($electricity->quantity) . "] and "
-            . $modifier . " copper ore [" . number_format($copperOre->quantity) . "] to smelt " . $production
-            . " copper ingots. ";
-        } else {
-          $coal->quantity -= $modifier;
-          $coal->save();
-          $status = $agentCaption . " used " . $modifier . " coal [" . number_format($coal->quantity) . "] and "
-            . $modifier . " copper ore [" . number_format($copperOre->quantity) . "] to smelt " . $production
-            . " copper ingots. ";
+        $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName . $buildingName), $contractorID);
+        if (isset($itemCaption['error'])){
+          return [
+            'error' => $itemCaption['error'],
+          ];
         }
-        $status .= $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($copperIngots->quantity) . ". ";
-        }
-
-
-
-      } else if ($actionName == 'smelt-iron'){
-        $coal = Items::fetchByName('Coal', $contractorID);
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $ironOre = Items::fetchByName('Iron Ore', $contractorID);
-        if (!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-          && !\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
-          && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)){
-          return ['error' => "You don't have a Small Furnace, Large Furnace or Electric Arc Furnace."];
-        } else if ($ironOre->quantity < 10){
-          return ['error' => "You don't have enough Iron Ore."];
-        } else if(!\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
-        && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)
-        && \App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        && ($electricity->quantity < 1000 || $ironOre->quantity < 1000)){
-          return ['error' => "You have an Electric Arc Furnace but don't have enough Electricity or Iron Ore."];
-        } else if ((!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        || (\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        && ($ironOre->quantity < 1000 || $electricity->quantity < 1000)))
-        && (\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
-        || \App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)) && $coal->quantity < 10){
-          return ['error' => "You have a Small Furnace  or Large Furnace but don't have enough Coal."];
-        }
-        $buildingCaption = '';
-        $ironIngots = Items::fetchByName('Iron Ingots', $contractorID);
-        $buildingName = 'Small Furnace';
-        $modifier = 10;
-        $productionModifier = 1;
-        if (\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-          && $electricity->quantity >= 1000 && $ironOre->quantity >= 1000){
-            $modifier = 1000;
-            $productionModifier = 100;
-            $buildingName = 'Electric Arc Furnace';
-        } else if (\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)){
-          if ($ironOre->quantity >= 100 && $coal->quantity >= 100){
-            $modifier = 100;
-            $productionModifier = 10;
-            $buildingName = 'Large Furnace';
-          }
-          if (!\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)){
-            $buildingName = 'Large Furnace';
-          }
-        }
-        $production = $productionModifier;
-        if ($robot == null){
-          $production = $action->rank  * $productionModifier;
-        }
-        $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
-        $ironOre->quantity -= $modifier;
-        $ironOre->save();
-        $ironIngots->quantity += $production;
-        $ironIngots->save();
-        if ($buildingName == 'Electric Arc Furnace'){
-          $electricity->quantity -= $modifier;
-          $electricity->save();
-          $status = $agentCaption . " used " . $modifier . " Electricity [" . number_format($electricity->quantity) . "] and "
-            . $modifier . " iron ore [" . number_format($ironOre->quantity) . "] to smelt " . $production
-            . " iron ingots. ";
-        } else {
-          $coal->quantity -= $modifier;
-          $coal->save();
-          $status = $agentCaption . " used " . $modifier . " coal [" . number_format($coal->quantity) . "] and "
-            . $modifier . " iron ore [" . number_format($ironOre->quantity) . "] to smelt " . $production
-            . " iron ingots. ";
-        }
-        $status .= $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($ironIngots->quantity) . ". ";
-        }
-
-
-
-      } else if ($actionName == 'smelt-steel'){
-        $coal = Items::fetchByName('Coal', $contractorID);
-        $electricity = Items::fetchByName('Electricity', $contractorID);
-        $ironIngots = Items::fetchByName('Iron Ingots', $contractorID);
-        if (!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-          && !\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
-          && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)){
-          return ['error' => "You don't have a Small Furnace, Large Furnace or Electric Arc Furnace."];
-        } else if ($ironIngots->quantity < 10){
-          return ['error' => "You don't have enough Iron Ingots."];
-        } else if(!\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
-        && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)
-        && \App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        && ($electricity->quantity < 1000 || $ironIngots->quantity < 1000)){
-          return ['error' => "You have an Electric Arc Furnace but don't have enough Electricity or Iron Ingots."];
-        } else if ((!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        || (\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-        && ($ironIngots->quantity < 1000 || $electricity->quantity < 1000)))
-        && (\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
-        || \App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)) && $coal->quantity < 10){
-          return ['error' => "You have a Small Furnace  or Large Furnace but don't have enough Coal."];
-        }
-        $buildingCaption = '';
-        $steelIngots = Items::fetchByName('Steel Ingots', $contractorID);
-        $buildingName = 'Small Furnace';
-        $modifier = 10;
-        $productionModifier = 1;
-        if (\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
-          && $electricity->quantity >= 1000 && $ironIngots->quantity >= 1000){
-            $modifier = 1000;
-            $productionModifier = 100;
-            $buildingName = 'Electric Arc Furnace';
-        } else if (\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', $contractorID)){
-          if ($ironIngots->quantity >= 100 && $coal->quantity >= 100){
-            $modifier = 100;
-            $productionModifier = 10;
-            $buildingName = 'Large Furnace';
-          }
-          if (!\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', $agentID)){
-            $buildingName = 'Large Furnace';
-          }
-        }
-        $production = $productionModifier;
-        if ($robot == null){
-          $production = $action->rank  * $productionModifier;
-        }
-        $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
-        $ironIngots->quantity -= $modifier;
-        $ironIngots->save();
-        $steelIngots->quantity += $production;
-        $steelIngots->save();
-        if ($buildingName == 'Electric Arc Furnace'){
-          $electricity->quantity -= $modifier;
-          $electricity->save();
-          $status = $agentCaption . " used " . $modifier . " Electricity [" . number_format($electricity->quantity) . "] and "
-            . $modifier . " iron ingots [" . number_format($ironIngots->quantity) . "] to smelt " . $production
-            . " steel ingots. ";
-        } else {
-          $coal->quantity -= $modifier;
-          $coal->save();
-          $status = $agentCaption . " used " . $modifier . " coal [" . number_format($coal->quantity) . "] and "
-            . $modifier . " iron ingots [" . number_format($ironIngots->quantity) . "] to smelt " . $production
-            . " steel ingots. ";
-        }
-        $status .= $buildingCaption;
-        if ($agentID == $contractorID){
-          $status .= " You now have " . number_format($steelIngots->quantity) . ". ";
-        }
+        $output = \App\Items::make($itemOutputArr[$actionName], $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $itemCaption['status']
+          . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
@@ -2638,22 +1956,21 @@ class Actions extends Model
         $powerPlant->electricity = 0;
         $powerPlant->save();
         $buildingCaption = \App\Buildings::use('Solar Power Plant', $contractorID);
-        $electricity->quantity += $production;
-        $electricity->save();
-        $status = $agentCaption . " transferred " . $production . " Electricity [" . number_format($electricity->quantity) . "] from your Solar Power Plant. " . $buildingCaption;
+        $output = \App\Items::make('Electricity', $production,
+          $contractorID, $agentID);
+        $status =  "<span class='actionInput'>" . $buildingCaption
+          . "</span> &rarr; " . $output;
 
 
 
       }
       if ($robot == null){
-        //removed work hours decrement
         $user = \App\User::find($agentID);
         $user->lastAction = date("Y-m-d H:i:s");
         $user->save();
       }
-      $medStatus = \App\Labor::useMeds($agentID);
       $childrenStatus = \App\Labor::feedChildren($agentID);
-      return ['status' => $status . $medStatus . $radStatus . " " . $childrenStatus];
+      return ['status' => $status . " " . $childrenStatus];
     }
 
 
