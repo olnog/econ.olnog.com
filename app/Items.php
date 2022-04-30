@@ -14,10 +14,6 @@ class Items extends Model
     return \App\Items::where('itemTypeID', $itemType->id)->where('userID', $userID)->first();
   }
 
-  static public function fetchByItemTypeID($itemTypeID){
-    return \App\Items::where('userID', Auth::id())->where('itemTypeID', $itemTypeID)->first();
-  }
-
   static public function fetch(){
     return Items::where('userID', Auth::id())
       ->join('itemTypes', 'items.itemTypeID', 'itemTypes.id')
@@ -111,6 +107,7 @@ class Items extends Model
     ];
     return $itemNameArr[$actionName];
   }
+
   static public function doTheyHaveEnoughFor($actionName){
     $items = \App\Items::fetchActionItemInput($actionName);
     if ($items === null){
@@ -123,6 +120,7 @@ class Items extends Model
     }
     return true;
   }
+
   static public function fetchActionItemInput($actionName){
     $actionReqs = [
       'cook-flourCampfire'                    => ['Flour' => 1, 'Wood'=> 1],
@@ -243,12 +241,8 @@ class Items extends Model
   }
 
   static public function fetchTotalQuantity($userID){
-    $items = \App\Items::where('userID', $userID)->where('countable', true)->get();
-    $total = 0;
-    foreach ($items as $item){
-      $total += $item->quantity;
-    }
-    return $total;
+    return \App\Items::where('userID', $userID)->where('countable', true)
+      ->sum('quantity');
   }
 
   static public function doTheyHave($name, $quantity){
@@ -270,12 +264,16 @@ class Items extends Model
     return $status;
   }
 
+  public static function new($itemTypeID, $userID){
+    $item = new \App\Items;
+    $item->itemTypeID = $itemTypeID;
+    $item->userID = $userID;
+    $item->save();
+  }
 
   public function type(){
     return $this->hasOne('App\ItemTypes', 'itemTypesID');
   }
-
-
 
   public static function use($itemArr, $contractorID){
     $status = "";

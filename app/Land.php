@@ -11,7 +11,8 @@ class Land extends Model
     protected $table = 'land';
 
     public static function aretheySellingThis($landID){
-      return \App\Contracts::where('active', 1)->where('category', 'sellLand')->where('landID', $landID)->first();
+      return \App\Contracts::where('active', 1)->where('category', 'sellLand')
+        ->where('landID', $landID)->first();
     }
 
     public static function autoBribe(){
@@ -42,7 +43,6 @@ class Land extends Model
         $lease = \App\Lease::where('active', 1)->where('userID', $userID)
           ->where('landType', $landTypeArr[$resource])->first();
         if ($lease == null){
-
           return $error;
         }
         $contract = \App\Contracts::find($lease->contractID);
@@ -64,7 +64,6 @@ class Land extends Model
       return $error;
     }
 
-
     public static function checkBribes(){
       \App\Land::autoBribe();
       $land = \App\Land::all();
@@ -72,7 +71,8 @@ class Land extends Model
       $numOfUnprotectedParcels = 0;
       foreach($land as $parcel){
         $parcel->protected = false;
-        if ($parcel->bribe >= $averageBribe && $parcel->hostileTakeoverBy == null){
+        if ($parcel->bribe >= $averageBribe
+          && $parcel->hostileTakeoverBy == null){
           $parcel->protected = true;
         } else {
           $numOfUnprotectedParcels++;
@@ -80,41 +80,6 @@ class Land extends Model
         $parcel->bribe = 0;
         $parcel->save();
       }
-      $chat = new \App\Chat;
-      $chat->message = "The State has evaluated all bribes from land owners. "
-        . $numOfUnprotectedParcels . " parcels were unprotected.";
-      $chat->save();
-    }
-
-    public static function count($type, $userID){
-      $count = \App\Land::where('userID', $userID)->where('type', $type)->count();
-      if ($count < 1){
-        return 0;
-      }
-      $n = 0;
-      $i = 1;
-
-      while ($count > 0){
-        if ($count / $i > 1){
-          $count -= $i;
-          $n++;
-          $i++;
-        } else {
-          $count = 0;
-        }
-      }
-      return $n;
-    }
-
-    public static function fetch(){
-      return Land::join('users', 'land.userID', 'users.id')
-        ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-        'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-        'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')->get();
-    }
-
-    public static function fetchMine(){
-      return Land::where('userID', Auth::id())->get();
     }
 
     public static function canTheyGetRidOfThisLand($landID){
@@ -126,49 +91,50 @@ class Land extends Model
     public static function doTheyHaveAccessTo($landType){
       if (\App\Lease::areTheyAlreadyLeasing($landType, \Auth::id())){
         return true;
-      }      
+      }
       return \App\Land::doTheyOwn($landType, \Auth::id());
-
     }
 
     public static function doTheyOwn($landType, $userID){
-      $land = Land::where('userID', $userID)->where('type', $landType)->get();
-      return count($land) > 0;
+      return Land::where('userID', $userID)->where('type', $landType)->count() > 0;
+    }
+
+    public static function fetch(){
+      return Land::join('users', 'land.userID', 'users.id')
+        ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+        'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+        'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')->get();
     }
 
     public static function fetchBuildingSlots($landType){
       $buildingSlots = [
-        'plains' => 5, 'forest' => 3, 'mountains' => 2, 'jungle' => 2, 'desert' => 2
+        'plains' => 5, 'forest' => 3, 'mountains' => 2, 'jungle' => 2,
+        'desert' => 2
       ];
       return $buildingSlots[$landType];
     }
 
-    static public function integrityCheck($userID){
-      $theirLand = \App\Land::where('userID', $userID)->get();
-      $buildingType = \App\BuildingTypes::fetchByName('Warehouse');
-      $warehouses = \App\Buildings::where('userID', $userID)->where('buildingTypeID', $buildingType->id)->get();
-      $newBuildingSlots = 0;
-      $newItemCapacity = 1000;
+    public static function fetchLandTypes(){
+      return ['desert', 'forest', 'jungle', 'mountains', 'plains'];
+    }
 
-      foreach($theirLand as $parcel){
-        $newBuildingSlots += \App\Land::fetchBuildingSlots($parcel->type);
-        $newItemCapacity += 1000;
+    public static function fetchMine(){
+      return Land::where('userID', Auth::id())->get();
+    }
+
+    static public function integrityCheck($userID){
+      $newBuildingSlots = 0;
+      foreach(fetchLandTypes() as $landType){
+        $newBuildingSlots += \App\Land::fetchBuildingSlots($landType)
+          * \App\Land::where('type', $landType)->count();;
       }
-      $newItemCapacity += count($warehouses) * 10000;
       $user = \App\User::find($userID);
-      $user->itemCapacity = $newItemCapacity;
       $user->buildingSlots = $newBuildingSlots;
       $user->save();
     }
 
     static public function isThereAHostileTakeover(){
-      $land = \App\Land::fetchMine();
-      foreach($land as $parcel){
-        if ($parcel->hostileTakeoverBy > 0){
-          return true;
-        }
-      }
-      return false;
+      return \App\Land::where('hostileTakeoverBy', '>', 0)->count() > 0;
     }
 
     static public function new($userID){
@@ -189,7 +155,6 @@ class Land extends Model
         $land->type = 'jungle';
       }
       $user->buildingSlots += \App\Land::fetchBuildingSlots($land->type);
-      $user->itemCapacity+= 1000;
       $land->save();
       $user->save();
       return ucfirst($land->type);
@@ -207,13 +172,12 @@ class Land extends Model
         $parcel->bribe += $amount;
         $parcel->valuation += $amount;
         $parcel->save();
-
       }
       $user->clacks -= count($land) * $amount;
       $user->save();
-      return ['status' => "You paid " . (count($land) * $amount)
-        . " clacks across your " . count($land)
-        . " parcel(s) to increase your bribe by " . $amount];
+      return ['status' => "<span class='actionInput'>Clacks: <span class='fn'>-"
+        . (count($land) * $amount) . "</span> [" . number_format($user->clacks)
+        . "]</span> &rarr; " . count($land) . " Parcels' Bribes: <span class='fp'>+" . $amount] . "</span>";
     }
 
     static public function payAutoBribe($userID){
@@ -222,11 +186,11 @@ class Land extends Model
       $i = 0;
       foreach($land as $parcel){
         if ($parcel->bribe < $user->autoBribe){
-
           if ($user->clacks < $user->autoBribe){
             $user->autoBribe = 0;
             $user->save();
-            \App\History::new($user->id, 'land', "You ran out of money paying bribes, so your auto bribe setting was set to 0.");
+            \App\History::new($user->id, 'land',
+              "You ran out of money paying bribes, so your auto bribe setting was set to 0.");
             return;
           }
           $i++;
@@ -244,14 +208,9 @@ class Land extends Model
     }
 
     public static function takeResource($resource, $userID, $quantity, $useLease){
-
       $dbNameArr = ['Stone' => 'stone', 'Iron Ore'=> 'iron', 'Coal'=>'coal',
         'Copper Ore'=>'copper', 'Oil'=>'oil', "Sand"=>'sand',
         'Uranium Ore'=>'uranium', 'Logs'=>'logs'];
-      $landTypeArr = ['Stone'=> 'mountains', 'Iron Ore'=>'mountains',
-        'Coal'=>'mountains', 'Copper Ore'=>'mountains', 'Sand'=>'desert',
-        'Uranium Ore'=>'mountains', 'Logs'=>'forest'];
-
       $land = \App\Land::where('userID', $userID)->where('oil', '>', $quantity)->first();
       if ($resource != 'Oil'){
         $land = \App\Land::where('userID', $userID)

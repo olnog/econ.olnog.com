@@ -121,6 +121,9 @@ class Actions extends Model
         $foodCooked = $action->rank * 2 * $modifier;
       }
       $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName.$buildingName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $output = \App\Items::make('Food', $foodCooked, $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
         . "</span> &rarr; " . $output;
@@ -129,7 +132,7 @@ class Actions extends Model
     } else if ($actionName == 'explore'){
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Car (gasoline)', 'Car (diesel)'], $agentID);
-      $numOfParcels = \App\Land::count() + 1;
+      $numOfParcels = \App\Land::where('userID', '>', 0)->count() + 1;
       $satellite = \App\Items::fetchByName('Satellite', $contractorID);
       $electricity = \App\Items::fetchByName('Electricity', $contractorID);
       $satStatus = "";
@@ -177,7 +180,7 @@ class Actions extends Model
         $agentID);
       $howManyFields = 1;
       $totalYield = 0;
-      $itemName = fetchItemNameForAction($actionName);
+      $itemName = \App\Items::fetchItemNameForAction($actionName);
       $fieldName = ' Field';
       if ($itemName == 'Rubber'){
         $fieldName = ' Plantation';
@@ -245,6 +248,9 @@ class Actions extends Model
         ];
       }
       $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $labor->availableSkillPoints--;
       $labor->save();
       $output = \App\Items::make('Books', $action->rank, $contractorID, $agentID);
@@ -280,7 +286,12 @@ class Actions extends Model
       if ($robot == null){
         $production = $action->rank * ($modifier * .5);
       }
-      $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName . $buildingName), $contractorID);
+      $itemCaption = \App\Items
+        ::use(\App\Items
+        ::fetchActionItemInput($actionName . $buildingName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $output = \App\Items::make('Flour', $production, $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $itemCaption['status']
         . $buildingCaption . $equipmentCaption
@@ -309,7 +320,12 @@ class Actions extends Model
           $equipmentCaption = Equipment::useEquipped('Saw', $agentID);
       }
       $production *= $modifier;
-      $itemCaption = \App\Items::use(\App\Items::fetchActionItemInput($actionName . $buildingName), $contractorID);
+      $itemCaption = \App\Items
+        ::use(\App\Items
+        ::fetchActionItemInput($actionName . $buildingName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $output = \App\Items::make('Wood', $production, $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $itemCaption['status']
         . $buildingCaption . $equipmentCaption
@@ -360,11 +376,11 @@ class Actions extends Model
     } else if ($actionName == 'mine-coal' || $actionName == 'mine-iron-ore'
       || $actionName == 'mine-stone' || $actionName == 'mine-copper-ore'
       || $actionName == 'mine-uranium-ore'){
+      $itemName = \App\Items::fetchItemNameForAction($actionName);
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Jackhammer (gasoline)', 'Jackhammer (electric)',
         'Pickaxe'], $agentID);
       $labor = \App\Labor::where('userID', $agentID)->first();
-
       if (count($equipmentAvailable) < 1){
         return ['error' => "You don't have any equipment to mine with right now."];
       } else if (!\App\Land::doTheyHaveAccessTo('mountains', $contractorID)){
@@ -401,7 +417,7 @@ class Actions extends Model
         }
         $production = $action->rank * ($modifier + $landBonus);
       }
-      $landResource = \App\Land::takeResource($miningArr[$actionName]['item'],  $agentID, $production, true);
+      $landResource = \App\Land::takeResource($itemName,  $agentID, $production, true);
       if ($landResource != true){
         return $landResource;
       }
@@ -419,7 +435,7 @@ class Actions extends Model
           . number_format($equipment->uses / $equipment->totalUses * 100, 2 )
           . "%</span> ";
       }
-      $output = \App\Items::make(fetchItemNameForAction($actionName), $production, $contractorID, $agentID);
+      $output = \App\Items::make($itemName, $production, $contractorID, $agentID);
       if ($buildingCaption != ""){
         $status .=  "<span class='actionInput'>";
       }
@@ -478,9 +494,7 @@ class Actions extends Model
     } else if ($actionName == 'plant-wheat-field'
       || $actionName == 'plant-plant-x-field'
       || $actionName == 'plant-herbal-greens-field'){
-
-      $itemName = fetchItemNameForAction($actionName);
-
+      $itemName = \App\Items::fetchItemNameForAction($actionName);
       $whichVarName = [
         'plant-wheat-field' => 'wheat',
         'plant-plant-x-field' => 'plantX',
@@ -601,7 +615,7 @@ class Actions extends Model
       $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName . $buildingName), $contractorID);
-      $output = \App\Items::make(fetchItemNameForAction($actionName),
+      $output = \App\Items::make(\App\Items::fetchItemNameForAction($actionName),
         $production, $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $itemCaption['status']
         . $buildingCaption
@@ -923,7 +937,7 @@ class Actions extends Model
 
       }
       return $robotActions;
-    }    
+    }
 
     public static function reset($legacy){
       $actions = \App\Actions::where('userID', \Auth::id())->get();

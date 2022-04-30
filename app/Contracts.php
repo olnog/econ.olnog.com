@@ -32,7 +32,6 @@ class Contracts extends Model
     return "";
   }
 
-
   public static function anyoneSelling($contractID){
     $buyContract = \App\Contracts::find($contractID);
     $sellContracts = \App\Contracts::where('itemTypeID', $buyContract->itemTypeID)
@@ -122,11 +121,6 @@ class Contracts extends Model
       return false;
     }
     return true;
-  }
-
-  public static function doTheyAlreadyHaveSimilarContract($category, $itemTypeID){
-
-    //return $contract != null;
   }
 
   public static function fetch(){

@@ -23,8 +23,6 @@ class ActionController extends Controller
     public function index()
     {
       echo json_encode(\App\Actions::available(\Auth::id()));
-      $labor = \App\Labor::fetch();
-
     }
 
     /**
@@ -58,6 +56,7 @@ class ActionController extends Controller
       }
       $msg = \App\Actions::do($actionName, Auth::id(), Auth::id(), null);
       $status = "";
+
       if (isset($msg['error'])){
         echo json_encode(['error' => $msg['error'] ]);
         \App\History::new(Auth::id(), 'action', 'ERROR! : ' . $msg['error']);

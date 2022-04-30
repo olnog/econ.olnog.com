@@ -9,16 +9,13 @@ class Report extends Model
     protected $table = 'reports';
 
     public static function new(){
-      //var_dump(date('Y-m-d H:i:s', strtotime('-1 days')));
       $newLine = "<br>";
       $date = date('Y-m-d', strtotime('-1 days'));
       $reportMsg = "Daily Report " . $date . $newLine;
-
       $buttons = \App\Metric::whereDate('created_at', $date)
         ->whereNotNull('button')->get();
       $actions = \App\Metric::whereDate('created_at', $date)
         ->whereNotNull('action')->get();
-
       $data = [
         'action' => [
           'start'=>[],
@@ -31,7 +28,6 @@ class Report extends Model
           'users'=>[],
         ],
       ];
-
       foreach ($buttons as $button){
         if (!in_array($button->userID, $data['button']['users'])){
           array_push($data['button']['users'], $button->userID);
@@ -73,8 +69,6 @@ class Report extends Model
             $reportMsg .= "\t" . $user->name . " : " . $minutesPassed . " minutes " . $newLine;
           }
         }
-
-
       }
       $reportMsg .= $newLine;
       $reportMsg .= "Total Minutes Played  : " . $minutesPassed . " minutes "
@@ -88,11 +82,8 @@ class Report extends Model
       $reportMsg .=  "Total Skill Points Allocated: " . number_format($totalAllocations) . $newLine;
       $totalAvailable = \DB::table('labor')->sum('availableSkillPoints');
       $reportMsg .=  "Total Skill Points Available: " . number_format($totalAvailable) . $newLine;
-      //file_put_contents('dailyReport.txt', $reportMsg, FILE_APPEND);
       $report = new \App\Report;
       $report->report = $reportMsg;
       $report->save();
-      //echo $reportMsg;
-
     }
 }

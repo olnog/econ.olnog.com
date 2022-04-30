@@ -10,7 +10,7 @@ class BuildingTypes extends Model
   protected $table = 'buildingTypes';
 
   public static function canTheyRepair($buildingName, $agentID, $contractorID){
-    $action = \App\Actions::fetchByName($agentID, 'build');
+    $action = \App\Actions::fetchByName($agentID, 'repair');
     if ($action->rank == 0 || !$action->unlocked){
       return false;
     }
@@ -33,7 +33,6 @@ class BuildingTypes extends Model
       'Bio Lab' => ['Steel Ingots' => 2000, 'Stone' => 500, 'Copper Ingots' => 1000, 'Iron Ingots'=> 2000],
       'Campfire' => ['Wood' => 10],
       'Centrifuge' => ['Steel Ingots' => 10000, 'Copper Ingots' => 1000, 'Stone'=>1100],
-
       'Chem Lab' => ['Steel Ingots' => 1000, 'Stone' => 300, 'Copper Ingots' => 1000, 'Iron Ingots'=> 1000],
       'Clone Vat' => ['Steel Ingots' => 1000000, 'Stone' => 100000, 'Copper Ingots' => 10000],
       'Coal Power Plant' => ['Iron Ingots'=> 1000, 'Copper Ingots'=> 1000, 'Stone'=>200],
@@ -41,7 +40,6 @@ class BuildingTypes extends Model
       'Electric Arc Furnace' => ['Steel Ingots' => 1000, 'Copper Ingots' => 5000, 'Stone' => 600],
       'Food Factory' => ['Steel Ingots' => 2000, 'Copper Ingots' => 2000, 'Stone' => 1000],
       'Garage' => ['Steel Ingots' => 2000, 'Stone' => 200, 'Copper Ingots' => 200],
-
       'Gristmill' => ['Stone' => 500, 'Wood' => 500],
       'Herbal Greens Field' => [],
       'Kitchen' => ['Stone' => 100, 'Wood' => 100],
@@ -71,17 +69,5 @@ class BuildingTypes extends Model
 
   public static function fetchByName($buildingName){
     return BuildingTypes::where('name', $buildingName)->first();
-  }
-
-  public static function fetchDurability($constructionSkill){
-
-    $durabilityArr = [
-      null, 'horribly built', 'poorly built', 'average built', 'well-built',
-      'excellently built'
-    ];
-    if ($constructionSkill == null){
-      return $durabilityArr;
-    }
-    return $durabilityArr[$constructionSkill];
   }
 }

@@ -90,7 +90,8 @@ class ContractController extends Controller
       } else if ($request->category == 'sellOrder'
         && (\App\ItemTypes::find($request->itemTypeID) == null
         || \App\Items:: fetchTotalQuantity(Auth::id()) < 1
-        || \App\Items::fetchByItemTypeID($request->itemTypeID)->quantity < 1)){
+        || \App\Items::where('itemTypeID', $request->itemTypeID)->first()
+          ->quantity < 1)){
           echo "You don't appear to have this item. <a href='" . route('contracts.create') . "'>back</a>";
           return;
       } else if ($request->category == 'sellLand'
@@ -132,6 +133,7 @@ class ContractController extends Controller
         }
         $building = \App\Buildings::find($request->buildingID);
         $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
+        $contract->buildingTypeID = $building->buildingTypeID;
         $contract->buildingName = $buildingType->name;
         $contract->buildingID = $request->buildingID;
       } else if ($request->category == 'lease'){

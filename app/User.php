@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class User extends Authenticatable
 {
     use Notifiable;
-    public static function fetchRemainingItemCapacity($userID){
-      return \App\User::find($userID)->itemCapacity - \App\Items::fetchTotalQuantity($userID);
-    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -62,12 +60,9 @@ class User extends Authenticatable
         $item->save();
       }
 
-
-
       $equipment = \App\Equipment::fetch();
       foreach($equipment as $piece){
         \App\Equipment::destroy($piece->id);
-
       }
 
       $contracts = \App\Contracts::where('userID', Auth::id())->where('active', 1)->get();
@@ -76,29 +71,26 @@ class User extends Authenticatable
       }
 
       $labor = \App\Labor::fetch();
-
       $labor->equipped = null;
       $labor->availableSkillPoints = 4;
       $labor->allocatedSkillPoints = 0;
       $labor->actions=0;
       $labor->actionsUntilSkill = 30;
-      $labor->rebirth=false;
+      $labor->rebirth = false;
       $labor->legacy = null;
-      $labor->legacySkillTypeID = null;
       $labor->save();
 
       $robots = \App\Robot::fetch();
       foreach($robots as $robot){
         \App\Robot::destroy($robot->id);
       }
+
       \App\Actions::reset();
-      \App\Skills::reset();
 
       $user = Auth::user();
       $user->buildingSlots = 0;
-      $user->itemCapacity = 1000;
       $user->save();
 
-      \App\History::new(Auth::id(), 'reset', "You did a reset. Everything is gone now.");
+      \App\History::new(Auth::id(), 'reset', "Reset!");
     }
 }

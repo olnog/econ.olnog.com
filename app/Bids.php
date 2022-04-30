@@ -24,8 +24,9 @@ class Bids extends Model
       && $land->hostileTakeoverBy != \Auth::id()){
       return ['error' => "You've not able to bid on this."];
     }
-    $previousBids = \App\Bids::where('userID', \Auth::id())
-      ->where('landID', $landID)->where('hostileTakeoverNum', $land->hostileTakeoverNum)->get();
+    $numOfPreviousBids = \App\Bids::where('userID', \Auth::id())
+      ->where('landID', $landID)
+      ->where('hostileTakeoverNum', $land->hostileTakeoverNum)->count();
     $user->clacks -= $amount;
     $user->save();
     $bid = new \App\Bids;
@@ -33,15 +34,15 @@ class Bids extends Model
     $bid->landID = $landID;
     $bid->hostileTakeoverNum = $land->hostileTakeoverNum;
     $bid->amount = $amount;
-    $bid->bidNum = count($previousBids) + 1;
+    $bid->bidNum = $numOfPreviousBids + 1;
     $bid->save();
-    return ['status' => "You placed a bid of " . $amount . " on parcel #" . $landID . "."];
+    return ['status' => "You placed a bid of " . $amount . " on parcel #"
+      . $landID . "."];
   }
 
   public static function checkBids(){
     $land = \App\Land::where('hostileTakeoverBy', '>', 0)->get();
     foreach ($land as $parcel){
-
       $lastBid = \App\Bids::lastBid($parcel->id);
       if (strtotime('now') - strtotime($lastBid->created_at) > 24 * 60 * 60){
         \App\Bids::completeHostileTakeover($parcel->id);
@@ -55,33 +56,31 @@ class Bids extends Model
     $owner = \App\User::find($land->userID);
     $attacker = \App\User::find($land->hostileTakeoverBy);
     $allOfOwnersBids = \App\Bids::where('userID', $land->userID)
-      ->where('landID', $landID)->where('hostileTakeoverNum', $land->hostileTakeoverNum)->sum('amount');
+      ->where('landID', $landID)
+      ->where('hostileTakeoverNum', $land->hostileTakeoverNum)->sum('amount');
     $allOfAttackersBids = \App\Bids::where('userID', $land->hostileTakeoverBy)
-      ->where('landID', $landID)->where('hostileTakeoverNum', $land->hostileTakeoverNum)->sum('amount');
+      ->where('landID', $landID)
+      ->where('hostileTakeoverNum', $land->hostileTakeoverNum)->sum('amount');
     $ownersFirstBid = 0;
-    if (count(\App\Bids::where('userID', $land->userID)
-      ->where('landID', $landID)->where('hostileTakeoverNum', $land->hostileTakeoverNum)
-      ->where('bidNum', 1)->get()) > 0){
-        $ownersFirstBid = \App\Bids::where('userID', $land->userID)
-        ->where('landID', $landID)->where('hostileTakeoverNum', $land->hostileTakeoverNum)
-        ->where('bidNum', 1)->first()->amount;
-      }
-
+    if ($allOfOwnersBids != 0){
+      $ownersFirstBid = \App\Bids::where('userID', $land->userID)
+        ->where('hostileTakeoverNum', $land->hostileTakeoverNum)
+        ->where('landID', $landID)->where('bidNum', 1)->first()->amount;
+    }
     if ($lastBid->userID == $land->userID){ // owner is winner
       $owner->clacks += ($allOfOwnersBids - $ownersFirstBid );
-      \App\History::new($owner->id, 'bid', "You maintained ownership over parcel #"
-        . $landID . " and you got back "
-        . ($allOfOwnersBids - $ownersFirstBid ) . " clacks.");
-      \App\History::new($attacker->id, 'bid', "You lost the hostile takeover of parcel #"
-        . $landID);
-      \App\Chat::new(null, $owner->name . " won the hostile takeover and kept ownership of parcel #" . $landID);
+      \App\History::new($owner->id, 'bid',
+        "You maintained ownership over parcel #" . $landID
+        . " and you got back " . ($allOfOwnersBids - $ownersFirstBid )
+        . " clacks.");
+      \App\History::new($attacker->id, 'bid',
+        "You lost the hostile takeover of parcel #" . $landID);
     } else if ($lastBid->userID == $land->hostileTakeoverBy){
-      \App\History::new($owner->id, 'bid', "You lost ownership of parcel #"
-        . $landID . " but you got back "
+      \App\History::new($owner->id, 'bid',
+        "You lost ownership of parcel #" . $landID . " but you got back "
         . $ownersFirstBid . " clacks.");
-      \App\History::new($attacker->id, 'bid', "You won the hostile takeover of parcel #"
-        . $landID . ". Congrats!");
-      \App\Chat::new(null, $attacker->name . " won the hostile takeover and took over ownership of parcel #" . $landID);
+      \App\History::new($attacker->id, 'bid',
+        "You won the hostile takeover of parcel #" . $landID . ". Congrats!");
       $owner->clacks += $ownersFirstBid ;
       $attacker->save();
       $land->userID = $land->hostileTakeoverBy;
@@ -97,11 +96,9 @@ class Bids extends Model
   }
 
 
-
   public static function hostileTakeover($landID, $amount){
     $land = \App\Land::find($landID);
     $user = \App\User::find(\Auth::id());
-
     if ($amount < $land->valuation * 2){
       return ['error' => "This is too low of a bid for this land's valuation."];
     } else if ($user->clacks < $amount){
@@ -123,13 +120,13 @@ class Bids extends Model
     $bid->amount = $amount;
     $bid->hostileTakeoverNum = $land->hostileTakeoverNum;
     $bid->save();
-    \App\Chat::new(null, $user->name . " started a hostile takeover of parcel #" . $landID);
     return ['status' => "You spent " . number_format($amount)
       . " clacks and started a hostile takeover on parcel #" . $landID
       . ". You now have " . number_format($user->clacks) . "."];
   }
 
   public static function lastBid($landID){
-    return \App\Bids::where('landID', $landID)->orderBy('created_at', 'desc')->first();
+    return \App\Bids::where('landID', $landID)->orderBy('created_at', 'desc')
+      ->first();
   }
 }

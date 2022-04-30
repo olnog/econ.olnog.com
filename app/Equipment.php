@@ -33,17 +33,11 @@ class Equipment extends Model
     ];
   }
 
-  public static function fetchUses($material, $durability){
-    $materialUses = ['stone' => 10, 'iron' => 100, 'steel' => 1000];
-    $durabilityCaption = [null, 'horrible', 'poor', 'average', 'good', 'great'];
-    return $materialUses[$material] * array_search($durability, $durabilityCaption);
-  }
-
   static public function fetch(){
     return Equipment::where('userID', Auth::id())
       ->join('itemTypes', 'equipment.itemTypeID', 'itemTypes.id')
-      ->select('equipment.id', 'itemTypeID', 'uses', 'totalUses', 'name', 'description',
-        'durability', 'material')
+      ->select('equipment.id', 'itemTypeID', 'uses', 'totalUses', 'name',
+        'description', 'durability', 'material')
       ->orderBy('name')->get();
   }
 
@@ -59,7 +53,6 @@ class Equipment extends Model
     if ($labor->equipped == null && !$couldTheySwitch){
       return false;
     }
-
     $equipment = Equipment::find($labor->equipped);
     $itemType = ItemTypes::find($equipment->itemTypeID);
     if (substr($itemType->name, 0, strlen($itemName)) != $itemName){
@@ -67,7 +60,6 @@ class Equipment extends Model
       $labor = \App\Labor::where('userID', $userID)->first(); // idk if these will automatically refresh
       $equipment = Equipment::find($labor->equipped);
       $itemType = ItemTypes::find($equipment->itemTypeID);
-
       if (!$switch){
         return false;
       }
@@ -76,7 +68,6 @@ class Equipment extends Model
       if (!str_contains($itemName, $fueledBy)){
         continue;
       }
-
       $fuel = \App\Items::fetchByName($fuelName, $userID);
       if ($fuel->quantity < 100){
         return false;

@@ -8,20 +8,11 @@ class Robot extends Model
 {
     protected $table ='robots';
 
-    public static function areTheyEquippedWith($equipmentName, $robotID){
-      $robot = \App\Robot::find($robotID);
-      if ($robot->equipped == null){
-        return false;
-      }
-      $equipment = \App\Equipment::find($robot->equipped);
-      $itemType = \App\ItemTypes::find($equipment->itemTypeID);
-      return $itemType->name == $equipmentName;
-    }
-
     public static function fetch(){
-      return \App\Robot::join('action_types', 'robots.actionTypeID', 'action_types.id')
-        ->select('robots.id', 'name', 'actionTypeID', 'uses', 'num', 'defaultAction',
-        'doDefaultWhenAble')->where('userID', \Auth::id())->get();
+      return \App\Robot::join('action_types', 'robots.actionTypeID',
+        'action_types.id')->select('robots.id', 'name', 'actionTypeID',
+        'uses', 'num', 'defaultAction', 'doDefaultWhenAble')
+        ->where('userID', \Auth::id())->get();
     }
 
     public static function fetchBannedActions(){
@@ -48,10 +39,13 @@ class Robot extends Model
         $robot = \App\Robot::find($robotID);
         $actionType = \App\ActionTypes::find($robot->actionTypeID);
         if ($electricity->quantity < 100){
-          $status [$robotID] = ['error' => "You don't have enough Electricity to operate this Robot."];
+          $status [$robotID]
+            = ['error'
+              => "You don't have enough Electricity to operate this Robot."];
           continue;
         } else if (in_array($actionType->name, $bannedActions)){
-          $status [$robotID] = ['error' => "This is not a valid action for this robot."];
+          $status [$robotID]
+            = ['error' => "This is not a valid action for this robot."];
           continue;
         }
         $msg = \App\Actions::do($actionType->name, \Auth::id(), \Auth::id(),
@@ -81,25 +75,5 @@ class Robot extends Model
         'numOfItems' => \App\Items::fetchTotalQuantity(\Auth::id()),
         'itemCapacity' => \App\User::find(\Auth::id())->itemCapacity,
       ]);
-    }
-    public static function useEquipped($robotID){
-      $robot = \App\Robot::find($robotID);
-      if ($robot->equipped == null){
-        return false;
-      }
-      $selfCaption = " Robot #" + $robot->num + "'s' ";
-      $equipment = Equipment::find($robot->equipped);
-      $itemType = ItemTypes::find($equipment->itemTypeID);
-      $equipment->uses--;
-      $equipment->save();
-      if ($equipment->uses <= 0){
-        $status = $selfCaption . $itemType->name . " was destroyed in the process.";
-        Equipment::destroy($labor->equipped);
-        $robot->equipped = null;
-        $robot->save();
-        return $status;
-      }
-      return $selfCaption . $itemType->name . " is now at "
-        . number_format($equipment->uses / $equipment->totalUses * 100, 2 ) . "%. ";
     }
 }

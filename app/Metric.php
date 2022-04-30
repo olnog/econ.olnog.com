@@ -26,10 +26,8 @@ class Metric extends Model
     if (empty($buttons)){
       return;
     }
-    
     for ($i = 0; $i < count($buttons); $i++){
-      $button = $buttons[$i];
-      \App\Metric::newButton($userID, $button);
+      \App\Metric::newButton($userID, $buttons[$i]);
     }
 
   }
