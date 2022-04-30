@@ -9,16 +9,10 @@ class BuildingLease extends Model
   protected $table = 'building_leases';
 
   public static function areTheyLeasingThis($buildingName, $userID){
-    $buildingLeases
-      = \App\BuildingLease::where('userID', $userID)->where('active', 1)->get();
-    foreach ($buildingLeases as $buildingLease){
-      $building = \App\Buildings::find($buildingLease->buildingID);
-      $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
-      if ($buildingType->name == $buildingName){
-        return true;
-      }
-    }
-    return false;
+    $buildingType = \App\BuildingTypes::fetchByName($buildingName);
+    return \App\BuildingLease::where('userID', $userID)
+      ->where('active', 1)->where('buildingTypeID', $buildingType->id)
+      ->count() > 0;    
   }
 
   public static function bad($contractID, $why){

@@ -126,14 +126,9 @@ class Land extends Model
     public static function doTheyHaveAccessTo($landType){
       if (\App\Lease::areTheyAlreadyLeasing($landType, \Auth::id())){
         return true;
-      }
-      $land = Land::fetchMine();
-      foreach ($land as $landPiece){
-        if ($landPiece->type == $landType){
-          return true;
-        }
-      }
-      return false;
+      }      
+      return \App\Land::doTheyOwn($landType, \Auth::id());
+
     }
 
     public static function doTheyOwn($landType, $userID){

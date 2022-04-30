@@ -25,7 +25,18 @@ class Items extends Model
         'durability', 'material')
       ->orderBy('name')->get();
   }
-
+  static public function doTheyHaveEnoughFor($actionName){
+    $items = \App\Items::fetchActionItemInput($actionName);
+    if ($items === null){
+      return true;
+    }
+    foreach($items as $itemName => $quantity){
+      if (!\App\Items::doTheyHave($itemName, $quantity)){
+        return false;
+      }
+    }
+    return true;
+  }
   static public function fetchActionItemInput($actionName){
     $actionReqs = [
       'cook-flourCampfire'                    => ['Flour' => 1, 'Wood'=> 1],
@@ -129,6 +140,10 @@ class Items extends Model
       'smelt-steelLarge Furnace'             => ['Coal'=>100, 'Steel Ingots'=>100],
       'smelt-steelSmall Furnace'             => ['Coal'=>10, 'Steel Ingots'=>10],
     ];
+    if(!in_array($actionName, array_keys($actionReqs))){
+      return null;
+    }
+
     return $actionReqs[$actionName];
   }
 

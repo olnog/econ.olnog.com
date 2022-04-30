@@ -15,7 +15,7 @@ class Actions extends Model
   public static function fetch($userID){
       return [
         'buildings' => \App\Actions::fetchAvailableBuildings(),
-        'possible'  =>\App\Actions::available($userID),
+        'possible'  =>\App\Actions::fetchActionable($userID),
         'robots'    => \App\Actions::fetchRobotActions(),
         'unlocked'  =>\App\Actions::fetchUnlocked($userID),
       ];
@@ -29,17 +29,11 @@ class Actions extends Model
       'rank', 'unlocked')->get();
   }
 
-  public static function fetchByName($userID, $name){
-    $actionType = \App\ActionTypes::where('name', $name)->first();
-    return \App\Actions::where('actionTypeID', $actionType->id)
-      ->where('userID', $userID)->first();
 
-  }
 
-    public static function available($userID){
-      $availableActions = [];
-      $availableBuildings = null;
-      $labor = \App\Labor::where('userID', \Auth::id())->first();
+    public static function fetchActionable($userID){
+      $actionable = [];
+      $labor = \App\Labor::where('userID', $userID)->first();
       $wearingRadiationSuit = false;
       if ($labor->alsoEquipped != null){
         $equipment = \App\Equipment::find($labor->alsoEquipped);
@@ -48,432 +42,183 @@ class Actions extends Model
           $wearingRadiationSuit = true;
         }
       }
-      //if (Skills::fetchByIdentifier('construction', Auth::id())->rank > 0){
-        //$availableBuildings  = Actions::fetchAvailableBuildings();
-      //}
       $solarElectricity = 0;
-      if (\App\Buildings::doesItExist('Solar Power Plant', Auth::id())){
-        $solarPowerPlant = \App\Buildings::fetchByName('Solar Power Plant', \Auth::id() );
+      if (\App\Buildings::doTheyHaveAccessTo('Solar Power Plant', $userID)){
+        $solarPowerPlant = \App\Buildings::fetchByName('Solar Power Plant', $userID );
         $solarElectricity = $solarPowerPlant->electricity;
       }
+      foreach (\App\ActionTypes::all() as $action){
+        $reqBuildings = \App\Buildings
+          ::whichBuildingsDoTheyHaveAccessTo($action->name, \Auth::id());
+        $coveredActions = ['chop-tree', 'cook-meat', 'cook-flour',
+          'harvest-herbal-greens', 'harvest-plant-x', 'harvest-wheat',
+          'harvest-rubber', 'make-book', 'mill-flour', 'mill-log', 'mine-sand',
+          'mine-coal', 'mine-stone', 'mine-iron-ore', 'mine-copper-ore',
+          'mine-uranium-ore', 'plant-rubber-plantation', 'plant-wheat-field',
+          'plant-herbal-greens-field', 'plant-plant-x-field', 'program-robot',
+          'smelt-copper', 'smelt-iron', 'smelt-steel',
+          'transfer-electricity-from-solar-power-plant'
+        ];
+        if ($action->name == 'chop-tree'
+          && count(\App\Equipment::whichOfTheseCanTheyUse(['Chainsaw (electric)',
+          'Chainsaw (gasoline)', 'Axe'], \Auth::id())) > 0
+          && Land::doTheyHaveAccessTo('forest')){
+          $actionable[] = $action->name;
 
+        } else if ($action->name == 'cook-meat'
+          && (\App\Items::doTheyHave('Meat', 1)
+            && \App\Items::doTheyHave('Wood', 1)
+            && \App\Buildings::doTheyHaveAccessTo('Campfire', Auth::id()))
+          || (\App\Items::doTheyHave('Meat', 10)
+            && \App\Items::doTheyHave('Wood', 10)
+            && \App\Buildings::doTheyHaveAccessTo('Kitchen', Auth::id()))
+          || (\App\Items::doTheyHave('Meat', 100)
+            &&  \App\Items::doTheyHave('Electricity', 100)
+            && \App\Buildings::doTheyHaveAccessTo('Food Factory', Auth::id()))){
+          $actionable[] = $action->name;
 
-      $possibleActions = \App\ActionTypes::all();
-      foreach ($possibleActions as $action){
-        $actionName = $action->name;
-        if ($actionName == 'chop-tree'
-        && ((!Equipment::doTheyHave('Axe', Auth::id())
-        && !Equipment::doTheyHave('Chainsaw (electric)', Auth::id())
-        && !Equipment::doTheyHave('Chainsaw (gasoline)', Auth::id()))
-          || !Land::doTheyHaveAccessTo('forest'))){
-          continue;
-        } else if ($actionName == 'cook-meat'
-          && (
-            !\App\Items::doTheyHave('Meat', 1)
-            || !\App\Buildings::didTheyAlreadyBuildThis('Campfire', Auth::id())
-            && !\App\Buildings::didTheyAlreadyBuildThis('Kitchen', Auth::id())
-            && !\App\Buildings::didTheyAlreadyBuildThis('Food Factory', Auth::id())
-            )){
-          continue;
-        } else if ($actionName == 'cook-flour'
-          && (
-            !\App\Items::doTheyHave('Flour', 1)
-            || !\App\Buildings::didTheyAlreadyBuildThis('Campfire', Auth::id())
-            && !\App\Buildings::didTheyAlreadyBuildThis('Kitchen', Auth::id())
-            && !\App\Buildings::didTheyAlreadyBuildThis('Food Factory', Auth::id())
-          )){
-          continue;
+        } else if ($action->name == 'cook-flour'
+        && ((\App\Items::doTheyHave('Flour', 1)
+          && \App\Items::doTheyHave('Wood', 1)
+          && \App\Buildings::doTheyHaveAccessTo('Campfire', Auth::id()))
+        || (\App\Items::doTheyHave('Flour', 10)
+          && \App\Items::doTheyHave('Wood', 10)
+          && \App\Buildings::doTheyHaveAccessTo('Kitchen', Auth::id()))
+        || (\App\Items::doTheyHave('Flour', 100)
+          &&  \App\Items::doTheyHave('Electricity', 100)
+          && \App\Buildings::doTheyHaveAccessTo('Food Factory', Auth::id())))){
+          $actionable[] = $action->name;
 
-      } else if ($actionName == 'convert-corpse-to-genetic-material'
-        && (!\App\Buildings::doesItExist('Clone Vat', Auth::id())
-        || !\App\Items::doTheyHave('Corpse', 1)
-        || !\App\Items::doTheyHave('Electricity', 1000)
-        )){
-        continue;
-        } else if ($actionName == 'convert-wheat-to-Bio-Material'
-          && (!\App\Buildings::doesItExist('Bio Lab', Auth::id())
-          || !\App\Items::doTheyHave('Wheat', 100)
-          || !\App\Items::doTheyHave('Electricity', 100)
-          )){
-          continue;
-        } else if ($actionName == 'convert-corpse-to-Bio-Material'
-          && (!\App\Buildings::doesItExist('Bio Lab', Auth::id())
-          || !\App\Items::doTheyHave('Corpse', 1)
-          || !\App\Items::doTheyHave('Electricity', 100)
-          )){
-          continue;
-        } else if ($actionName == 'convert-herbal-greens-to-Bio-Material'
-          && (!\App\Buildings::doesItExist('Bio Lab', Auth::id())
-          || !\App\Items::doTheyHave('Herbal Greens', 100)
-          || !\App\Items::doTheyHave('Electricity', 100)
-          )){
-          continue;
-        } else if ($actionName == 'convert-plant-x-to-Bio-Material'
-          && (!\App\Buildings::doesItExist('Bio Lab', Auth::id())
-          || !\App\Items::doTheyHave('Plant X', 100)
-          || !\App\Items::doTheyHave('Electricity', 100)
-          )){
-          continue;
-        } else if ($actionName == 'convert-meat-to-Bio-Material'
-          && (!\App\Buildings::doesItExist('Bio Lab', Auth::id())
-          || !\App\Items::doTheyHave('Meat', 100)
-          || !\App\Items::doTheyHave('Electricity', 100)
-          )){
-          continue;
-        } else if ($actionName == 'convert-sand-to-silicon'
-          && (!\App\Buildings::doesItExist('Chem Lab', Auth::id())
-          || !\App\Items::doTheyHave('Sand', 1000)
-          || !\App\Items::doTheyHave('Electricity', 100)
-        )){
-          continue;
-        } else if ($actionName == 'convert-coal-to-carbon-nanotubes'
-          && (!\App\Buildings::doesItExist('Chem Lab', Auth::id())
-          || !\App\Items::doTheyHave('Coal', 1000)
-          || !\App\Items::doTheyHave('Electricity', 100)
-        )){
-          continue;
-        } else if ($actionName == 'convert-wood-to-carbon-nanotubes'
-          && (!\App\Buildings::doesItExist('Chem Lab', Auth::id())
-          || !\App\Items::doTheyHave('Wood', 1000)
-          || !\App\Items::doTheyHave('Electricity', 100)
-        )){
-          continue;
-        } else if ($actionName == 'convert-wood-to-coal'
-          && (!\App\Buildings::doesItExist('Chem Lab', Auth::id())
-          || !\App\Items::doTheyHave('Wood', 1000)
-          || !\App\Items::doTheyHave('Electricity', 100)
-        )){
-          continue;
-        } else if ($actionName == 'convert-uranium-ore-to-plutonium'
-          && (!\App\Buildings::doesItExist('Centrifuge', Auth::id())
-          || !\App\Items::doTheyHave('Uranium Ore', 1000)
-          || !\App\Items::doTheyHave('Electricity', 1000)
-        )){
-          continue;
-        } else if ($actionName == 'generate-electricity-with-coal'
-          && (!\App\Buildings::doesItExist('Coal Power Plant', Auth::id())
-          || !\App\Items::doTheyHave('Coal', 1000)
-        )){
-          continue;
-        } else if ($actionName == 'generate-electricity-with-plutonium'
-          && (!\App\Buildings::doesItExist('Nuclear Power Plant', Auth::id())
-          || !\App\Items::doTheyHave('Plutonium', 1000)
-        )){
-          continue;
-        } else if ($actionName == 'harvest-herbal-greens'
-          && (!\App\Buildings::doesItExist('Herbal Greens Field', Auth::id())
-          || !\App\Buildings::canTheyHarvest('Herbal Greens Field', Auth::id()))){
-          continue;
-        } else if ($actionName == 'harvest-plant-x'
-          && (!\App\Buildings::doesItExist('Plant X Field', Auth::id())
-          || !\App\Buildings::canTheyHarvest('Plant X Field', Auth::id()))){
-          continue;
-        } else if ($actionName == 'harvest-wheat'
-          && (!\App\Buildings::doesItExist('Wheat Field', Auth::id())
-          || !\App\Buildings::canTheyHarvest('Wheat Field', Auth::id()))){
-          continue;
-        } else if ($actionName == 'harvest-rubber'
-          && (!\App\Buildings::doesItExist('Rubber Plantation', Auth::id())
-          || !\App\Buildings::canTheyHarvest('Rubber Plantation', Auth::id()))){
+        } else if ($action->name == 'harvest-herbal-greens'
+          && \App\Buildings::canTheyHarvest('Herbal Greens Field', Auth::id())){
+          $actionable[] = $action->name;
 
-          continue;
-      } else if ($actionName == 'make-BioMeds'
-        && (!\App\Buildings::doesItExist('Bio Lab', Auth::id())
-        || !\App\Items::doTheyHave('Electricity', 10)
-        || !\App\Items::doTheyHave('HerbMeds', 10)
-        || !\App\Items::doTheyHave('Bio Material', 10)
-        )){
-          continue;
-        } else if ($actionName == 'make-book'
-          &&  (!\App\Items::doTheyHave('Paper', 100) || $labor->availableSkillPoints < 1)
-        ){
-          continue;
-        } else if ($actionName == 'make-clone'
-        && (!\App\Buildings::doesItExist('Clone Vat', Auth::id())
-        || !\App\Items::doTheyHave('Electricity', 100000)
-        || !\App\Items::doTheyHave('Genetic Material', 1000)
-        )){
-          continue;
+        } else if ($action->name == 'harvest-plant-x'
 
-        } else if ($actionName == 'make-contract'
-          && (!\App\Items::doTheyHave('Paper', 1))){
-          continue;
+          && \App\Buildings::canTheyHarvest('Plant X Field', Auth::id())){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-CPU'
-          && (!\App\Buildings::doesItExist('CPU Fabrication Plant', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Silicon', 100)
-          || !\App\Items::doTheyHave('Copper Ingots', 100)
-          )){
-          continue;
+        } else if ($action->name == 'harvest-wheat'
+          && \App\Buildings::canTheyHarvest('Wheat Field', Auth::id())){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-diesel-bulldozer'
-          && (!\App\Buildings::doesItExist('Garage', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Steel Ingots', 250)
-          || !\App\Items::doTheyHave('Copper Ingots', 50)
-          || !\App\Items::doTheyHave('Diesel Engines', 1)
-          )){
-          continue;
-        } else if ($actionName == 'make-gasoline-bulldozer'
-          && (!\App\Buildings::doesItExist('Garage', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Steel Ingots', 250)
-          || !\App\Items::doTheyHave('Copper Ingots', 50)
-          || !\App\Items::doTheyHave('Gasoline Engines', 1)
-          )){
-          continue;
-        } else if ($actionName == 'make-gasoline-car'
-          && (!\App\Buildings::doesItExist('Garage', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Steel Ingots', 50)
-          || !\App\Items::doTheyHave('Copper Ingots', 10)
-          || !\App\Items::doTheyHave('Tires', 4)
-          || !\App\Items::doTheyHave('Gasoline Engines', 1)
-          )){
-          continue;
-        } else if ($actionName == 'make-diesel-car'
-          && (!\App\Buildings::doesItExist('Garage', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Steel Ingots', 50)
-          || !\App\Items::doTheyHave('Copper Ingots', 10)
-          || !\App\Items::doTheyHave('Tires', 4)
-          || !\App\Items::doTheyHave('Diesel Engines', 1)
-          )){
-          continue;
-        } else if ($actionName == 'make-diesel-tractor'
-          && (!\App\Buildings::doesItExist('Garage', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Steel Ingots', 100)
-          || !\App\Items::doTheyHave('Copper Ingots', 20)
-          || !\App\Items::doTheyHave('Tires', 4)
-          || !\App\Items::doTheyHave('Diesel Engines', 1)
-          )){
-          continue;
-        } else if ($actionName == 'make-gasoline-tractor'
-          && (!\App\Buildings::doesItExist('Garage', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          || !\App\Items::doTheyHave('Steel Ingots', 100)
-          || !\App\Items::doTheyHave('Copper Ingots', 20)
-          || !\App\Items::doTheyHave('Tires', 4)
-          || !\App\Items::doTheyHave('Gasoline Engines', 1)
-          )){
-          continue;
-        } else if (($actionName == 'make-electric-jackhammer' || $actionName == 'make-electric-chainsaw')
-          && (!\App\Items::doTheyHave('Electric Motors', 1)
-          || !\App\Items::doTheyHave('Steel Ingots', 10))){
-            continue;
-        } else if (($actionName == 'make-gas-jackhammer' || $actionName == 'make-gas-chainsaw')
-          && (!\App\Items::doTheyHave('Gas Motors', 1)
-          || !\App\Items::doTheyHave('Steel Ingots', 10))){
-            continue;
-        } else if (($actionName == 'make-diesel-engine' || $actionName == 'make-gasoline-engine')
-          && (!\App\Buildings::doesItExist('Machine Shop', Auth::id())
-          || !\App\Items::doTheyHave('Iron Ingots', 40)
-          || !\App\Items::doTheyHave('Steel Ingots', 40)
-          || !\App\Items::doTheyHave('Copper Ingots', 20)
-          || !\App\Items::doTheyHave('Electricity', 100)
+        } else if ($action->name == 'harvest-rubber'
+          && \App\Buildings::canTheyHarvest('Rubber Plantation', Auth::id())){
+          $actionable[] = $action->name;
 
-          )){
-            continue;
-        } else if (($actionName == 'make-electric-motor' || $actionName == 'make-gas-motor')
-          && (!\App\Buildings::doesItExist('Machine Shop', Auth::id())
-          || !\App\Items::doTheyHave('Iron Ingots', 10)
-          || !\App\Items::doTheyHave('Steel Ingots', 10)
-          || !\App\Items::doTheyHave('Copper Ingots', 5)
-          || !\App\Items::doTheyHave('Electricity', 25)
-          )){
-            continue;
+        } else if ($action->name == 'make-book'
+          &&  \App\Items::doTheyHave('Paper', 100)
+          && $labor->availableSkillPoints < 1){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-HerbMed'
-          && (!\App\Items::doTheyHave('Herbal Greens', 10))){
-          continue;
-        } else if (($actionName == 'make-iron-axe'
-          || $actionName == 'make-iron-pickaxe'
-          || $actionName == 'make-iron-saw'
-          || $actionName == 'make-iron-shovel'
-          || $actionName == "make-iron-handmill")
-          && (!\App\Items::doTheyHave('Iron Ingots', 1)
-          || !\App\Items::doTheyHave('Wood', 1))){
+        } else if ($action->name == 'mill-flour'
+        && (Equipment::doTheyHave('Handmill', Auth::id())
+          && Items::doTheyHave('Flour', 10))
+          || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
+          && Items::doTheyHave('Flour', 100))){
+          $actionable[] = $action->name;
 
-          continue;
-        } else if ($actionName == 'make-nanites'
-          && (!\App\Buildings::doesItExist('Nano Lab', Auth::id())
-          || !\App\Items::doTheyHave('Carbon Nanotubes', 100)
-          || !\App\Items::doTheyHave('Silicon', 100)
-          || !\App\Items::doTheyHave('Electricity', 1000)
-          )){
-          continue;
-        } else if ($actionName == 'make-NanoMeds'
-          && (!\App\Buildings::doesItExist('Nano Lab', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 100)
-          || !\App\Items::doTheyHave('BioMeds', 10)
-          || !\App\Items::doTheyHave('Nanites', 10)
-          )){
-            continue;
+        } else if ($action->name == 'mill-log'
+          && (Equipment::doTheyHave('Saw', Auth::id())
+            && Items::doTheyHave('Logs', 1))
+            || (\App\Buildings::doTheyHaveAccessTo('Sawmill', Auth::id())
+            && Items::doTheyHave('Logs', 10))){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-paper'
-          && (!\App\Items::doTheyHave('Wood', 1))){
-          continue;
+        } else if (($action->name == 'mine-sand')
+          && Land::doTheyHaveAccessTo('desert')
+          && count(\App\Equipment::whichOfTheseCanTheyUse(['Bulldozer (gasoline)',
+          'Bulldozer (diesel)', 'Shovel'], \Auth::id())) > 0){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-rocket-engine'
-        && (!\App\Buildings::doesItExist('Propulsion Lab', Auth::id())
-        || !\App\Items::doTheyHave('Electricity', 1000)
-        || !\App\Items::doTheyHave('Jet Fuel', 1000)
-        || !\App\Items::doTheyHave('Iron Ingots', 1000)
-        || !\App\Items::doTheyHave('Steel Ingots', 1000)
-        )){
-        continue;
+        } else if (($action->name == 'mine-coal' || $action->name == 'mine-stone'
+          || $action->name == 'mine-iron-ore' || $action->name == 'mine-copper-ore')
+          && Land::doTheyHaveAccessTo('mountains')
+          && count(\App\Equipment::whichOfTheseCanTheyUse(['Jackhammer (electric)',
+          'Jackhammer (gasoline)', 'Pickaxe'], \Auth::id())) > 0){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-solar-panel'
-          && (!\App\Buildings::doesItExist('Solar Panel Fabrication Plant', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 100)
-          || !\App\Items::doTheyHave('Silicon', 100)
-          || !\App\Items::doTheyHave('Copper Ingots', 100)
-          || !\App\Items::doTheyHave('Steel Ingots', 100)
-          )){
-          continue;
-        } else if (($actionName == 'make-steel-axe'
-          || $actionName == 'make-steel-pickaxe'
-          || $actionName == 'make-steel-saw'
-          || $actionName == 'make-steel-shovel'
-          || $actionName == "make-steel-handmill")
-          && (!\App\Items::doTheyHave('Steel Ingots', 1)
-          || !\App\Items::doTheyHave('Wood', 1))){
-          continue;
-        } else if (($actionName == 'make-stone-axe'
-          || $actionName == 'make-stone-pickaxe'
-          || $actionName == 'make-stone-saw'
-          || $actionName == 'make-stone-shovel'
-          || $actionName == "make-stone-handmill")
-          && (!\App\Items::doTheyHave('Stone', 1)
-          || !\App\Items::doTheyHave('Wood', 1))){
-          continue;
+        } else if ($action->name == 'mine-uranium-ore'
+          && Land::doTheyHaveAccessTo('mountains')
+          && count(\App\Equipment::whichOfTheseCanTheyUse(['Jackhammer (electric)',
+          'Jackhammer (gasoline)', 'Pickaxe'], \Auth::id())) > 0
+          && $wearingRadiationSuit){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-tire'
-          && (!\App\Buildings::doesItExist('Chem Lab', Auth::id())
-          || !\App\Items::doTheyHave('Rubber', 10)
-          || !\App\Items::doTheyHave('Electricity', 10)
-        )){
-          continue;
-        } else if ($actionName == 'make-radiation-suit'
-          && (!\App\Buildings::doesItExist('Chem Lab', Auth::id())
-          || !\App\Items::doTheyHave('Rubber', 100)
-          || !\App\Items::doTheyHave('Electricity', 100)
-        )){
-          continue;
-        } else if ($actionName == 'make-robot'
-          && (!\App\Buildings::doesItExist('Robotics Lab', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 100000)
-          || !\App\Items::doTheyHave('Steel Ingots', 100)
-          || !\App\Items::doTheyHave('Copper Ingots', 100)
-          || !\App\Items::doTheyHave('CPU', 10)
-          || !\App\Items::doTheyHave('Electric Motors', 100)
-        )){
-          continue;
+        } else if ($action->name == 'plant-rubber-plantation'
+          && \App\User::find(Auth::id())->buildingSlots>0
+          && Land::doTheyHaveAccessTo('jungle')){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'make-satellite'
-          && (!\App\Buildings::doesItExist('Propulsion Lab', Auth::id())
-          || !\App\Items::doTheyHave('Rocket Engines', 1)
-          || !\App\Items::doTheyHave('Electricity', 100)
-          || !\App\Items::doTheyHave('Steel Ingots', 100)
-          || !\App\Items::doTheyHave('Copper Ingots', 100)
-          || !\App\Items::doTheyHave('CPU', 1)
-          || !\App\Items::doTheyHave('Solar Panels', 5)
-        )){
-          continue;
-        } else if ($actionName == 'mill-flour'
-          && ((!Equipment::doTheyHave('Handmill', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Gristmill', Auth::id()))
-          || !Items::doTheyHave('Wheat', 1))){
-          continue;
+        } else if (($action->name == 'plant-wheat-field'
+        || $action->name == 'plant-herbal-greens-field'
+        || $action->name == 'plant-plant-x-field')
+          && \App\User::find(Auth::id())->buildingSlots>0){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'mill-log'
-          && (!Equipment::doTheyHave('Saw', Auth::id())
-            || !Items::doTheyHave('Logs', 1))
-            && (!\App\Buildings::didTheyAlreadyBuildThis('Sawmill', Auth::id())
-            || !Items::doTheyHave('Logs', 10))){
-          continue;
-        } else if (($actionName == 'mine-sand')
-          && ((!Equipment::doTheyHave('Shovel', Auth::id())
-          && !Equipment::doTheyHave('Bulldozer (gasoline)', Auth::id())
-          && !Equipment::doTheyHave('Bulldozer (diesel)', Auth::id()))
-          || !Land::doTheyHaveAccessTo('desert'))){
-          continue;
+        } else if ($action->name == 'program-robot'
+          && \App\Items::doTheyHave('Robots', 1)){
+          $actionable[] = $action->name;
 
-        } else if (($actionName == 'mine-coal' || $actionName == 'mine-stone'
-          || $actionName == 'mine-iron-ore' || $actionName == 'mine-copper-ore'
-          || $actionName == 'mine-uranium-ore')
-          && ((!Equipment::doTheyHave('Pickaxe', Auth::id())
-            && !Equipment::doTheyHave('Jackhammer (electric)', Auth::id())
-            && !Equipment::doTheyHave('Jackhammer (gasoline)', Auth::id()))
-            || !Land::doTheyHaveAccessTo('mountains'))){
-          continue;
-        } else if ($actionName == 'mine-uranium-ore' && !$wearingRadiationSuit){
-        continue;
-        } else if ($actionName == 'plant-rubber-plantation'
-          && (\App\User::find(Auth::id())->buildingSlots<1
-          || !Land::doTheyHaveAccessTo('jungle'))){
-          continue;
-        } else if (($actionName == 'plant-wheat-field'
-        || $actionName == 'plant-herbal-greens-field'
-        || $actionName == 'plant-plant-x-field')
+        } else if ($action->name == 'smelt-copper'
+        && ((\App\Buildings::doTheyHaveAccessTo('Electric Arc Furnace', Auth::id())
+          && \App\Items::doTheyHave('Copper Ore', 1000)
+          && \App\Items::doTheyHave('Electricity', 1000))
+        || (\App\Buildings::doTheyHaveAccessTo('Small Furnace', Auth::id())
+          && \App\Items::doTheyHave('Copper Ore', 10)
+          && \App\Items::doTheyHave('Coal', 10))
+        || (\App\Buildings::doTheyHaveAccessTo('Large Furnace', Auth::id())
+          && \App\Items::doTheyHave('Copper Ore', 100)
+          && \App\Items::doTheyHave('Coal', 100)))){
+          $actionable[] = $action->name;
+          $actionable[] = $action->name;
 
-          && (\App\User::find(Auth::id())->buildingSlots<1)){
-          continue;
-        } else if ($actionName == 'program-robot'
-          && !\App\Items::doTheyHave('Robots', 1)){
-          continue;
+        } else if ($action->name == 'smelt-iron'
+          && ((\App\Buildings::doTheyHaveAccessTo('Electric Arc Furnace', Auth::id())
+            && \App\Items::doTheyHave('Iron Ore', 1000)
+            && \App\Items::doTheyHave('Electricity', 1000))
+          || (\App\Buildings::doTheyHaveAccessTo('Small Furnace', Auth::id())
+            && \App\Items::doTheyHave('Iron Ore', 10)
+            && \App\Items::doTheyHave('Coal', 10))
+          || (\App\Buildings::doTheyHaveAccessTo('Large Furnace', Auth::id())
+            && \App\Items::doTheyHave('Iron Ore', 100)
+            && \App\Items::doTheyHave('Coal', 100)))){
+          $actionable[] = $action->name;
 
+        } else if ($action->name == 'smelt-steel'
+        && ((\App\Buildings::doTheyHaveAccessTo('Electric Arc Furnace', Auth::id())
+          && \App\Items::doTheyHave('Iron Ingots', 1000)
+          && \App\Items::doTheyHave('Electricity', 1000))
+        || (\App\Buildings::doTheyHaveAccessTo('Small Furnace', Auth::id())
+          && \App\Items::doTheyHave('Iron Ingots', 10)
+          && \App\Items::doTheyHave('Coal', 10))
+        || (\App\Buildings::doTheyHaveAccessTo('Large Furnace', Auth::id())
+          && \App\Items::doTheyHave('Iron Ingots', 100)
+          && \App\Items::doTheyHave('Coal', 100)))){
+          $actionable[] = $action->name;
 
-        } else if ($actionName == 'pump-oil'
-          && (!\App\Buildings::didTheyAlreadyBuildThis('Oil Well', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 10))){
-          continue;
-        } else if ($actionName == 'refine-oil'
-          && (!\App\Buildings::didTheyAlreadyBuildThis('Oil Refinery', Auth::id())
-          || !\App\Items::doTheyHave('Electricity', 100)
-          || !\App\Items::doTheyHave('Oil', 100)
-        )){
-          continue;
-        } else if ($actionName == 'smelt-copper'
-          && (!\App\Items::doTheyHave('Copper Ore', 10)
-            || (!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', Auth::id())))
-        ) {
-          continue;
-        } else if ($actionName == 'smelt-iron'
-          && (!\App\Items::doTheyHave('Iron Ore', 10)
-            || (!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', Auth::id())))
-        ) {
-          continue;
-        } else if ($actionName == 'smelt-steel'
-          && (!\App\Items::doTheyHave('Iron Ingots', 10)
-            || (!\App\Buildings::didTheyAlreadyBuildThis('Electric Arc Furnace', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Small Furnace', Auth::id())
-          && !\App\Buildings::didTheyAlreadyBuildThis('Large Furnace', Auth::id())))
-        ) {
-          continue;
-        } else if ($actionName == 'transfer-electricity-from-solar-power-plant'
-          && (!\App\Buildings::didTheyAlreadyBuildThis('Solar Power Plant', Auth::id())
-          || $solarElectricity < 1
-        )){
-              continue;
+        } else if ($action->name == 'transfer-electricity-from-solar-power-plant'
+          && \App\Buildings::doTheyHaveAccessTo('Solar Power Plant', Auth::id())
+          && $solarElectricity > 0){
+          $actionable[] = $action->name;
 
+        } else if (!in_array($action->name, $coveredActions) && ($reqBuildings === null
+          || ($reqBuildings !== null && count($reqBuildings) > 0))
+          && \App\Items::doTheyHaveEnoughFor($action->name)){
+          $actionable[] = $action->name;
         }
-        $availableActions [] = $actionName;
 
       }
-      return $availableActions;
-      /*
-      return ['possible' => $possibleActions, 'available'=>$availableActions,
-        'buildings' => $availableBuildings, 'robots' => \App\Actions::fetchRobotActions()];
-        */
+      return $actionable;
+
     }
 
+    public static function fetchByName($userID, $name){
+      $actionType = \App\ActionTypes::where('name', $name)->first();
+      return \App\Actions::where('actionTypeID', $actionType->id)
+        ->where('userID', $userID)->first();
+
+    }
 
 
     public static function do($actionName, $agentID, $contractorID, $robotID){
@@ -850,7 +595,7 @@ class Actions extends Model
 
       } else if ($actionName == 'generate-electricity-with-coal'){
         $buildingCaption = "";
-        if (!\App\Buildings::doesItExist('Coal Power Plant', $agentID)){
+        if (!\App\Buildings::doTheyHaveAccessTo('Coal Power Plant', $agentID)){
           return ['error' => 'You do not have a Coal Power Plant. Build one first please. '];
         }
         $buildingCaption = \App\Buildings::use('Coal Power Plant', $contractorID);
@@ -875,7 +620,7 @@ class Actions extends Model
           return;
         }
         $buildingCaption = "";
-        if (!\App\Buildings::doesItExist('Nuclear Power Plant', $agentID)){
+        if (!\App\Buildings::doTheyHaveAccessTo('Nuclear Power Plant', $agentID)){
           return ['error' => 'You do not have a Nuclear Power Plant. Build one first please. '];
         }
         $buildingCaption = \App\Buildings::use('Nuclear Power Plant', $contractorID);
@@ -899,7 +644,7 @@ class Actions extends Model
         $totalRubberYield = 0;
         $equipmentAvailable = \App\Equipment
           ::whichOfTheseCanTheyUse(['Tractor (gasoline)', 'Tractor (diesel)'], $agentID);
-        if (!\App\Buildings::doesItExist('Rubber Plantation', $contractorID)
+        if (!\App\Buildings::doTheyHaveAccessTo('Rubber Plantation', $contractorID)
         || !\App\Buildings::canTheyHarvest('Rubber Plantation', $contractorID)){
           return ['error' => "You either do not have a Rubber Plantation or cannot harvest one right now. Sorry."];
         }
@@ -963,7 +708,7 @@ class Actions extends Model
           'harvest-plant-x' => 'plantX',
           'harvest-herbal-greens'=> 'herbalGreens'
         ];
-        if (!\App\Buildings::doesItExist($whichItemType[$actionName] . ' Field', $contractorID)
+        if (!\App\Buildings::doTheyHaveAccessTo($whichItemType[$actionName] . ' Field', $contractorID)
         || !\App\Buildings::canTheyHarvest($whichItemType[$actionName] . ' Field', $contractorID)){
           return ['error' => "You either do not have a " . $whichItemType[$actionName] . " Field or cannot harvest one right now. Sorry."];
         }
@@ -1170,7 +915,7 @@ class Actions extends Model
           return [
             'error' => $agentCaption . " do not have enough materials to create this engine."
           ];
-        } else if (!\App\Buildings::doesItExist('Machine Shop', $agentID)){
+        } else if (!\App\Buildings::doTheyHaveAccessTo('Machine Shop', $agentID)){
           return [
             'error' => $agentCaption . " do not have a Machine Shop."
           ];
@@ -1204,7 +949,7 @@ class Actions extends Model
           return [
             'error' => $agentCaption . " do not have enough materials to create this motor."
           ];
-        } else if (!\App\Buildings::doesItExist('Machine Shop', $agentID)){
+        } else if (!\App\Buildings::doTheyHaveAccessTo('Machine Shop', $agentID)){
           return [
             'error' => $agentCaption . " do not have a Machine Shop."
           ];
@@ -1991,7 +1736,7 @@ class Actions extends Model
       $availableBuildings = [];
       foreach($buildingTypes as $buildingType){
         if (Actions::doTheyHaveEnoughToBuild($buildingType->name)
-          && !\App\Buildings::doesItExist($buildingType->name, Auth::id())){
+          && !\App\Buildings::doTheyHaveAccessTo($buildingType->name, Auth::id())){
           $availableBuildings[] = $buildingType->name;
         }
       }

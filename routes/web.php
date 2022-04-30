@@ -77,7 +77,10 @@ Route::post('/autobribe', function (Request $request){
   ]);
 });
 Route::get('/test', function(){
-
+  $actions = \App\Actions::fetchActionable(\Auth::id());
+  foreach ($actions as $action){
+    echo "<div>" . $action . "</div>";
+  }
 });
 
 Route::get('/changes', function(){

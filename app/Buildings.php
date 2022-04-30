@@ -119,6 +119,19 @@ class Buildings extends Model
     return true;
   }
 
+  public static function doTheyHaveAccessTo($buildingName, $userID){
+    if (\App\BuildingLease::areTheyLeasingThis($buildingName, $userID)){
+      return true;
+    }
+    return \App\Buildings::doTheyHaveAWorking($buildingName, $userID);
+  }
+  public static function doTheyHaveAWorking($buildingName, $userID){
+    $buildingType = \App\BuildingTypes::fetchByName($buildingName);
+    return \App\Buildings::where('userID', $userID)->where("uses", '>', 0)
+      ->where('buildingTypeID', $buildingType->id)->count() > 0;
+  }
+
+
   public static function isItBuilt($buildingName, $userID){
     $building = \App\Buildings::fetchByName($buildingName, $userID);
     if ($building == null){
@@ -190,9 +203,109 @@ class Buildings extends Model
       if (\App\BuildingTypes::canTheyRepair($building->name, \Auth::id(), \Auth::id())){
         $repairableBuildings[] = $building->id;
       }
-
     }
     return $repairableBuildings;
+  }
+
+  public static function fetchRequiredBuildingsFor($actionName){
+    $buildingReqsArr = [
+      "build"                               => null,
+      "chop-tree"                           => null,
+      "convert-coal-to-carbon-nanotubes"    => ['Chem Lab'],
+      "convert-corpse-to-Bio-Material"      => ['Bio Lab'],
+      "convert-corpse-to-genetic-material"  => ['Clone Vat'],
+      "convert-herbal-greens-to-Bio-Material"
+        => ['Bio Lab'],
+      "convert-meat-to-Bio-Material"        => ['Bio Lab'],
+      "convert-plant-x-to-Bio-Material"     => ['Bio Lab'],
+      "convert-sand-to-silicon"             => ['Chem Lab'],
+      "convert-uranium-ore-to-plutonium"    => ['Centrifuge'],
+      "convert-wheat-to-Bio-Material"       => ['Bio Lab'],
+      "convert-wood-to-carbon-nanotubes"    => ['Chem Lab'],
+      "convert-wood-to-coal"                => ['Chem Lab'],
+      "cook-flour"
+        => ['Campfire', 'Kitchen', 'Food Factory'],
+      "cook-meat"
+        => ['Campfire', 'Kitchen', 'Food Factory'],
+      "explore"                             => null,
+      "gather-stone"                        => null,
+      "gather-wood"                         => null,
+      "generate-electricity-with-coal"      => ['Coal Power Plant'],
+      "generate-electricity-with-plutonium" => ['Nuclear Power Plant'],
+      "harvest-herbal-greens"               => null,
+      "harvest-plant-x"                     => null,
+      "harvest-rubber"                      => null,
+      "harvest-wheat"                       => null,
+      "hunt"                                => null,
+      "make-BioMeds"                        => ['Bio Lab'],
+      "make-book"                           => null,
+      "make-clone"                          => ['Clone Vat'],
+      "make-contract"                       => null,
+      "make-CPU"                            => ['CPU Fabrication Plant'],
+      "make-diesel-bulldozer"               => ['Garage'],
+      "make-diesel-car"                     => ['Garage'],
+      "make-diesel-engine"                  => ['Machine Shop'],
+      "make-diesel-tractor"                 => ['Garage'],
+      "make-electric-chainsaw"              => null,
+      "make-electric-jackhammer"            => null,
+      "make-electric-motor"                 => ['Machine Shop'],
+      "make-gas-chainsaw"                   => null,
+      "make-gas-jackhammer"                 => null,
+      "make-gas-motor"                      => ['Machine Shop'],
+      "make-gasoline-bulldozer"             => ['Garage'],
+      "make-gasoline-car"                   => ['Garage'],
+      "make-gasoline-engine"                => ['Machine Shop'],
+      "make-gasoline-tractor"               => ['Garage'],
+      "make-HerbMed"                        => null,
+      "make-iron-axe"                       => null,
+      "make-iron-handmill"                  => null,
+      "make-iron-pickaxe"                   => null,
+      "make-iron-saw"                       => null,
+      "make-iron-shovel"                    => null,
+      "make-nanites"                        => ['Nano Lab'],
+      "make-NanoMeds"                       => ['Nano Lab'],
+      "make-paper"                          => null,
+      "make-radiation-suit"                 => ['Chem Lab'],
+      "make-robot"                          => ['Robotics Lab'],
+      "make-rocket-engine"                  => ['Propulsion Lab'],
+      "make-satellite"                      => ['Propulsion Lab'],
+      "make-solar-panel"                    => ['Solar Panel Fabrication Plant'],
+      "make-steel-axe"                      => null,
+      "make-steel-handmill"                 => null,
+      "make-steel-pickaxe"                  => null,
+      "make-steel-saw"                      => null,
+      "make-steel-shovel"                   => null,
+      "make-stone-axe"                      => null,
+      "make-stone-handmill"                 => null,
+      "make-stone-pickaxe"                  => null,
+      "make-stone-saw"                      => null,
+      "make-stone-shovel"                   => null,
+      "make-tire"                           => ['Chem Lab'],
+      "mill-flour"                          => null,
+      "mill-log"                            => null,
+      "mine-coal"                           => null,
+      "mine-copper-ore"                     => null,
+      "mine-iron-ore"                       => null,
+      "mine-sand"                           => null,
+      "mine-stone"                          => null,
+      "mine-uranium-ore"                    => null,
+      "plant-herbal-greens-field"           => null,
+      "plant-plant-x-field"                 => null,
+      "plant-rubber-plantation"             => null,
+      "plant-wheat-field"                   => null,
+      "program-robot"                       => null,
+      "pump-oil"                            => ['Oil Well'],
+      "refine-oil"                          => ['Oil Refinery'],
+      "repair"                              => null,
+      "smelt-copper"
+        => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
+      "smelt-iron"
+        => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
+      "smelt-steel"
+        => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
+      "transfer-electricity-from-solar-power-plant" => ['Solar Power Plant'],
+    ];
+    return $buildingReqsArr[$actionName];
   }
 
   public static function fetchByName($buildingName, $userID){
@@ -288,5 +401,19 @@ class Buildings extends Model
     $building->save();
     return $buildingName . ": <span class='fn'>"
       . ($building->uses / $building->totalUses * 100) . "%</span>";
+  }
+
+  public static function whichBuildingsDoTheyHaveAccessTo($actionName, $userID){
+      $reqBuildings = \App\Buildings::fetchRequiredBuildingsFor($actionName);
+      $buildingsTheyHave = [];
+      if ($reqBuildings == null){
+        return null;
+      }
+      foreach ($reqBuildings as $buildingName){
+        if (\App\Buildings::doTheyHaveAccessTo($buildingName, $userID)){
+          $buildingsTheyHave [] = $buildingName;
+        }
+      }
+      return $buildingsTheyHave;
   }
 }
