@@ -14,6 +14,14 @@ use Illuminate\Http\Request;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/test', function(){
+  $actions = \App\Actions::fetchActionable(\Auth::id());
+  foreach ($actions as $action){
+    var_dump($action,  '<br>');
+  }
+});
+
 Route::get('/read', function(){
   $books = \App\Items::fetchByName('Books', \Auth::id());
   $labor = \App\Labor::fetch();
@@ -76,12 +84,7 @@ Route::post('/autobribe', function (Request $request){
     'autoBribe' => $user->autoBribe,
   ]);
 });
-Route::get('/test', function(){
-  $actions = \App\Actions::fetchActionable(\Auth::id());
-  foreach ($actions as $action){
-    echo "<div>" . $action . "</div>";
-  }
-});
+
 
 Route::get('/changes', function(){
   return view('changes');

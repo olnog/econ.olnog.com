@@ -125,12 +125,29 @@ class Buildings extends Model
     }
     return \App\Buildings::doTheyHaveAWorking($buildingName, $userID);
   }
+
   public static function doTheyHaveAWorking($buildingName, $userID){
     $buildingType = \App\BuildingTypes::fetchByName($buildingName);
     return \App\Buildings::where('userID', $userID)->where("uses", '>', 0)
       ->where('buildingTypeID', $buildingType->id)->count() > 0;
   }
+  public static function doTheyOwn($buildingName, $userID){
+    $buildingType = \App\BuildingTypes::fetchByName($buildingName);
+    return \App\Buildings::where('userID', $userID)
+      ->where('buildingTypeID', $buildingType->id)->count() > 0;
+  }
 
+  public static function fetchBuildingsYouCanBuild(){
+    $buildingTypes = \App\BuildingTypes::fetch();
+    $availableBuildings = [];
+    foreach($buildingTypes as $buildingType){
+      if (Actions::doTheyHaveEnoughToBuild($buildingType->name)
+        && !\App\Buildings::doTheyOwn($buildingType->name, Auth::id())){
+        $availableBuildings[] = $buildingType->name;
+      }
+    }
+    return $availableBuildings;
+  }
 
   public static function isItBuilt($buildingName, $userID){
     $building = \App\Buildings::fetchByName($buildingName, $userID);
