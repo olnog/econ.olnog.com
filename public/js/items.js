@@ -17,6 +17,8 @@ function dump(itemID, quantity){
 
 function equipItem(itemID){
   $.post( "/labor", {itemID: itemID, _token: fetchCSRF() }).done(function(data){
+    loadPage('items')
+/*
     actions = JSON.parse(data).actions
     items = JSON.parse(data).items
     equipment = JSON.parse(data).equipment
@@ -24,6 +26,7 @@ function equipItem(itemID){
     status(JSON.parse(data).status)
 
     refreshUI()
+    */
   })
 }
 

@@ -1,3 +1,82 @@
+<div class='text-center m-3'>
+  <button id='show-moreLand' class='show btn btn-link'> [ MORE ] </button>
+  <button id='hide-moreLand' class='hide btn btn-link d-none'> [ LESS ] </button>
+</div>
+<div id='moreLand' class='d-none'>
+<div class='text-center m-1'>
+  In order to get land you must use the Exploration skill to explore and find
+  new land, buy it from other players or launch a hostile takeover.
+</div><div class='text-center m-1'>
+  The State requires bribes from each land owner in order to keep it protected.
+  Land owners who pay less than the average bribe will be unprotected and
+  other players may attempt to launch a hostile takeover by bidding 2x the current valuation against that
+  property.
+</div><div class='text-center payAllBribes'>
+  Pay Bribe On All Your Properties:
+</div><div class='text-center payAllBribes'>
+
+  <button id='payAllBribes-1' class='payAllBribes btn btn-danger'>+1</button>
+  <button id='payAllBribes-10' class='payAllBribes btn btn-danger'>+10</button>
+  <button id='payAllBribes-100' class='payAllBribes btn btn-danger'>+100</button>
+</div><div class='m-1 text-center autoBribes'>
+  Auto-Bribe:
+  <input type='number' id='autoBribe' value='0'>
+  <button id='setAutoBribe' class='btn btn-primary '>set</button>
+</div><div class='mb-3'>
+  This is the amount that you will automatically pay when bribes are checked to see if you are protected.
+</div>
+<div class='m-1 text-center payAllBribes'>
+  The average bribe now is <span id='avgBribe'></span> clack(s).
+
+</div>
+</div>
+
+
+<div class='row'>
+    <span class='fw-bold me-3'>Filter:</span>
+</div><div class='row'>
+  <div class='col'>
+
+    <input type='radio'  name='landFilter' class='landFilter' value='all' checked> All
+  </div><div class='col'>
+
+    <input type='radio' name='landFilter' class='landFilter ' value='yours'> Your Land?
+  </div><div class='col'>
+
+    <input type='radio' name='landFilter' class='landFilter ' value='takeovers'> Hostile Takeovers?
+  </div>
+</div><div class='row'>
+  <div class='col text-center'>
+    Owner:
+    <input type='text' id='landOwnerFilter' class='landFilter'>
+
+    <button id='clearLandOwnerFilter' class='btn btn-outline-danger'>x</button>
+  </div>
+</div><div class='row'>
+  <div class='col'>
+    <span>
+      Show Only:
+    </span>
+      <select name='landTypeFilter' class='landFilter'>
+        <option value='jungle' @if ($landType == 'jungle') selected @endif>Jungle</option>
+        <option value='forest' @if ($landType == 'forest') selected @endif>Forest</option>
+        <option value='mountains' @if ($landType == 'mountains') selected @endif >Mountains</option>
+        <option value='plains' @if ($landType == 'plains') selected @endif>Plains</option>
+        <option value='desert' @if ($landType == 'desert') selected @endif>Desert</option>
+        </select>
+    </div><div class='col'>
+      Sort By:
+      <select id='landSortByFilter' >
+        <option value='null' selected>Parcel #</option>
+        <option value='valuation' >Value</option>
+        <option value='name' >Owner</option>
+        <option value='type' >Land Type</option>
+      </select>
+    </div>
+  </div>
+<div id='landTable'>
+
+
 @foreach ($land as $parcel)
   <?php
   $landForSale = \App\Land::aretheySellingThis($parcel->id);
@@ -73,3 +152,4 @@
       </div>
     </div>
   @endforeach
+</div>

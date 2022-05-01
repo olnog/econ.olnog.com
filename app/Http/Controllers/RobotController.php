@@ -89,7 +89,7 @@ class RobotController extends Controller
      */
     public function update(Request $request, $id)
     {
-      $bannedActions == \App\Robot::fetchBannedActions();
+      $bannedActions = \App\Actions::fetchBanned();
       $action = \App\Actions::fetchByName(\Auth::id(), $request->actionName);
       if ($request->actionName == 'null'){
         echo json_encode(['error' => "You haven't setup which action you want to program."]);

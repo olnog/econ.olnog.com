@@ -9,20 +9,7 @@ class BuildingTypes extends Model
 {
   protected $table = 'buildingTypes';
 
-  public static function canTheyRepair($buildingName, $agentID, $contractorID){
-    $action = \App\Actions::fetchByName($agentID, 'repair');
-    if ($action->rank == 0 || !$action->unlocked){
-      return false;
-    }
-    $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
-    foreach ($buildingCosts as $material=>$cost){
-      $item = \App\Items::fetchByName($material, $contractorID);
-      if ($item->quantity < ceil($cost * ($action->rank * .5))){
-        return false;
-      }
-    }
-    return true;
-  }
+
 
   public static function fetch(){
       return \App\BuildingTypes::where('farming', false)->get();

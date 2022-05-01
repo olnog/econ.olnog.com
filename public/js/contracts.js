@@ -7,12 +7,15 @@ function buyFromSellOrder(contractID, quantity){
       return
     }
     status(JSON.parse(data).status)
+    loadPage('items')
+    /*
     clacks = JSON.parse(data).clacks
     history = JSON.parse(data).history
     items = JSON.parse(data).items
     actions = JSON.parse(data).actions
     contracts = JSON.parse(data).contracts
     refreshUI()
+    */
   })
 }
 
@@ -270,17 +273,22 @@ function sellLand(contractID){
 function sellToBuyOrder(contractID, quantity){
   $.post( "/contracts/" + contractID, {type: 'sellToBuyOrder', quantity:quantity,
     _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
+      console.log(data)
       if (JSON.parse(data).error != undefined){
         displayError(JSON.parse(data).error)
         fetchContracts()
         return
       }
     status(JSON.parse(data).status)
+    loadPage('items')
+
+    /*
     clacks = JSON.parse(data).clacks
     history = JSON.parse(data).history
     items = JSON.parse(data).items
     actions = JSON.parse(data).actions
     contracts = JSON.parse(data).contracts
     refreshUI()
+    */
   })
 }

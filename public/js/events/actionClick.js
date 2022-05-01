@@ -3,7 +3,7 @@ $(document).on('click', '.action', function(e) {
   $("#lastAction").html($("#" + e.target.id).html())
   action(actionName)
   lastAction = actionName
-  refreshUI()
+  //refreshUI()
 })
 
 $(document).on('click', '#build:not(.btn-warning)', function(e) {

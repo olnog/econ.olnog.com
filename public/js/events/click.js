@@ -108,6 +108,7 @@ $(document).on('click', ".menu", function(e) {
   $(this).addClass('active')
   $(".otherPages").addClass('d-none')
   $("#" + e.target.innerHTML).removeClass('d-none')
+  loadPage(e.target.innerHTML)
 })
 
 $(document).on('click', '.payBribe', function(e) {
@@ -119,7 +120,7 @@ $(document).on('click', '.payAllBribes', function(e) {
 })
 
 $(document).on('click', '#programRobot', function(e) {
-  programRobot($("#robotSkillList").val())
+  robot.program($("#robotActionList").val())
 })
 
 $(document).on('click', '#quitForcedSkillScreen', function(e) {
@@ -132,7 +133,7 @@ $(document).on('click', '#readBook', function(e) {
 })
 
 $(document).on('click', '.reprogram', function(e) {
-  reprogramRobot($("#reprogramList-" +  e.target.id.split('-')[1]).val(), e.target.id.split('-')[1])
+  robot.reprogram($("#reprogramList-" +  e.target.id.split('-')[1]).val(), e.target.id.split('-')[1])
 })
 
 $(document).on('click', '.rebuild', function(e) {
@@ -153,11 +154,11 @@ $(document).on('click', '#reset', function(e) {
 })
 
 $(document).on('click', '#robotStart', function(e) {
-  startRobot()
+  robot.start()
 })
 
 $(document).on('click', '#robotStop', function(e) {
-  stopRobot()
+  robot.stop()
 })
 
 $(document).on('click', '.sellToState', function(e) {

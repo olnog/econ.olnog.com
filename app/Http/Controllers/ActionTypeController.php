@@ -16,7 +16,7 @@ class ActionTypeController extends Controller
       return view('ActionTypes.index')->with([
         'actionTypes' => \App\ActionTypes::orderBy("name")->get(),
         'labor'       => \App\Labor::fetch(),
-        'availableActions'  => \App\Actions::fetchActionable(\Auth::id()),
+        'actionable'  => \App\Actions::fetchActionable(\Auth::id(), false),
       ]);
     }
 

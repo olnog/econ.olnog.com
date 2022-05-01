@@ -1,3 +1,4 @@
+
 var actions = null, autoActions = null, autoBribe = null, automation = null, buildings = null,
   buildingLeases = null, buildingSlots = null,
   buyOrders = null, clacks = null,  contracts = null, csrfToken = null, currentskillPoints = null,

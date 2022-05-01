@@ -15,10 +15,24 @@ class ItemController extends Controller
      */
     public function index()
     {
+      $labor = \App\Labor::fetch();
+      return view('Items.index')->with([
+        'actions'  => \App\Actions::fetchUnlocked(\Auth::id(), true),
+        'booksReq'
+          => $labor->availableSkillPoints + $labor->allocatedSkillPoints,
+        'buyOrderItems'     => \App\Items::fetchItemsForBuyOrders(),
+        'buyOrders'       => \App\BuyOrders::fetch(null),
+        'clacks'  => \App\User::find(\Auth::id())->clacks,
+        'equippableItems' => \App\Items::fetchItemNamesForEquipment(),
+        'items'   => \App\Items::fetch(),
+
+      ]);
+      /*
       echo json_encode([
         'items' => Items::fetch(),
         'itemTypes' => \App\ItemTypes::all(),
       ]);
+      */
     }
 
     /**

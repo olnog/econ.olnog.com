@@ -28,13 +28,17 @@ function buildBuilding(buildingName){
 
 function destroyBuilding(buildingID){
   $.post( "/buildings/" + buildingID, {buildingID: buildingID, _token: fetchCSRF(), _method: 'DELETE' }).done(function(data){
+/*
     actions = JSON.parse(data).actions
     buildings = JSON.parse(data).buildings
     itemCapacity = JSON.parse(data).itemCapacity
     numOfItems = JSON.parse(data).numOfItems
+    */
     status(JSON.parse(data).status)
+    loadPage('buildings')
+    /*
     refreshUI()
-
+*/
   })
 }
 
@@ -80,12 +84,15 @@ function repair(buildingID){
       return
     }
     status(JSON.parse(data).status)
+    loadPage('buildings')
+/*
     actions = JSON.parse(data).actions
     buildings = JSON.parse(data).buildings
     history = JSON.parse(data).history
     items = JSON.parse(data).items
     numOfItems = JSON.parse(data).numOfItems
     refreshUI()
+    */
   })
 }
 

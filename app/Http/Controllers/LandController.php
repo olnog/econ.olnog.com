@@ -11,10 +11,39 @@ class LandController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+      $landType = $request->landType;
+      if ($request->sort == 'valuation'){
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->where('type', $landType)->orderBy('valuation')->get();
+      } else if ($request->sort == 'name'){
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->where('type', $landType)->orderBy('name')->get();
+      } else if ($request->sort == 'type'){
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->where('type', $landType)->orderBy('type')->get();
+      } else {
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->where('type', $landType)->get();
+      }
 
-      echo json_encode(['land' => \App\Land::fetch()]);
+      return view('Land.index')->with([
+        'land'      => $land,
+        'landType'  => $landType,
+      ]);
     }
 
     /**
@@ -48,11 +77,9 @@ class LandController extends Controller
           'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
           'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')->get();
       }
-
       return view('land2')->with([
         'land' => $land,
       ]);
-
     }
 
     /**

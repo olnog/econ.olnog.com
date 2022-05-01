@@ -74,6 +74,23 @@ class Buildings extends Model
     return count($fields) > 0;
   }
 
+  public static function canTheyRepair($buildingName, $agentID, $contractorID){
+    $action = \App\Actions::fetchByName($agentID, 'repair');
+    if ($action->rank == 0 || !$action->unlocked){
+      return false;
+    }
+    $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
+    foreach ($buildingCosts as $material=>$cost){
+
+      $item = \App\Items::fetchByName($material, $contractorID);
+
+      if ($item->quantity < ceil($cost * ($action->rank * .5))){
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static function destroyBuilding($id){
     \App\Buildings::destroy($id);
     $user = Auth::user();
@@ -112,13 +129,7 @@ class Buildings extends Model
 
   public static function fetch(){
     return [
-      'built' => \App\Buildings::
-        join('buildingTypes', 'buildings.buildingTypeID', 'buildingTypes.id')
-        ->where('userID', Auth::id())->select('buildings.id', 'buildingTypeID',
-        'uses', 'totalUses', 'durabilityCaption', 'name', 'description')
-        ->select('buildings.id', 'buildingTypeID', 'uses', 'totalUses',
-        'durabilityCaption', 'repairedTo', 'wheat', 'harvestAfter', 'name',
-        'description', 'skill', 'actions', 'cost', 'farming')->get(),
+      'built' => \App\Buildings::fetchBuilt(),
       'repairable' => \App\Buildings::fetchRepairable(),
       'possible' => \App\BuildingTypes::all(),
       'costs' => \App\BuildingTypes::fetchBuildingCost(null),
@@ -129,12 +140,23 @@ class Buildings extends Model
   public static function fetchBuilt(){
     return \App\Buildings::
       join('buildingTypes', 'buildings.buildingTypeID', 'buildingTypes.id')
+      ->where('userID', Auth::id())->select('buildings.id', 'buildingTypeID',
+      'uses', 'totalUses', 'durabilityCaption', 'name', 'description')
+      ->select('buildings.id', 'buildingTypeID', 'uses', 'totalUses',
+      'durabilityCaption', 'repairedTo', 'wheat', 'harvestAfter', 'name',
+      'description', 'skill', 'actions', 'cost', 'farming')
+      ->orderBy('buildingTypes.name')->get();
+  }
+  /*
+  public static function fetchBuilt(){
+    return \App\Buildings::
+      join('buildingTypes', 'buildings.buildingTypeID', 'buildingTypes.id')
       ->where('userID', Auth::id())->where('farming', false)
       ->select('buildings.id', 'buildingTypeID',
       'uses', 'totalUses', 'durabilityCaption', 'name', 'description')
       ->get();
   }
-
+*/
   public static function fetchByName($buildingName, $userID){
     $buildingType = \App\BuildingTypes::fetchByName($buildingName);
     return \App\Buildings::where('buildingTypeID', $buildingType->id)
@@ -155,10 +177,12 @@ class Buildings extends Model
     ->select('buildings.id', 'name')->orderBy('name')->get();
     $repairableBuildings = [];
     foreach ($buildings as $building){
-      if (\App\BuildingTypes::canTheyRepair($building->name, \Auth::id(), \Auth::id())){
+
+      if (\App\Buildings::canTheyRepair($building->name, \Auth::id(), \Auth::id())){
         $repairableBuildings[] = $building->id;
       }
     }
+
     return $repairableBuildings;
   }
 
@@ -260,6 +284,9 @@ class Buildings extends Model
         => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
       "transfer-electricity-from-solar-power-plant" => ['Solar Power Plant'],
     ];
+    if (! in_array($actionName, $buildingReqsArr)){
+      return null;
+    }
     return $buildingReqsArr[$actionName];
   }
 
@@ -278,7 +305,7 @@ class Buildings extends Model
       return [
         'error' => "You haven't unlocked Repair yet.",
       ];
-    } else if (!\App\BuildingTypes::canTheyRepair($buildingType->name, $agentID, $contractorID)){
+    } else if (!\App\Buildings::canTheyRepair($buildingType->name, $agentID, $contractorID)){
       return [
         'error' => "You don't have the necessary materials to repair this.",
       ];
@@ -293,7 +320,7 @@ class Buildings extends Model
         . "</span> [" . number_format($item->quantity) . "] ";
       $item->save();
     }
-    $status = "</span> &rarr; " . $buildingType->name . ": (<span class='fp'>100%</span>)";
+    $status .= "</span> &rarr; " . $buildingType->name . ": (<span class='fp'>100%</span>)";
     $building->uses = $building->totalUses;
     $building->save();
     return [ 'status' => $status ];

@@ -1,3 +1,21 @@
+robot = new Robot()
+
+loadPage('actions')
+
+
+
+function loadPage (page){
+  console.log(page)
+  let landTypes = ['jungle', 'forest', 'desert', 'plains', 'mountains']
+  let url = page
+  if (page == 'land'){
+    url = "land?landType=" + landTypes[Math.round(Math.random() * (landTypes.length - 1 - 0) + 0)];
+  }
+  $.get("/" + url, function(data){
+    console.log(url)
+    $("#" + page).html(data)
+  })
+}
 
 function autoBribe(){
   $.post( "/autobribe", {amount: $("#autoBribe").val(), _token: fetchCSRF() }).done(function(data){
@@ -196,79 +214,9 @@ function playSkill(){
   currentskillPoints = labor.availableSkillPoints
 }
 
-function processAndSendRobotActions(){
-  let robotData = []
-  for (let i in robots){
-    $("#robotStatus" + i).html()
-    $("#robotError" + i).html()
-    if ($("#robotAction" + robots[i].id).val() != 'nothing'){
-      robotData.push( {id: robots[i].id, defaultAction: $("#robotAction" + robots[i].id).val()})
-    }
-  }
-  $.post( "/robotActions", {robotData: JSON.stringify(robotData), _token: fetchCSRF() }).done(function(data){
-    actions = JSON.parse(data).actions
-    buildSlots = JSON.parse(data).buildingSlots
-    buildings = JSON.parse(data).buildings
-    clacks        = JSON.parse(data).clacks
-    equipment = JSON.parse(data).equipment
-    statusHistory = JSON.parse(data).history
-    items = JSON.parse(data).items
-    itemCapacity = JSON.parse(data).itemCapacity
-    labor = JSON.parse(data).labor
-    land = JSON.parse(data).land
-    numOfItems = JSON.parse(data).numOfItems
-    robots      = JSON.parse(data).robots
-    csrfToken = JSON.parse(data).csrf
-    statusArr = JSON.parse(data).statusArr
 
-    refreshUI()
-    let robotStopped = true
-    for (let i in statusArr){
-      if ('error' in statusArr[i]){
-        $("#robotError" + i).html(statusArr[i].error)
-      } else {
-        if (robotStopped){
-          robotStopped = false
-        }
-        $("#robotStatus" + i).html(statusArr[i].status)
-      }
-    }
-    if (robotStopped){
-      stopRobot()
-    }
-  })
-}
 
-function programRobot(actionName){
-  if (actionName == 'null'){
-    return
-  }
-  $.post( "/robots", {actionName: actionName, _token: fetchCSRF() }).done(function(data){
-    if (JSON.parse(data).error != undefined){
-      displayError(JSON.parse(data).error)
-      return
-    }
-    robots = JSON.parse(data).robots
-    status(JSON.parse(data).status)
-    refreshUI()
-  })
-}
 
-function reprogramRobot(actionName, id){
-  if (actionName == 'null'){
-    return
-  }
-  $.post( "/robots/" + id, {actionName: actionName, _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
-    if (JSON.parse(data).error != undefined){
-      displayError(JSON.parse(data).error)
-      return
-    }
-    actions = JSON.parse(data).actions
-    robots = JSON.parse(data).robots
-    status(JSON.parse(data).status)
-    refreshUI()
-  })
-}
 
 function reset(){
   $.post( "/reset/", { _token: fetchCSRF() }).done(function(data){
@@ -317,28 +265,7 @@ function readBook(){
   })
 }
 
-function startRobot(){
-  $("#robotStart").addClass('d-none')
-  $("#robotStop").removeClass('d-none')
-  processAndSendRobotActions()
-  $("#robotAnimation").removeClass('d-none')
-  robotAnimating = setInterval(robotAnimation, 100)
-  robotAutomation = setInterval(function(){
-    processAndSendRobotActions()
 
-  }, 4000)
-}
-
-function stopRobot(){
-  $("#robotStart").removeClass('d-none')
-  $("#robotStop").addClass('d-none')
-  $("#robotAnimation").addClass('d-none')
-  clearInterval(robotAutomation)
-  robotAutomation = null
-  clearInterval(robotAnimating)
-  robotAnimating = null
-
-}
 
 function takeover(landID, amount){
   $.post( "/bids", {landID: landID, amount: amount, _token: fetchCSRF() }).done(function(data){

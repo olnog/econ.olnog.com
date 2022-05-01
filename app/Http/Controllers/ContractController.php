@@ -688,9 +688,12 @@ class ContractController extends Controller
           \App\History::new($contract->userID, 'contract', "You ran out of money so your contract buying " . $itemType->name . " was cancelled.");
           $contract->active = false;
           $contract->save();
+          echo json_encode(['error' => "The buyer ran out of money. Sorry."]);
           return;
+
         }
         if ($sellerItem->quantity < $request->quantity){
+          echo json_encode(['error' => "You don't have the necessary amount of items to sell this."]);
           return;
         }
         $seller = Auth::user();

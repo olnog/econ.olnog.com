@@ -86,7 +86,6 @@ function refreshUI(){
   displayLand()
   displaySkills('skillListing')
   displayContracts()
-  displayChat()
   displayItems()
   displayActions()
   displayHireableActions()

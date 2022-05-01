@@ -22,7 +22,42 @@ class ActionController extends Controller
      */
     public function index()
     {
-      echo json_encode(\App\Actions::available(\Auth::id()));
+      $labor = \App\Labor::fetch();
+      $alsoEquipped = null;
+      $mainEquipped = null;
+      if ($labor->equipped != null){
+        $mainEquipped = \App\Equipment::where('equipment.id', $labor->equipped)
+          ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
+          ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
+            'equipment.totalUses')->first();
+      }
+      if ($labor->alsoEquipped != null){
+        $alsoEquipped = \App\Equipment::where('equipment.id', $labor->alsoEquipped)
+          ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
+          ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
+            'equipment.totalUses')->first();
+      }
+      return view('Actions.index')->with([
+        'actions'             => \App\Actions::fetchUnlocked(\Auth::id(), true),
+        'actionable'          => \App\Actions::fetchActionable(\Auth::id(), true),
+        'allEquipment'        => \App\Equipment::fetch(),
+        'banned'              => \App\Actions::fetchBanned(),
+        'buildableBuildings'  => \App\Buildings::fetchBuildingsYouCanBuild(),
+        'electricity'         => \App\Items
+          ::fetchByName('Electricity', \Auth::id())->quantity,
+        'equipped'            => [
+                                    'also' => $alsoEquipped,
+                                    'main' => $mainEquipped,
+                                ],
+        'freelanceContracts'   => \App\Contracts::where('active', 1)
+          ->where('category', 'freelance')->orderBy('action')
+          ->orderBy('price', 'desc')->get(),
+        'hireableContracts'   => \App\Contracts::where('active', 1)
+          ->where('category', 'hire')->orderBy('action')
+          ->orderBy('price', 'desc')->get(),
+        'food'               => \App\Items::fetchByName('Food', \Auth::id())->quantity,
+        'robots'              => \App\Robot::fetch(),
+      ]);
     }
 
     /**
@@ -67,6 +102,10 @@ class ActionController extends Controller
       }
       $user = \App\User::find(\Auth::id());
       echo json_encode([
+        'status' => $status,
+      ]);
+/*
+      echo json_encode([
         'actions' => \App\Actions::fetch(\Auth::id()),
         'buildingSlots' => $user->buildingSlots,
         'buildings' => \App\Buildings::fetch(),
@@ -79,8 +118,9 @@ class ActionController extends Controller
         'items' => Items::fetch(),
         'land' => \App\Land::fetch(),
         'numOfItems' => \App\Items::fetchTotalQuantity(Auth::id()),
-        'itemCapacity' => $user->itemCapacity,
+
       ]);
+*/
     }
 
     /**

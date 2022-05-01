@@ -16,10 +16,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  $actions = \App\Actions::fetchActionable(\Auth::id());
-  foreach ($actions as $action){
-    var_dump($action,  '<br>');
-  }
+  \App\Buildings::fetchRepairable();
 });
 
 Route::get('/read', function(){
@@ -70,7 +67,6 @@ Route::get('/account', function(){
 });
 Route::post('/robotActions', function (Request $request){
   \App\Robot::processActions(json_decode($request->robotData));
-
 });
 Route::post('/autobribe', function (Request $request){
   if (!filter_var($request->amount, FILTER_VALIDATE_INT)){
@@ -127,7 +123,9 @@ Route::get('/ajax', function () {
   if (Auth::check()){
     $user = \App\User::find(Auth::id());
     echo json_encode([
+      /*
       'actions'       => \App\Actions::fetch(\Auth::id()),
+
       'autoBribe'     => $user->autoBribe,
       'avgBribe'      => \App\Land::averageBribe(),
       'buildingLeases'=> \App\BuildingLease::fetch(),
@@ -140,14 +138,15 @@ Route::get('/ajax', function () {
       'hostileTakeover' => \App\Land::isThereAHostileTakeover(),
       'labor'         => \App\Labor::fetch(),
       'leases'        => \App\Lease::fetch(),
-      'itemCapacity'  => $user->itemCapacity,
       'items'         => \App\Items::fetch(),
       'itemTypes'     => \App\ItemTypes::all(),
       'land'          => \App\Land::fetch(),
       'numOfContracts'=> \App\Contracts::where('userID', \Auth::id())->where('active', 1)->count(),
       'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
-      'numOfParcels'    => count(\App\Land::fetchMine()),
+      'numOfParcels'    => \App\Land::where('userID', \Auth::id())->count(),
+      */
       'robots'        => \App\Robot::fetch(),
+      /*
       'settings'      => [
         'sound'=>$user->soundSetting,
         'eatFood'=>$user->eatFoodSetting,
@@ -155,10 +154,9 @@ Route::get('/ajax', function () {
         'useBioMeds' => $user->useBioMedsSetting,
         'useNanoMeds' => $user->useNanoMedsSetting,
       ],
-      'skills'        => \App\Skills::fetch(),
-      'statusHistory' => \App\History::fetch(),
       'userID'        => $user->id,
       'username'      => $user->name,
+*/
     ]);
   }
 });

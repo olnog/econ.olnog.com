@@ -27,6 +27,7 @@ class HomeController extends Controller
       if ($labor->rebirth){
         return redirect()->route('rebirth');
       }
-        return view('home');
+      return view('home');
+      
     }
 }

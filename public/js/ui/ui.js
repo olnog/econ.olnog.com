@@ -29,13 +29,6 @@ function displayBuyOrders(){ //23
   formatBuyOrders()
 }
 
-function displayChat(){ //5
-  $.get('/chat', function (data){
-    $("#chatMsgs").html(data)
-    formatChat()
-
-  })
-}
 
 function displayRobots (){
   let html = "<div>Electricity: <span id='robotsElectricity'></span> "
@@ -242,12 +235,7 @@ function formatBuyOrders(){
 
 }
 
-function formatChat(){
-  $('.allChat').removeClass('d-none')
-  if ($("#filterChat").is(":checked")){
-    $(".allChat:not('.chitChat')").addClass('d-none')
-  }
-}
+
 
 function formatItems(){
   $(".dump").addClass('d-none')

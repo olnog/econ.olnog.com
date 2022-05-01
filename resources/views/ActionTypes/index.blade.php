@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
   <div class='text-center'>
     <a href="{{route('home')}}">[ Home ]</a>
@@ -10,7 +9,7 @@
     Show Only Actions You Can Do Now
   </div>
   @foreach($actionTypes as $actionType)
-    <div class="@if(in_array($actionType->name, $availableActions)) yesDo @else noDo d-none @endif mt-3">
+    <div class="@if(in_array($actionType->name, $actionable)) yesDo @else noDo d-none @endif mt-3">
       <?php $action = \App\Actions::fetchByName(\Auth::id(), $actionType->name); ?>
       <?php $hireContract = \App\Contracts::fetchHighestHireContract($actionType->name); ?>
 

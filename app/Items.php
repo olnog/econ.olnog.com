@@ -9,10 +9,19 @@ class Items extends Model
 {
   protected $table = 'items';
 
-  static public function fetchByName($name, $userID){
-    $itemType = \App\ItemTypes::where('name', $name)->first();
-    return \App\Items::where('itemTypeID', $itemType->id)->where('userID', $userID)->first();
+  static public function doTheyHaveEnoughFor($actionName){
+    $items = \App\Items::fetchActionItemInput($actionName);
+    if ($items === null){
+      return true;
+    }
+    foreach($items as $itemName => $quantity){
+      if (!\App\Items::doTheyHave($itemName, $quantity)){
+        return false;
+      }
+    }
+    return true;
   }
+
 
   static public function fetch(){
     return Items::where('userID', Auth::id())
@@ -21,6 +30,12 @@ class Items extends Model
         'durability', 'material')
       ->orderBy('name')->get();
   }
+
+  static public function fetchByName($name, $userID){
+    $itemType = \App\ItemTypes::where('name', $name)->first();
+    return \App\Items::where('itemTypeID', $itemType->id)->where('userID', $userID)->first();
+  }
+
 
   public static function fetchItemNameForAction($actionName){
     $itemNameArr = [
@@ -108,17 +123,16 @@ class Items extends Model
     return $itemNameArr[$actionName];
   }
 
-  static public function doTheyHaveEnoughFor($actionName){
-    $items = \App\Items::fetchActionItemInput($actionName);
-    if ($items === null){
-      return true;
-    }
-    foreach($items as $itemName => $quantity){
-      if (!\App\Items::doTheyHave($itemName, $quantity)){
-        return false;
-      }
-    }
-    return true;
+  public static function fetchItemNamesForEquipment(){
+    return [
+      'Axe (iron)', 'Axe (steel)', 'Axe (stone)', 'Bulldozer (diesel)',
+      'Bulldozer (gasoline)', 'Car (diesel)', 'Car (gasoline)',
+      'Chainsaw (electric)', 'Chainsaw (gasoline)', 'Handmill (iron)',
+      'Handmill (stone)', 'Handmill (steel)', 'Jackhammer (electric)',
+      'Jackhammer (gasoline)', 'Pickaxe (iron)', 'Pickaxe (stone)',
+      'Pickaxe (steel)', 'Radiation Suit', 'Shovel (iron)', 'Shovel (steel)',
+      'Shovel (stone)', 'Tractor (diesel)', 'Tractor (gasoline)',
+    ];
   }
 
   static public function fetchActionItemInput($actionName){
@@ -238,6 +252,12 @@ class Items extends Model
       ->select('items.id', 'itemTypeID', 'quantity', 'name', 'description',
         'durability', 'material')
       ->orderBy('name')->get();
+  }
+
+  public static function fetchItemsForBuyOrders(){
+    return \App\BuyOrders::join('itemTypes', 'buyOrders.itemTypeID', 'itemTypes.id')
+      ->where('buyOrders.active', 1)->select('itemTypes.name', 'itemTypes.id')
+      ->orderBy('itemTypes.name')->distinct()->get();
   }
 
   static public function fetchTotalQuantity($userID){

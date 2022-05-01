@@ -23,7 +23,6 @@ class Actions extends Model
       ::whichBuildingsDoTheyHaveAccessTo($actionName, $contractorID);
     $robot = null;
     $status = "";
-
     if ($reqBuildings !== null && count($reqBuildings) < 1){
       return ['error' => "You don't have the necessary building ("
         .  implode(', ', \App\Buildings::fetchRequiredBuildingsFor($actionName))
@@ -48,10 +47,10 @@ class Actions extends Model
     }
     \App\Metric::newAction($agentID, $actionName);
 
-
     if ($actionName == 'chop-tree'){
       $leaseStatus = '';
-      $landBonus = \App\Land::count('forest', $agentID);
+      $landBonus = \App\Land::where('type', 'forest')
+        ->where('userID', $contractorID)->count();
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Chainsaw (electric)',
         'Chainsaw (gasoline)', 'Axe'], $agentID);
@@ -335,7 +334,8 @@ class Actions extends Model
 
     } else if ($actionName == 'mine-sand'){
       $leaseStatus = '';
-      $landBonus = \App\Land::count('desert', $agentID);
+      $landBonus = \App\Land::where('type', 'desert')
+        ->where('userID', $contractorID)->count();
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Bulldozer (gasoline)', 'Bulldozer (diesel)',
         'Shovel'], $agentID);
@@ -396,7 +396,8 @@ class Actions extends Model
         }
       }
       $leaseStatus = '';
-      $landBonus = \App\Land::count('mountains', $agentID);
+      $landBonus = \App\Land::where('type', 'mountains')
+        ->where('userID', $contractorID)->count();
       if (!\App\Land::doTheyOwn('mountains', $agentID)){
         $leaseStatus = \App\Lease::use('mountains', $agentID);
         $landBonus = 1;
@@ -450,7 +451,8 @@ class Actions extends Model
 
     } else if ($actionName == 'plant-rubber-plantation'){
       $leaseStatus = '';
-      $landBonus = \App\Land::count('jungle', $agentID);
+      $landBonus = \App\Land::where('type', 'jungle')
+        ->where('userID', $contractorID)->count();
       if (!\App\Land::doTheyOwn('jungle', $agentID)){
         $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('jungle', $agentID);
         if ($currentlyLeasing){
@@ -685,13 +687,13 @@ class Actions extends Model
   public static function fetch($userID){
       return [
         'buildings' => \App\Buildings::fetchBuildingsYouCanBuild(),
-        'possible'  =>\App\Actions::fetchActionable($userID),
+        'possible'  =>\App\Actions::fetchActionable($userID, true),
         'robots'    => \App\Actions::fetchRobotActions(),
-        'unlocked'  =>\App\Actions::fetchUnlocked($userID),
+        'unlocked'  =>\App\Actions::fetchUnlocked($userID, false),
       ];
   }
 
-  public static function fetchActionable($userID){
+  public static function fetchActionable($userID, $onlyUnlocked){
     $actionable = [];
     $labor = \App\Labor::where('userID', $userID)->first();
     $wearingRadiationSuit = false;
@@ -707,9 +709,16 @@ class Actions extends Model
       $solarPowerPlant = \App\Buildings::fetchByName('Solar Power Plant', $userID );
       $solarElectricity = $solarPowerPlant->electricity;
     }
-    foreach (\App\ActionTypes::all() as $action){
+    $actions = \App\ActionTypes::all();
+    if ($onlyUnlocked){
+      $actions = \App\Actions::fetchUnlocked($userID, true);
+    }
+    foreach ($actions as $action){
+      if (!$onlyUnlocked){
+        $action = $action->name;
+      }
       $reqBuildings = \App\Buildings
-        ::whichBuildingsDoTheyHaveAccessTo($action->name, \Auth::id());
+        ::whichBuildingsDoTheyHaveAccessTo($action, \Auth::id());
       $coveredActions = ['chop-tree', 'cook-meat', 'cook-flour',
         'harvest-herbal-greens', 'harvest-plant-x', 'harvest-wheat',
         'harvest-rubber', 'make-book', 'mill-flour', 'mill-log', 'mine-sand',
@@ -719,13 +728,14 @@ class Actions extends Model
         'smelt-copper', 'smelt-iron', 'smelt-steel',
         'transfer-electricity-from-solar-power-plant'
       ];
-      if ($action->name == 'chop-tree'
+
+      if ($action == 'chop-tree'
         && count(\App\Equipment::whichOfTheseCanTheyUse(['Chainsaw (electric)',
         'Chainsaw (gasoline)', 'Axe'], \Auth::id())) > 0
         && Land::doTheyHaveAccessTo('forest')){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'cook-meat'
+      } else if ($action == 'cook-meat'
         && ((\App\Items::doTheyHave('Meat', 1)
           && \App\Items::doTheyHave('Wood', 1)
           && \App\Buildings::doTheyHaveAccessTo('Campfire', Auth::id()))
@@ -735,9 +745,9 @@ class Actions extends Model
         || (\App\Items::doTheyHave('Meat', 100)
           &&  \App\Items::doTheyHave('Electricity', 100)
           && \App\Buildings::doTheyHaveAccessTo('Food Factory', Auth::id())))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'cook-flour'
+      } else if ($action == 'cook-flour'
       && ((\App\Items::doTheyHave('Flour', 1)
         && \App\Items::doTheyHave('Wood', 1)
         && \App\Buildings::doTheyHaveAccessTo('Campfire', Auth::id()))
@@ -747,79 +757,79 @@ class Actions extends Model
       || (\App\Items::doTheyHave('Flour', 100)
         &&  \App\Items::doTheyHave('Electricity', 100)
         && \App\Buildings::doTheyHaveAccessTo('Food Factory', Auth::id())))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'harvest-herbal-greens'
+      } else if ($action == 'harvest-herbal-greens'
         && \App\Buildings::canTheyHarvest('Herbal Greens Field', Auth::id())){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'harvest-plant-x'
+      } else if ($action == 'harvest-plant-x'
         && \App\Buildings::canTheyHarvest('Plant X Field', Auth::id())){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'harvest-wheat'
+      } else if ($action == 'harvest-wheat'
         && \App\Buildings::canTheyHarvest('Wheat Field', Auth::id())){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'harvest-rubber'
+      } else if ($action == 'harvest-rubber'
         && \App\Buildings::canTheyHarvest('Rubber Plantation', Auth::id())){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'make-book'
+      } else if ($action == 'make-book'
         &&  \App\Items::doTheyHave('Paper', 100)
         && $labor->availableSkillPoints < 1){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'mill-flour'
+      } else if ($action == 'mill-flour'
       && (Equipment::doTheyHave('Handmill', Auth::id())
         && Items::doTheyHave('Flour', 10))
         || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
         && Items::doTheyHave('Flour', 100))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'mill-log'
+      } else if ($action == 'mill-log'
         && ((Equipment::doTheyHave('Saw', Auth::id())
           && Items::doTheyHave('Logs', 1))
           || (\App\Buildings::doTheyHaveAccessTo('Sawmill', Auth::id())
           && Items::doTheyHave('Logs', 10)))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if (($action->name == 'mine-sand')
+      } else if (($action == 'mine-sand')
         && Land::doTheyHaveAccessTo('desert')
         && count(\App\Equipment::whichOfTheseCanTheyUse(['Bulldozer (gasoline)',
         'Bulldozer (diesel)', 'Shovel'], \Auth::id())) > 0){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if (($action->name == 'mine-coal' || $action->name == 'mine-stone'
-        || $action->name == 'mine-iron-ore' || $action->name == 'mine-copper-ore')
+      } else if (($action == 'mine-coal' || $action == 'mine-stone'
+        || $action == 'mine-iron-ore' || $action == 'mine-copper-ore')
         && Land::doTheyHaveAccessTo('mountains')
         && count(\App\Equipment::whichOfTheseCanTheyUse(['Jackhammer (electric)',
         'Jackhammer (gasoline)', 'Pickaxe'], \Auth::id())) > 0){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'mine-uranium-ore'
+      } else if ($action == 'mine-uranium-ore'
         && Land::doTheyHaveAccessTo('mountains')
         && count(\App\Equipment::whichOfTheseCanTheyUse(['Jackhammer (electric)',
         'Jackhammer (gasoline)', 'Pickaxe'], \Auth::id())) > 0
         && $wearingRadiationSuit){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'plant-rubber-plantation'
+      } else if ($action == 'plant-rubber-plantation'
         && \App\User::find(Auth::id())->buildingSlots>0
         && Land::doTheyHaveAccessTo('jungle')){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if (($action->name == 'plant-wheat-field'
-      || $action->name == 'plant-herbal-greens-field'
-      || $action->name == 'plant-plant-x-field')
+      } else if (($action == 'plant-wheat-field'
+      || $action == 'plant-herbal-greens-field'
+      || $action == 'plant-plant-x-field')
         && \App\User::find(Auth::id())->buildingSlots>0){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'program-robot'
+      } else if ($action == 'program-robot'
         && \App\Items::doTheyHave('Robots', 1)){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'smelt-copper'
+      } else if ($action == 'smelt-copper'
       && ((\App\Buildings::doTheyHaveAccessTo('Electric Arc Furnace', Auth::id())
         && \App\Items::doTheyHave('Copper Ore', 1000)
         && \App\Items::doTheyHave('Electricity', 1000))
@@ -829,9 +839,9 @@ class Actions extends Model
       || (\App\Buildings::doTheyHaveAccessTo('Large Furnace', Auth::id())
         && \App\Items::doTheyHave('Copper Ore', 100)
         && \App\Items::doTheyHave('Coal', 100)))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'smelt-iron'
+      } else if ($action == 'smelt-iron'
         && ((\App\Buildings::doTheyHaveAccessTo('Electric Arc Furnace', Auth::id())
           && \App\Items::doTheyHave('Iron Ore', 1000)
           && \App\Items::doTheyHave('Electricity', 1000))
@@ -841,9 +851,9 @@ class Actions extends Model
         || (\App\Buildings::doTheyHaveAccessTo('Large Furnace', Auth::id())
           && \App\Items::doTheyHave('Iron Ore', 100)
           && \App\Items::doTheyHave('Coal', 100)))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'smelt-steel'
+      } else if ($action == 'smelt-steel'
       && ((\App\Buildings::doTheyHaveAccessTo('Electric Arc Furnace', Auth::id())
         && \App\Items::doTheyHave('Iron Ingots', 1000)
         && \App\Items::doTheyHave('Electricity', 1000))
@@ -853,17 +863,18 @@ class Actions extends Model
       || (\App\Buildings::doTheyHaveAccessTo('Large Furnace', Auth::id())
         && \App\Items::doTheyHave('Iron Ingots', 100)
         && \App\Items::doTheyHave('Coal', 100)))){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if ($action->name == 'transfer-electricity-from-solar-power-plant'
+      } else if ($action == 'transfer-electricity-from-solar-power-plant'
         && \App\Buildings::doTheyHaveAccessTo('Solar Power Plant', Auth::id())
         && $solarElectricity > 0){
-        $actionable[] = $action->name;
+        $actionable[] = $action;
 
-      } else if (!in_array($action->name, $coveredActions)
+      } else
+      if (!in_array($action, $coveredActions)
         && ($reqBuildings === null || !empty($reqBuildings))
-        && \App\Items::doTheyHaveEnoughFor($action->name)){
-        $actionable[] = $action->name;
+        && \App\Items::doTheyHaveEnoughFor($action)){
+        $actionable[] = $action;
       }
 
     }
@@ -871,19 +882,34 @@ class Actions extends Model
 
   }
 
-    public static function fetchByName($userID, $name){
-      $actionType = \App\ActionTypes::where('name', $name)->first();
-      return \App\Actions::where('actionTypeID', $actionType->id)
-        ->where('userID', $userID)->first();
+  public static function fetchBanned(){
+    return [
+      'build', 'make-book', 'repair', 'program-robot'
+    ];
 
-    }
+  }
 
-    public static function fetchUnlocked($userID){
-      return \App\Actions
+  public static function fetchByName($userID, $name){
+    $actionType = \App\ActionTypes::where('name', $name)->first();
+    return \App\Actions::where('actionTypeID', $actionType->id)
+      ->where('userID', $userID)->first();
+
+  }
+
+    public static function fetchUnlocked($userID, $asArr){
+      $actions = \App\Actions
         ::join('action_types', 'actions.actionTypeID', 'action_types.id')
         ->where('userID', $userID)->where('unlocked', true)
         ->select('name', 'actions.id', 'actionTypeID', 'totalUses', 'nextRank',
         'rank', 'unlocked')->get();
+      if ($asArr){
+        $actionArr = [];
+        foreach ($actions as $action){
+          $actionArr[] = $action->name;
+        }
+        return $actionArr;
+      }
+      return $actions;
     }
 
     public static function fetchBaseProduction($actionName, $robotID, $userID){
@@ -924,7 +950,7 @@ class Actions extends Model
     }
 
     public static function fetchRobotActions(){
-      $bannedActions = \App\Robot::fetchBannedActions();
+      $bannedActions = \App\Actions::fetchBanned();
       $robots = \App\Robot::fetch();
       $robotActions = [];
       foreach ($robots as $robot){

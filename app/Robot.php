@@ -15,12 +15,7 @@ class Robot extends Model
         ->where('userID', \Auth::id())->get();
     }
 
-    public static function fetchBannedActions(){
-      return [
-        'build', 'make-book', 'repair', 'program-robot'
-      ];
 
-    }
 
     public static function new($actionTypeID, $userID){
       $robot = new \App\Robot;
@@ -31,7 +26,7 @@ class Robot extends Model
     }
 
     public static function processActions($robots){
-      $bannedActions = \App\Robot::fetchBannedActions();
+      $bannedActions = \App\Actions::fetchBanned();
       $status = [];
       $electricity = \App\Items::fetchByName('Electricity', \Auth::id());
       foreach($robots as $robotBeingProcessed){

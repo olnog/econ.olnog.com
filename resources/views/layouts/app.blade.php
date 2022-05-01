@@ -31,6 +31,9 @@
       .actionInput{
         color: LightGray;
       }
+      .fields{
+        color:green;
+      }
       .forest{
         border:2px DarkGreen solid;
       }
@@ -74,29 +77,34 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script src='https://code.jquery.com/jquery-3.6.0.js'></script>
-<!---->
+    <script src='/js/Robot.js'></script>
+
     <script src='/js/variables.js'></script>
     <script src='/js/js.js'></script>
+
     <script src='/js/ajax.js'></script>
+
     <script src='/js/buildings.js'></script>
     <script src='/js/contracts.js'></script>
     <script src='/js/equipment.js'></script>
     <script src='/js/items.js'></script>
+
     <script src='/js/events/change.js'></script>
     <script src='/js/events/click.js'></script>
     <script src='/js/events/contractClick.js'></script>
     <script src='/js/events/actionClick.js'></script>
 
     <script src='/js/action.js'></script>
+    <script src='/js/ui/ui.js'></script>
 
+<!--
     <script src='/js/ui/displayActions.js'></script>
     <script src='/js/ui/displayContracts.js'></script>
 
     <script src='/js/ui/displayBuildings.js'></script>
     <script src='/js/ui/displayItems.js'></script>
-    <script src='/js/ui/ui.js'></script>
     <script src='/js/ui/whyNot.js'></script>
     <script src='/js/ui/refreshui.js'></script>
-
+-->
 </body>
 </html>

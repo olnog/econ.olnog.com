@@ -15,7 +15,11 @@ class BuildingController extends Controller
     public function index()
     {
       //var_dump(\App\Buildings::destroy(46));
-      echo json_encode(\App\Buildings::fetch());
+      return view('Buildings.index')->with([
+        'buildings'   => \App\Buildings::fetchBuilt(),
+        'repairable'  => \App\Buildings::fetchRepairable(),
+      ]);
+      //echo json_encode(\App\Buildings::fetch());
     }
 
     /**
@@ -133,6 +137,6 @@ class BuildingController extends Controller
         'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
         'status'        => "You destroyed your " . $buildingType->name,
       ]);
-      
+
     }
 }
