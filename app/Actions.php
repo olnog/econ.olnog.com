@@ -687,13 +687,13 @@ class Actions extends Model
   public static function fetch($userID){
       return [
         'buildings' => \App\Buildings::fetchBuildingsYouCanBuild(),
-        'possible'  =>\App\Actions::fetchActionable($userID, true),
+        'possible'  =>\App\Actions::fetchActionable($userID, true, null),
         'robots'    => \App\Actions::fetchRobotActions(),
         'unlocked'  =>\App\Actions::fetchUnlocked($userID, false),
       ];
   }
 
-  public static function fetchActionable($userID, $onlyUnlocked){
+  public static function fetchActionable($userID, $onlyUnlocked, $justThisOne){
     $actionable = [];
     $labor = \App\Labor::where('userID', $userID)->first();
     $wearingRadiationSuit = false;
@@ -714,7 +714,9 @@ class Actions extends Model
       $actions = \App\Actions::fetchUnlocked($userID, true);
     }
     foreach ($actions as $action){
-      if (!$onlyUnlocked){
+      if ($justThisOne != null){
+        $action = $justThisOne;
+      } else if (!$onlyUnlocked){
         $action = $action->name;
       }
       $reqBuildings = \App\Buildings
@@ -870,16 +872,16 @@ class Actions extends Model
         && $solarElectricity > 0){
         $actionable[] = $action;
 
-      } else
-      if (!in_array($action, $coveredActions)
+      } else if (!in_array($action, $coveredActions)
         && ($reqBuildings === null || !empty($reqBuildings))
         && \App\Items::doTheyHaveEnoughFor($action)){
         $actionable[] = $action;
       }
-
+      if ($justThisOne != null){
+        break;
+      }
     }
     return $actionable;
-
   }
 
   public static function fetchBanned(){

@@ -12,10 +12,61 @@ class ContractController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-      echo json_encode(\App\Contracts::fetch());
+      $contracts = \App\Contracts::where('active', 1)
+        ->where('userID', \Auth::id())->get();
 
+      if ($request->filter == 'land'){
+        $contracts = \App\Contracts::
+          orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'sellLand');
+          })->orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'buyLand');
+          })->get();
+
+      } else if ($request->filter == 'labor'){
+        $contracts = \App\Contracts::
+          orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'freelance');
+          })->orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'hire');
+          })->orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'reproduction');
+          })->get();
+
+      } else if ($request->filter == 'items'){
+        $contracts = \App\Contracts::
+          orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'buyOrder');
+          })->orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'sellOrder');
+          })->get();
+
+      } else if ($request->filter == 'buildings'){
+        $contracts = \App\Contracts::where('active', 1)
+          ->where('category', 'leaseBuilding')->get();
+      } else if ($request->filter == 'mine'){
+        $contracts = \App\Contracts::where('active', 1)
+          ->where('userID', \Auth::id())->get();
+      }
+      return view('Contracts.index')->with([
+        'contracts'     => $contracts,
+        'clacks'        => \App\User::find(\Auth::id())->clacks,
+        'filter'        => $request->filter,
+        'landTypes'     => \App\Land::fetchLandTypes(),
+        'ownedLandTypes'=> \App\Land::fetchLandTypesTheyOwn(\Auth::id()),
+        'relevantItems' => \App\Items::fetchItemsInContracts(),
+        'unlocked'      => \App\Actions::fetchUnlocked(\Auth::id(), true),
+        'userID'        => \Auth::id(),
+      ]);
     }
 
     /**
@@ -290,6 +341,7 @@ class ContractController extends Controller
     {
       $contract = \App\Contracts::find($id);
       if ($contract == null){
+        echo json_encode(['error' => "This shouldn't have happened. Sorry."]);
         return;
       }
       $status = "";
@@ -543,6 +595,7 @@ class ContractController extends Controller
         $employer->save();
         if ($employer->clacks < $contract->price){
           \App\History::new($contract->userID, 'contract', "Contract Cancelled: You ran out of money to hire people to " . $contract->action);
+          echo json_encode(['error' => "They ran out of money for this contract. Sorry."]);
           $contract->active = false;
           $contract->save();
           return;
@@ -657,6 +710,7 @@ class ContractController extends Controller
 
         if ($sellerItem->quantity < $request->quantity){
           \App\History::new($contract->userID, 'contract', "You ran out of items to sell so your contract selling " . $itemType->name . " was cancelled.");
+          echo json_encode(['error' => 'They ran out of items to sell.']);
           $contract->active = false;
           $contract->save();
           return;
@@ -779,17 +833,9 @@ class ContractController extends Controller
       }
       \App\History::new(Auth::id(), 'contract', $status);
       echo json_encode([
-        'status' => $status,
-        'clacks' => $clacks,
-        'buildingSlots' => \App\User::find(\Auth::id())->buildingSlots,
-        'history' => \App\History::fetch(),
-        'items' => \App\Items::fetch(),
-        'labor' => \App\Labor::fetch(),
-        'land' => \App\Land::fetch(),
-        'leases' => \App\Lease::fetch(),
-        'contracts' => \App\Contracts::fetch(),
-        'actions' => \App\Actions::fetch(\Auth::id()),
-        'land' => \App\Land::fetch(),
+        'status'      => $status,
+        'info'        => \App\User::fetchInfo()
+
       ]);
 
     }

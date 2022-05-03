@@ -1,15 +1,20 @@
 $(document).on('change', '#buildingsThatCanBeBuilt', function(e) {
-  $("#build").attr('disabled', true)
-  $("#buildingCosts").html('')
+/*
+$("#build").attr('disabled', true)
 
+  $("#buildingCosts").html('')
+*/
   if ($("#buildingsThatCanBeBuilt").val() != ""){
+    /*
     html = "<span class='fw-bold'>Building Cost: </span> "
     for (let i in buildings.costs[$("#buildingsThatCanBeBuilt").val()]){
       html += " " + i + ":" + buildings.costs[$("#buildingsThatCanBeBuilt").val()][i] + " "
     }
     $("#buildingCosts").html(html)
+    */
     $("#build").removeAttr('disabled')
   }
+
 })
 
 $(document).on('change', '.buyUntil', function(e) {
@@ -52,19 +57,23 @@ $(document).on('change', '.contractFilterByCategory', function(e) {
 })
 
 $(document).on('change', '#contractItemFilter', function(e) {
-
-  formatContracts()
+  console.log($("#contractItemFilter").val())
+  $(".contracts").removeClass('d-none')
+  if ($("#contractItemFilter").val() != ''){
+    $(".contracts").addClass('d-none')
+    $(".itemClass" + $("#contractItemFilter").val()).removeClass('d-none')
+    return
+  }
 })
 
 $(document).on('change', '#contractLandFilter', function(e) {
   console.log($("#contractLandFilter").val())
+  $(".contracts").removeClass('d-none')
   if ($("#contractLandFilter").val() != ''){
     $(".contracts").addClass('d-none')
-
     $("." + $("#contractLandFilter").val()).removeClass('d-none')
     return
   }
-  formatContracts()
 })
 
 $(document).on('change', '.formatActions', function(e) {
@@ -107,9 +116,8 @@ $(document).on('change', '.historyFilter', function(e) {
 $(document).on('change', '.stateFilter', function(e) {
   formatBuyOrders()
 })
-
-$(document).on('change', '#landSortByFilter', function(e) {
-  displayLand()
+$(document).on('change', '.landFetch', function(e) {
+  fetchLand()
 })
 
 $(document).on('change', '.landFilter', function(e) {
@@ -139,13 +147,12 @@ $(document).on('change', '.settings', function(e) {
   adjustSettings(soundSetting, eatFoodSetting, useHerbMedsSetting, useBioMedsSetting, useNanoMedsSetting)
 
 })
-
-$("#showDump").change(function() {
+$(document).on('change', '#showDump', function(e) {
   formatItems()
 
 })
 
-$("#showOnlyInventory").change(function() {
+$(document).on('change', '#showOnlyInventory', function(e) {
   $(".noQuantity").removeClass('d-none')
   if (this.checked){
     $(".noQuantity").addClass('d-none')

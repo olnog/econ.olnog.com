@@ -57,7 +57,7 @@
     <span>
       Show Only:
     </span>
-      <select name='landTypeFilter' class='landFilter'>
+      <select name='landTypeFilter' id='landTypeFilter' class='landFetch'>
         <option value='jungle' @if ($landType == 'jungle') selected @endif>Jungle</option>
         <option value='forest' @if ($landType == 'forest') selected @endif>Forest</option>
         <option value='mountains' @if ($landType == 'mountains') selected @endif >Mountains</option>
@@ -66,11 +66,10 @@
         </select>
     </div><div class='col'>
       Sort By:
-      <select id='landSortByFilter' >
-        <option value='null' selected>Parcel #</option>
-        <option value='valuation' >Value</option>
-        <option value='name' >Owner</option>
-        <option value='type' >Land Type</option>
+      <select id='landSortByFilter' class='landFetch'>
+        <option value='null' @if ($sort == null) selected @endif>Parcel #</option>
+        <option value='valuation'@if ($sort == 'valuation') selected @endif >Value</option>
+        <option value='name' @if ($sort == 'name') selected @endif>Owner</option>
       </select>
     </div>
   </div>
@@ -121,7 +120,7 @@
       @endif
       <?php $buyLandContract = \App\Contracts::fetchHighestBuyLandContract($parcel->type); ?>
       @if ($buyLandContract != null && $parcel->userID == \Auth::id())
-        <button id='buyLand-"{{$buyLandContract->id}}"'
+        <button id='buyLand-{{$buyLandContract->id}}'
           class='buyLand btn btn-success'>sell
           (+{{number_format($buyLandContract->price)}} clacks)</button>
       @endif

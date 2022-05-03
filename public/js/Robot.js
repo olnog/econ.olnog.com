@@ -10,7 +10,7 @@ class Robot{
       }
     }
     $.post( "/robotActions", {robotData: JSON.stringify(robotData), _token: fetchCSRF() }).done(function(data){
-      console.log(JSON.parse(data).statusArr)
+      displayHeaders(JSON.parse(data).info)
       csrfToken = JSON.parse(data).csrf
       statusArr = JSON.parse(data).statusArr
       let robotStopped = true

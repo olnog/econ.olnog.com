@@ -38,6 +38,34 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public static function fetchInfo(){
+      $labor = \App\Labor::fetch();
+      $user = \App\User::find(\Auth::id());
+      $numOfParcels = \App\Land::where('userID', \Auth::id())->count();
+      $numOfActions = $labor->availableSkillPoints + $labor->allocatedSkillPoints;
+      $numOfItems = \App\Items::where('userID', \Auth::id())->sum('quantity');
+      $numOfBuildings = \App\Buildings::where('userID', \Auth::id())->count();
+      $numOfContracts = \App\Contracts::where('userID', \Auth::id())
+        ->where('active', 1)->count();
+      return [
+        'buildingSlots'   => $user->buildingSlots,
+        'clacks'          => $user->clacks,
+        'numOfActions'    => $numOfActions,
+        'numOfBuildings'  => $numOfBuildings,
+        'numOfContracts'  => $numOfContracts,
+        'numOfItems'      => $numOfItems,
+        'numOfParcels'    => $numOfParcels,
+        'settings'        => [
+                              'sound'=>$user->soundSetting,
+                              'eatFood'=>$user->eatFoodSetting,
+                              'useHerbMeds' => $user->useHerbMedsSetting,
+                              'useBioMeds' => $user->useBioMedsSetting,
+                              'useNanoMeds' => $user->useNanoMedsSetting,
+                            ],
+        'username'        => $user->name,
+      ];
+    }
+
     public static function reset(){
       $leases = \App\Lease::fetch();
       foreach($leases as $lease){

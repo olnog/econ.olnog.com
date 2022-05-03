@@ -95,7 +95,9 @@ function refreshUI(){
   displayHistory()
   $("#skillPointProgress").attr('aria-valuemax', labor.actionsUntilSkill)
   $("#skillPointProgress").attr('aria-valuenow', labor.actions)
-  let progressCent = ($("#skillPointProgress").attr('aria-valuenow') / $("#skillPointProgress").attr('aria-valuemax')).toFixed(2) * 100
+  let progressCent
+    = ($("#skillPointProgress").attr('aria-valuenow')
+    / $("#skillPointProgress").attr('aria-valuemax')).toFixed(2) * 100
   $("#skillPointProgress").css('width', progressCent + "%")
   $("#eatFood").prop('checked', settings.eatFood)
   $("#useHerbMeds").prop('checked', settings.useHerbMeds)

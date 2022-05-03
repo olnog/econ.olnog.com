@@ -3,18 +3,22 @@ robot = new Robot()
 loadPage('actions')
 
 
-
 function loadPage (page){
-  console.log(page)
   let landTypes = ['jungle', 'forest', 'desert', 'plains', 'mountains']
   let url = page
   if (page == 'land'){
     url = "land?landType=" + landTypes[Math.round(Math.random() * (landTypes.length - 1 - 0) + 0)];
+  } else if (page == 'market'){
+    url = 'contracts'
   }
   $.get("/" + url, function(data){
-    console.log(url)
     $("#" + page).html(data)
+    if (page == 'actions' && automation != null){
+      $("#buildingsThatCanBeBuilt").prop('disabled', true)
+      $(".action").prop('disabled', true)
+    }
   })
+
 }
 
 function autoBribe(){
@@ -198,11 +202,8 @@ function payAllBribes(amount){
 
 function payBribe(landID, amount){
   $.post( "/land/" + landID, {amount: amount, _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
-    avgBribe = JSON.parse(data).avgBribe
-    clacks = JSON.parse(data).clacks
-    land = JSON.parse(data).land
     status(JSON.parse(data).status)
-    refreshUI()
+    displayHeaders(JSON.parse(data).info)
   })
 }
 function playSkill(){

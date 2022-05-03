@@ -97,9 +97,9 @@
     <script src='/js/action.js'></script>
     <script src='/js/ui/ui.js'></script>
 
-<!--
-    <script src='/js/ui/displayActions.js'></script>
     <script src='/js/ui/displayContracts.js'></script>
+    <!--
+    <script src='/js/ui/displayActions.js'></script>
 
     <script src='/js/ui/displayBuildings.js'></script>
     <script src='/js/ui/displayItems.js'></script>

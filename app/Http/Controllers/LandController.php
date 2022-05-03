@@ -43,6 +43,7 @@ class LandController extends Controller
       return view('Land.index')->with([
         'land'      => $land,
         'landType'  => $landType,
+        'sort'      => $request->sort,
       ]);
     }
 
@@ -164,10 +165,14 @@ class LandController extends Controller
         $land->bribe += $request->amount;
         $land->save();
         echo json_encode([
-          'avgBribe' => \App\Land::averageBribe(),
-          'clacks' => $user->clacks,
-          'land' => \App\Land::fetch(),
-          'status' => "You put " . $request->amount . " clacks up for the bribe on parcel #" . $land->id,
+          'info'  => \App\User::fetchInfo(),
+          'status' => "<span class='actionInput'>Clacks: <span class='fn'>-"
+            . $request->amount . "</span> [" . number_format($user->clacks)
+            . "] </span> &rarr; Parcel #" . $land->id
+            . " - Bribe: <span class='fp'>+" . $request->amount . "</span> ["
+            . number_format($land->bribe) ."] Valuation: <span class='fp'>+"
+            . $request->amount . "</span> [" . number_format($land->valuation)
+            . "]",
         ]);
     }
 

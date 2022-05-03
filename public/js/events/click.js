@@ -74,15 +74,19 @@ $(document).on('click', '.goToLand', function(e) {
 
 
 $(document).on('click', '.market', function(e) {
+  
   $(".market").removeClass('active')
   $(this).addClass('active')
+  fetchContracts(this.innerHTML)
+  /*
   if ($(".nav-link.market.active").html() != 'items' && $("#contractItemFilter").val() != ""){
     //this is a very hacky solution to the issue I was having with
     //itemTypeFilter select list basically screwing up all the other tabs
-    displayContracts()
+
     return
   }
-  formatContracts()
+  */
+  //formatContracts()
 })
 
 

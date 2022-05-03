@@ -135,6 +135,28 @@ class Items extends Model
     ];
   }
 
+  public static function fetchItemsInContracts(){
+    $contracts = \App\Contracts::
+      orWhere(function($query){
+        $query->where('active', 1)
+              ->where('category', 'buyOrder');
+      })->orWhere(function($query){
+        $query->where('active', 1)
+              ->where('category', 'sellOrder');
+      })->select('itemTypeID')->distinct()->get();
+    $itemsArr = [];
+    foreach($contracts as $contract){
+      $itemsArr[$contract->itemTypeID] = \App\ItemTypes::find($contract->itemTypeID)->name;
+    }
+    $alphaItemsArr = $itemsArr;
+    sort($alphaItemsArr);
+    $finalArr = [];
+    foreach($alphaItemsArr as $item){
+      $finalArr[array_search($item, $itemsArr)] = $item;
+    }
+    return $finalArr;
+  }
+
   static public function fetchActionItemInput($actionName){
     $actionReqs = [
       'cook-flourCampfire'                    => ['Flour' => 1, 'Wood'=> 1],

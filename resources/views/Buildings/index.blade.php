@@ -1,6 +1,22 @@
 <?php
   $fieldsDisplayed = [];
  ?>
+
+ <div>
+   <span class='fw-bold'>
+     buildings
+     (<span class='builtBuildings'></span>)
+   </span> -
+   <span id='numOfBuildingSlots'></span>
+   free building slots
+   <button id='show-buildingListings' class='show btn btn-link d-none'>+</button>
+   <button id='hide-buildingListings' class='hide btn btn-link'>-</button>
+   <a href='/buildingCosts' class='ms-5'> Why Can't I Build Anything?</a>
+ </div><div>
+   <div id='buildingWarning' class='text-decoration-underline text-center'></div>
+   <input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?
+ </div><div id='buildingListings' class='p-3'>
+
 @foreach($buildings as $building)
   @continue (in_array($building->name, $fieldsDisplayed))
   <div class='mt-3 @if ($building->farming) fields @endif'>
@@ -33,3 +49,4 @@
   </div>
 
 @endforeach
+</div>

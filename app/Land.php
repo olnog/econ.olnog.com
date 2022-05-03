@@ -99,6 +99,7 @@ class Land extends Model
       return Land::where('userID', $userID)->where('type', $landType)->count() > 0;
     }
 
+
     public static function fetch(){
       return Land::join('users', 'land.userID', 'users.id')
         ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
@@ -118,18 +119,23 @@ class Land extends Model
       return ['desert', 'forest', 'jungle', 'mountains', 'plains'];
     }
 
+    public static function fetchLandTypesTheyOwn($userID){
+      $arr = \App\Land::fetchLandTypes();
+      $landTypeArr = [];
+      foreach ($arr as $landType){
+        if (\App\Land::doTheyOwn($landType, $userID)){
+          $landTypeArr[] = $landType;
+        }
+      }
+      return $landTypeArr;
+    }
     public static function fetchMine(){
       return Land::where('userID', Auth::id())->get();
     }
 
     static public function integrityCheck($userID){
-      $newBuildingSlots = 0;
-      foreach(fetchLandTypes() as $landType){
-        $newBuildingSlots += \App\Land::fetchBuildingSlots($landType)
-          * \App\Land::where('type', $landType)->count();;
-      }
       $user = \App\User::find($userID);
-      $user->buildingSlots = $newBuildingSlots;
+      $user->buildingSlots = \App\Land::where('userID', $userID)->count();
       $user->save();
     }
 
@@ -214,9 +220,9 @@ class Land extends Model
       $land = \App\Land::where('userID', $userID)->where('oil', '>', $quantity)->first();
       if ($resource != 'Oil'){
         $land = \App\Land::where('userID', $userID)
-        ->where($dbNameArr[$resource], '>', 0)->first();
+        ->where($dbNameArr[$resource], '>', $quantity)->first();
       }
-      if ($land == null  || $land[$dbNameArr[$resource]] < 1){
+      if ($land == null  || $land[$dbNameArr[$resource]] < $quantity){
         if (!$useLease){
           return ['error' => "You don't have enough resources."];
         }

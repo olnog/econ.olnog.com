@@ -19,7 +19,7 @@
     </li>
     <li class="nav-item text-center">
       <a class="nav-link menu" href="#">buildings</a>
-      (<span class='builtBuildings'></span>)
+      (<span class='builtBuildings'></span>/<span id='buildingSlots'></span>)
 
     </li>
     <li class="nav-item text-center">
@@ -67,77 +67,10 @@
   </div><div id='actions' class='otherPages ms-3'>
 
   </div><div id='buildings' class='d-none otherPages ms-3'>
-    <div>
-      <span class='fw-bold'>
-        buildings
-        (<span class='builtBuildings'></span>)
-      </span> -
-      <span id='numOfBuildingSlots'></span>
-      free building slots
-      <button id='show-buildingListings' class='show btn btn-link d-none'>+</button>
-      <button id='hide-buildingListings' class='hide btn btn-link'>-</button>
-      <a href='/buildingCosts' class='ms-5'> Why Can't I Build Anything?</a>
-    </div><div>
-      <div id='buildingWarning' class='text-decoration-underline text-center'></div>
-      <input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?
-    </div><div id='buildingListings' class='p-3'>
-    </div>
+
   </div><div id='items' class='d-none otherPages ms-3'>
 
-
   </div><div id='market'  class='d-none otherPages ms-3'>
-    <div>
-      <ul class="nav nav-tabs">
-        <li class="nav-item ">
-                <a class="nav-link active market" href="#">land</a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link market" href="#">labor</a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link market" href="#">items</a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link market" href='#'>buildings</a>
-        </li>
-        <li class="nav-item ">
-          <a class="nav-link market" href='#'>mine</a>
-        </li>
-      </ul>
-    </div>
-
-    <div id='contractItemFilterDiv'>
-      Filter By Item: <select id='contractItemFilter'></select>
-      <input type='checkbox' class='contractFilterByCategory ms-3' value='buyOrder' checked> buying
-      <input type='checkbox' class='contractFilterByCategory ms-3' value='sellOrder' checked> selling
-    </div><div id='contractLandFilterDiv'>
-      Filter By Land Type:
-      <select id='contractLandFilter'>
-        <option></option>
-        <option>desert</option>
-        <option>forest</option>
-        <option>jungle</option>
-        <option>mountains</option>
-        <option>plains</option>
-      </select>
-    </div>
-    <div id='newContactInContracts' class='text-center'></div>
-
-    <div id='contractListings'></div>
-  </div><div id='chat'  class='d-none otherPages ms-3'>
-    <div class='text-center mt-2'>
-      We also have a <a href='https://discord.gg/Ve7PjNBc'>Discord</a> if you need to contact me quickly.
-    </div>
-    <input type='checkbox' id='filterChat' checked> Show only chat messages?
-
-    <div id='chatMsgs'></div>
-    <div id='chatCreate' class='fixed-bottom row p-3'>
-      <div class='col-9'>
-        <input type='text' class='form-control'  id='chatContent' placeholder='type message here'>
-      </div><div class='col-3 text-right'>
-        <button id='chatSend' class='btn-primary btn'>send</button>
-      </div>
-    </div>
   </div><div class='mt-5 pt-5 text-center main'>
     <div>
       Thanks To:

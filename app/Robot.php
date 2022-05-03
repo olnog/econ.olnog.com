@@ -56,19 +56,8 @@ class Robot extends Model
       }
       echo json_encode([
         'statusArr' => $status,
-        'robots'    => \App\Robot::fetch(),
-        'actions' => \App\Actions::fetch(\Auth::id()),
-        'buildingSlots' => \App\User::find(\Auth::id())->buildingSlots,
-        'buildings' => \App\Buildings::fetch(),
-        'clacks' => \App\User::find(\Auth::id())->clacks,
-        'labor' => \App\Labor::fetch(),
-        'equipment' => \App\Equipment::fetch(),
-        'history' => \App\History::fetch(),
-        'csrf' => csrf_token(),
-        'items' => Items::fetch(),
-        'land' => \App\Land::fetch(),
-        'numOfItems' => \App\Items::fetchTotalQuantity(\Auth::id()),
-        'itemCapacity' => \App\User::find(\Auth::id())->itemCapacity,
+        'csrf'      => csrf_token(),
+        'info'      => \App\User::fetchInfo(),
       ]);
     }
 }

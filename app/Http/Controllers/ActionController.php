@@ -37,9 +37,10 @@ class ActionController extends Controller
           ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
             'equipment.totalUses')->first();
       }
+      $actionable = \App\Actions::fetchActionable(\Auth::id(), true, null);
       return view('Actions.index')->with([
         'actions'             => \App\Actions::fetchUnlocked(\Auth::id(), true),
-        'actionable'          => \App\Actions::fetchActionable(\Auth::id(), true),
+        'actionable'          => $actionable,
         'allEquipment'        => \App\Equipment::fetch(),
         'banned'              => \App\Actions::fetchBanned(),
         'buildableBuildings'  => \App\Buildings::fetchBuildingsYouCanBuild(),
@@ -53,9 +54,12 @@ class ActionController extends Controller
           ->where('category', 'freelance')->orderBy('action')
           ->orderBy('price', 'desc')->get(),
         'hireableContracts'   => \App\Contracts::where('active', 1)
-          ->where('category', 'hire')->orderBy('action')
+          ->where('userID', '!=', \Auth::id())
+          ->where('category', 'hire')
+          ->whereIn('action', $actionable)->orderBy('action')
           ->orderBy('price', 'desc')->get(),
         'food'               => \App\Items::fetchByName('Food', \Auth::id())->quantity,
+        'skillPointCent'      => $labor->actions / $labor->actionsUntilSkill * 100,
         'robots'              => \App\Robot::fetch(),
       ]);
     }
@@ -79,7 +83,6 @@ class ActionController extends Controller
     public function store(Request $request)
     {
       \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
-      $actionName = $request->name;
       if ($request->automation  == 'true'){
         $food = \App\Items::fetchByName('Food', Auth::id());
         if ($food->quantity == 0){
@@ -89,7 +92,7 @@ class ActionController extends Controller
         $food->quantity--;
         $food->save();
       }
-      $msg = \App\Actions::do($actionName, Auth::id(), Auth::id(), null);
+      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null);
       $status = "";
 
       if (isset($msg['error'])){
@@ -101,26 +104,17 @@ class ActionController extends Controller
         \App\History::new(Auth::id(), 'action', $status);
       }
       $user = \App\User::find(\Auth::id());
+      $lastAction = null;
+      if (in_array($request->name, \App\Actions::fetchActionable(\Auth::id(), true, $request->name))){
+        $lastAction = $request->name;
+      }
       echo json_encode([
-        'status' => $status,
+        'lastAction' => $lastAction,
+        'info'       => \App\User::fetchInfo(),
+        'csrf'       => csrf_token(),
+        'status'     => $status,
       ]);
-/*
-      echo json_encode([
-        'actions' => \App\Actions::fetch(\Auth::id()),
-        'buildingSlots' => $user->buildingSlots,
-        'buildings' => \App\Buildings::fetch(),
-        'clacks' => $user->clacks,
-        'labor' => \App\Labor::fetch(),
-        'equipment' => \App\Equipment::fetch(),
-        'history' => \App\History::fetch(),
-        'csrf' => csrf_token(),
-        'status' => $status,
-        'items' => Items::fetch(),
-        'land' => \App\Land::fetch(),
-        'numOfItems' => \App\Items::fetchTotalQuantity(Auth::id()),
 
-      ]);
-*/
     }
 
     /**

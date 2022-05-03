@@ -106,8 +106,7 @@ class ItemController extends Controller
       $item->quantity -= $request->quantity;
       $item->save();
       echo json_encode([
-        'items' => \App\Items::fetch(),
-        'numOfItems' => \App\Items::fetchTotalQuantity(Auth::id()),
+        'info'    => \App\User::fetchInfo(),
       ]);
     }
 }

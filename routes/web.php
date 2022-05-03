@@ -16,7 +16,27 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  \App\Buildings::fetchRepairable();
+  $labor = \App\Labor::fetch();
+
+  $alsoEquipped = null;
+  $mainEquipped = null;
+  if ($labor->equipped != null){
+    $mainEquipped = \App\Equipment::where('equipment.id', $labor->equipped)
+      ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
+      ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
+        'equipment.totalUses')->first();
+  }
+  if ($labor->alsoEquipped != null){
+    $alsoEquipped = \App\Equipment::where('equipment.id', $labor->alsoEquipped)
+      ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
+      ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
+        'equipment.totalUses')->first();
+  }
+  $equipment = \App\Equipment::fetch();
+  foreach($equipment as $item){
+    
+  }
+
 });
 
 Route::get('/read', function(){
@@ -123,40 +143,8 @@ Route::get('/ajax', function () {
   if (Auth::check()){
     $user = \App\User::find(Auth::id());
     echo json_encode([
-      /*
-      'actions'       => \App\Actions::fetch(\Auth::id()),
-
-      'autoBribe'     => $user->autoBribe,
-      'avgBribe'      => \App\Land::averageBribe(),
-      'buildingLeases'=> \App\BuildingLease::fetch(),
-      'buildings'     => \App\Buildings::fetch(),
-      'buildingSlots' => $user->buildingSlots,
-      'buyOrders'     => \App\BuyOrders::fetch(null),
-      'clacks'        => $user->clacks,
-      'contracts'     => \App\Contracts::fetch(),
-      'equipment'     => \App\Equipment::fetch(),
-      'hostileTakeover' => \App\Land::isThereAHostileTakeover(),
-      'labor'         => \App\Labor::fetch(),
-      'leases'        => \App\Lease::fetch(),
-      'items'         => \App\Items::fetch(),
-      'itemTypes'     => \App\ItemTypes::all(),
-      'land'          => \App\Land::fetch(),
-      'numOfContracts'=> \App\Contracts::where('userID', \Auth::id())->where('active', 1)->count(),
-      'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
-      'numOfParcels'    => \App\Land::where('userID', \Auth::id())->count(),
-      */
-      'robots'        => \App\Robot::fetch(),
-      /*
-      'settings'      => [
-        'sound'=>$user->soundSetting,
-        'eatFood'=>$user->eatFoodSetting,
-        'useHerbMeds' => $user->useHerbMedsSetting,
-        'useBioMeds' => $user->useBioMedsSetting,
-        'useNanoMeds' => $user->useNanoMedsSetting,
-      ],
-      'userID'        => $user->id,
-      'username'      => $user->name,
-*/
+      'info'    => \App\User::fetchInfo(),
+      'robots'  => \App\Robot::where('userID', \Auth::id())->select('id')->get(),
     ]);
   }
 });

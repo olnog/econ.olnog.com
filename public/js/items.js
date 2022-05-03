@@ -8,10 +8,10 @@ function doTheyHaveItemsQuant(itemTypeID, quantity){
 }
 
 function dump(itemID, quantity){
-  $.post( "/items/" + itemID, {itemID: itemID, _token: fetchCSRF(), quantity: quantity, _method:'DELETE'}).done(function(data){
-    items = JSON.parse(data).items
-    numOfItems = JSON.parse(data).numOfItems
-    refreshUI()
+  $.post( "/items/" + itemID, {itemID: itemID, _token: fetchCSRF(),
+      quantity: quantity, _method:'DELETE'}).done(function(data){
+    displayHeaders(JSON.parse(data).info)
+    loadPage('items')
   })
 }
 

@@ -52,6 +52,7 @@ function displayContracts(){
       //}
       html += " paying anyone " + contracts[i].price.toLocaleString()
       + " clack(s) to <span class='fw-bold'>create and raise a child</span> for them (you will <span class='fw-bold text-danger'>Rebirth</span> but will be paid your fee after [to avoid the estate tax])"
+
     } else if (contracts[i].category == 'sellOrder'){
       let itemName = fetchItemName(contracts[i].itemTypeID)
       if (clacks >= contracts[i].price){
@@ -130,6 +131,8 @@ function displayContracts(){
           + " time(s) [ done " + contracts[i].conditionFulfilled.toLocaleString() + " time(s) ]"
       }
       html += " (required minimum skill level: " + contracts[i].minSkillLevel + ")"
+
+
     } else if (contracts[i].category == 'freelance'){
       if (clacks >= contracts[i].price){
         signContract = "<button id='freelance-" + contracts[i].id
@@ -148,6 +151,8 @@ function displayContracts(){
       if (contracts[i].minSkillLevel != null){
         html += " they have a skill level of " + contracts[i].minSkillLevel
       }
+
+
     } else if (contracts[i].category == 'construction'){
       signContract = ''
       if (clacks >= contracts[i].price){
@@ -245,6 +250,18 @@ function displayContracts(){
   }
   filterContractsByType()
   formatContracts()
+}
+
+function fetchContracts(id){
+  $.get("/contracts?filter="+id, function(data){
+    $("#market").html(data)
+    if (id == 'items'){
+      $("#contractItemFilterDiv").removeClass('d-none')
+    } else if (id == 'land'){
+      $("#contractLandFilterDiv").removeClass('d-none')
+
+    }
+  })
 }
 
 function formatContracts(){

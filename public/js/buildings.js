@@ -14,15 +14,7 @@ function buildBuilding(buildingName){
       return
     }
     status(JSON.parse(data).status)
-    history = JSON.parse(data).history
-    items = JSON.parse(data).items
-    itemCapacity = JSON.parse(data).itemCapacity
-    actions = JSON.parse(data).actions
-    labor = JSON.parse(data).labor
-    buildings = JSON.parse(data).buildings
-    buildingSlots = JSON.parse(data).buildingSlots
-    numOfItems = JSON.parse(data).numOfItems
-    refreshUI()
+    loadPage('actions')
   })
 }
 

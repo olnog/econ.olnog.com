@@ -13,9 +13,7 @@ function doTheyAlreadyHaveThisAsEquipment(itemID){
 
 function equipEquipment(equipmentID){
   $.post( "/equipment", {equipmentID: equipmentID, _token: fetchCSRF() }).done(function(data){
-    labor = JSON.parse(data).labor
-    actions = JSON.parse(data).actions
-    refreshUI()
+    loadPage('actions')
   })
 }
 

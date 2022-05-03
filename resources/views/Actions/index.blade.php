@@ -9,10 +9,13 @@
       <button id='hide-equipmentListings' class='hide btn btn-link d-none'>-</button>
     </div><div id='equipmentListings' class='ms-3 pb-3 d-none'>
       @foreach ($allEquipment as $equipment)
+      {{var_dump($equipment)}}
         <div class='row'>
           <div class='col'>
-            <span class='@if ($equipment->id == $equipped['main']->id
-              || $equipment->id == $equipped['also']->id) fw-bold @endif'>
+            <span class='@if (($equipped['main'] != null
+              && $equipment->id == $equipped['main']['id'])
+              || ($equipped['also'] != null
+              && $equipment->id == $equipped['also']['id'])) fw-bold @endif'>
             {{$equipment->name}}:
             </span>
             {{round($equipment->uses / $equipment->totalUses * 100, 1)}} %
@@ -20,8 +23,12 @@
           </div>
 
           <div class='col'>
-            @if ($equipment->id != $equipped['main']->id
-              && $equipment->id != $equipped['also']->id)
+            @if (($equipped['main'] == null
+              || ($equipped['main'] != null
+              && $equipment->id != $equipped['main']->id))
+              && ($equipped['also'] == null
+                || ($equipped['also'] != null
+                && $equipment->id != $equipped['also']->id)))
               <button id='equipEquipment-{{$equipment->id}}'
                 class='equipEquipment btn btn-link'>equip</button>
             @endif
@@ -66,6 +73,7 @@
 </div><div class=''>
   <div class="progress">
     <div id='skillPointProgress' class="progress-bar" role="progressbar"
+      style="width:{{$skillPointCent}}%"
       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
   </div>
 
@@ -118,9 +126,12 @@
       <span class='fw-bold'>hiring</span> (receive clacks)
     </div><div id='hiredActions' class='ps-5'>
       @foreach($hireableContracts as $contract)
-        <button id='hireAction-{{$contract->id}}' class='hire btn btn-success'>
-          {{$contract->action}} (+{{$contract->price}})
-        </button>
+        @if(in_array($contract->action, $actions))
+          <button id='hireAction-{{$contract->id}}'
+            class='hire btn btn-success'>
+            {{$contract->action}} (+{{$contract->price}})
+          </button>
+        @endif
       @endforeach
     </div>
   </div>
