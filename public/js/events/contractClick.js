@@ -7,16 +7,15 @@ $(document).on('click', 'button.buildContract', function(e) {
 })
 
 $(document).on('click', 'button.buyFromSellContract', function(e) {
-  buyFromSellOrder(this.id.split('-')[1], this.id.split('-')[2])
+  buyFromSellOrder(this.id.split('-')[1], this.id.split('-')[2], 'market')
 })
 
 $(document).on('click', 'button.buyFromSellOrder', function(e) {
-  buyFromSellOrder(this.id.split('-')[1], this.id.split('-')[2])
+  buyFromSellOrder(this.id.split('-')[1], this.id.split('-')[2], 'items')
 })
 
 $(document).on('click', 'button.buyLand', function(e) {
-  console.log(this.id, this)
-  buyLand(this.id.split('-')[1])
+  buyLand(this.id.split('-')[1], this.id.split('-')[2])
 })
 
 
@@ -41,14 +40,14 @@ $(document).on('click', 'button.freelance', function(e) {
 
   lastContractAction = {freelance: this.id.split('-')[1]}
   lastAction = null
-  freelance(this.id.split('-')[1])
+  freelance(this.id.split('-')[1], this.id.split('-')[2])
 })
 
 $(document).on('click', 'button.hire', function(e) {
   $("#lastAction").html($("#" + this.id).html())
   lastContractAction = {hire: this.id.split('-')[1]}
   lastAction = null
-  hire(this.id.split('-')[1])
+  hire(this.id.split('-')[1], this.id.split('-')[2])
 })
 
 $(document).on('click', 'button.lease', function(e) {
@@ -77,11 +76,11 @@ $(document).on('click', 'button.sellLand', function(e) {
 })
 
 $(document).on('click', 'button.sellToBuyOrder', function(e) {
-  sellToBuyOrder(this.id.split('-')[1], this.id.split('-')[2])
+  sellToBuyOrder(this.id.split('-')[1], this.id.split('-')[2], 'items')
 })
 
 $(document).on('click', 'button.sellToBuyContract', function(e) {
-  sellToBuyOrder(this.id.split('-')[1], this.id.split('-')[2])
+  sellToBuyOrder(this.id.split('-')[1], this.id.split('-')[2], 'market')
 })
 
 $(document).on('click', '.createContract', function(e) {

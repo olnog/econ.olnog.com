@@ -120,13 +120,13 @@
       @endif
       <?php $buyLandContract = \App\Contracts::fetchHighestBuyLandContract($parcel->type); ?>
       @if ($buyLandContract != null && $parcel->userID == \Auth::id())
-        <button id='buyLand-{{$buyLandContract->id}}'
+        <button id='buyLand-{{$buyLandContract->id}}-land'
           class='buyLand btn btn-success'>sell
           (+{{number_format($buyLandContract->price)}} clacks)</button>
       @endif
       @if ($landForSale != null)
         <button id='sellLand-{{$landForSale->id}}' class='sellLand btn btn-danger'>
-          buy (-{{$landForSale->price}} clacks)
+          buy (-{{$lndForSale->price}} clacks)
         </button>
       @endif
       </div><div class='ms-3'>

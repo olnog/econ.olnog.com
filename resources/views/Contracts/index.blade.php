@@ -74,7 +74,7 @@
         class='cancelContract btn btn-warning'>cancel</button>
 
     @elseif (in_array($contract->landType, $ownedLandTypes))
-      <button id='buyLand-{{$contract->id}}' class='buyLand btn btn-success'>sell {{$contract->landType}}</button>
+      <button id='buyLand-{{$contract->id}}-market' class='buyLand btn btn-success'>sell {{$contract->landType}}</button>
     @endif
   </div>
 
@@ -141,7 +141,7 @@
         <button id='cancelContract-{{$contract->id}}'
           class='cancelContract btn btn-warning'>cancel</button>
       @elseif ($clacks >= $contract->price)
-        <button id='freelance-{{$contract->id}}' class='freelance btn btn-danger'>
+        <button id='freelance-{{$contract->id}}-market' class='freelance btn btn-danger'>
           {{implode(' ', explode('-', $contract->action))}}
         </button>
       @endif
@@ -163,7 +163,7 @@
      <button id='cancelContract-{{$contract->id}}'
        class='cancelContract btn btn-warning'>cancel</button>
    @elseif (in_array($contract->action, $unlocked))
-       <button id='hire-{{$contract->id}}' class='hire btn btn-success'>
+       <button id='hire-{{$contract->id}}-market' class='hire btn btn-success'>
          {{implode(' ', explode('-', $contract->action))}}
        </button>
    @endif

@@ -117,7 +117,7 @@
       <span class='fw-bold'>freelancing</span> (pay clacks)
     </div><div id='freelanceActions' class='ps-5'>
       @foreach($freelanceContracts as $contract)
-        <button id='freelanceAction-{{$contract->id}}'
+        <button id='freelanceAction-{{$contract->id}}-actions'
           class='freelance btn btn-danger'>
           {{$contract->action}} (-{{$contract->price}})
         </button>
@@ -132,7 +132,7 @@
     </div><div id='hiredActions' class='ps-5'>
       @foreach($hireableContracts as $contract)
         @if(in_array($contract->action, $actions))
-          <button id='hireAction-{{$contract->id}}'
+          <button id='hireAction-{{$contract->id}}-actions'
             class='hire btn btn-success'>
             {{$contract->action}} (+{{$contract->price}})
           </button>

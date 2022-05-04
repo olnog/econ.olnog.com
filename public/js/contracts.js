@@ -1,4 +1,4 @@
-function buyFromSellOrder(contractID, quantity){
+function buyFromSellOrder(contractID, quantity, page){
   $.post( "/contracts/" + contractID, {type: 'buyFromSellOrder', quantity: quantity,
     _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
     if (JSON.parse(data).error != undefined){
@@ -7,13 +7,17 @@ function buyFromSellOrder(contractID, quantity){
       return
     }
     status(JSON.parse(data).status)
-    loadPage('items')
     displayHeaders(JSON.parse(data).info)
+    if (page == 'items'){
+      loadPage('items')
+      return
+    }
+    fetchContracts('items')
     //is this item page or market page?
   })
 }
 
-function buyLand(contractID){
+function buyLand(contractID, page){
   $.post( "/contracts/" + contractID, {type: 'buyLand',
     _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
     if (JSON.parse(data).error != undefined){
@@ -23,7 +27,11 @@ function buyLand(contractID){
     }
     status(JSON.parse(data).status)
     displayHeaders(JSON.parse(data).info)
-    fetchLand('land')
+    if (page=='land'){
+      fetchLand()
+      return
+    }
+    fetchContracts('land')
   })
 }
 
@@ -31,6 +39,8 @@ function cancelBuildingLease(contractID){
   $.post( "/buildingLease/" + contractID, {
     _token: fetchCSRF(), _method: 'DELETE' }).done(function(data){
     status(JSON.parse(data).status)
+    fetchContracts('mine')
+    displayHeaders(JSON.parse(data).info)
 
   })
 }
@@ -39,6 +49,8 @@ function cancelLease(contractID){
   $.post( "/lease/" + contractID, {
     _token: fetchCSRF(), _method: 'DELETE' }).done(function(data){
     status(JSON.parse(data).status)
+    fetchContracts('mine')
+    displayHeaders(JSON.parse(data).info)
 
   })
 }
@@ -47,6 +59,8 @@ function cancelContract(contractID){
   $.post( "/contracts/" + contractID, {
     _token: fetchCSRF(), _method: 'DELETE' }).done(function(data){
     status(JSON.parse(data).status)
+    fetchContracts('mine')
+    displayHeaders(JSON.parse(data).info)
 
   })
 }
@@ -82,11 +96,17 @@ function freelance(contractID){
         return
       }
       status(JSON.parse(data).status)
-      loadPage('items')
+      displayHeaders(JSON.parse(data).info)
+
+      if (page == 'actions'){
+        loadPage('actions')
+        return
+      }
+      fetchContracts('actions')
   })
 }
 
-function hire(contractID){
+function hire(contractID, page){
   $.post( "/contracts/" + contractID, {type: 'hire', _token: fetchCSRF(),
     _method: 'PUT' }).done(function(data){
       if (JSON.parse(data).error != undefined){
@@ -95,6 +115,11 @@ function hire(contractID){
       }
     status(JSON.parse(data).status)
     displayHeaders(JSON.parse(data).info)
+    if (page == 'actions'){
+      loadPage('actions')
+      return
+    }
+    fetchContracts('actions')
   })
 }
 
@@ -109,7 +134,7 @@ function lease(contractID){
     }
     status(JSON.parse(data).status)
     displayHeaders(JSON.parse(data).info)
-    fetchLand('land')
+    fetchContracts('land')
   })
 }
 
@@ -122,7 +147,8 @@ function leaseBuilding(contractID){
       return
     }
     displayHeaders(JSON.parse(data).info)
-    fetchLand('land')
+    status(JSON.parse(data).status)
+    fetchContracts('buildings')
   })
 
 }
@@ -155,7 +181,7 @@ function sellLand(contractID){
   })
 }
 
-function sellToBuyOrder(contractID, quantity){
+function sellToBuyOrder(contractID, quantity, page){
   $.post( "/contracts/" + contractID, {type: 'sellToBuyOrder', quantity:quantity,
     _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
       if (JSON.parse(data).error != undefined){
@@ -164,7 +190,11 @@ function sellToBuyOrder(contractID, quantity){
         return
       }
     status(JSON.parse(data).status)
-    loadPage('items')
+    if (page == 'items'){
+      loadPage('items')
+      return
+    }
+    fetchContracts('items')
 
   })
 }
