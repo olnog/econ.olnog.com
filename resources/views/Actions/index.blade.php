@@ -7,34 +7,6 @@
       Equipment
       <button id='show-equipmentListings' class='show btn btn-link'>+</button>
       <button id='hide-equipmentListings' class='hide btn btn-link d-none'>-</button>
-    </div><div id='equipmentListings' class='ms-3 pb-3 d-none'>
-      @foreach ($allEquipment as $equipment)
-      {{var_dump($equipment)}}
-        <div class='row'>
-          <div class='col'>
-            <span class='@if (($equipped['main'] != null
-              && $equipment->id == $equipped['main']['id'])
-              || ($equipped['also'] != null
-              && $equipment->id == $equipped['also']['id'])) fw-bold @endif'>
-            {{$equipment->name}}:
-            </span>
-            {{round($equipment->uses / $equipment->totalUses * 100, 1)}} %
-
-          </div>
-
-          <div class='col'>
-            @if (($equipped['main'] == null
-              || ($equipped['main'] != null
-              && $equipment->id != $equipped['main']->id))
-              && ($equipped['also'] == null
-                || ($equipped['also'] != null
-                && $equipment->id != $equipped['also']->id)))
-              <button id='equipEquipment-{{$equipment->id}}'
-                class='equipEquipment btn btn-link'>equip</button>
-            @endif
-          </div>
-        </div>
-      @endforeach
     </div><div class='ms-3'>
       Equipped:
       <span id='equipped'>
@@ -55,6 +27,39 @@
           nothing
         @endif
       </span>
+    </div><div id='equipmentListings' class='ms-3 pb-3 d-none'>
+      @foreach ($allEquipment as $equipment)
+        <div class='row mt-3'>
+          <div class='col'>
+            <span class='@if (($equipped['main'] != null
+              && $equipment->id == $equipped['main']['id'])
+              || ($equipped['also'] != null
+              && $equipment->id == $equipped['also']['id'])) fw-bold @endif'>
+            {{$equipment->name}}:
+            </span>
+            {{round($equipment->uses / $equipment->totalUses * 100, 1)}} %
+            @foreach ($relevantFuel as $equipmentFuel => $fuelName)
+              @continue (!str_contains($equipment->name, $equipmentFuel))
+              <div class='ms-5'>
+              [{{$fuelName}}:
+              {{number_format(\App\Items::fetchByName($fuelName, \Auth::id())->quantity)}}]
+              </div>
+            @endforeach
+          </div>
+
+          <div class='col'>
+            @if (($equipped['main'] == null
+              || ($equipped['main'] != null
+              && $equipment->id != $equipped['main']->id))
+              && ($equipped['also'] == null
+                || ($equipped['also'] != null
+                && $equipment->id != $equipped['also']->id)))
+              <button id='equipEquipment-{{$equipment->id}}'
+                class='equipEquipment btn btn-link'>equip</button>
+            @endif
+          </div>
+        </div>
+      @endforeach
     </div>
   </div>
 </div><div class='row'>

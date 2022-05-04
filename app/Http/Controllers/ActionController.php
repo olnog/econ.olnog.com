@@ -50,6 +50,7 @@ class ActionController extends Controller
                                     'also' => $alsoEquipped,
                                     'main' => $mainEquipped,
                                 ],
+        'food'               => \App\Items::fetchByName('Food', \Auth::id())->quantity,
         'freelanceContracts'   => \App\Contracts::where('active', 1)
           ->where('category', 'freelance')->orderBy('action')
           ->orderBy('price', 'desc')->get(),
@@ -58,7 +59,7 @@ class ActionController extends Controller
           ->where('category', 'hire')
           ->whereIn('action', $actionable)->orderBy('action')
           ->orderBy('price', 'desc')->get(),
-        'food'               => \App\Items::fetchByName('Food', \Auth::id())->quantity,
+        'relevantFuel'        => \App\Equipment::fetchFuel(),
         'skillPointCent'      => $labor->actions / $labor->actionsUntilSkill * 100,
         'robots'              => \App\Robot::fetch(),
       ]);
