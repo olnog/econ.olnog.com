@@ -97,6 +97,13 @@
   @endif
   <div id='buildingCosts'></div>
   <div id='actionListing' class='ps-3'>
+    @if (empty($actions))
+      <div class='text-center mt-3'>
+        <span class='fw-bold'>You don't have any actions unlocked yet.</span>
+      </div><div class='text-center mt-3'>
+        <a href='/actionTypes'>[ Unlock here ]</a>
+      </div>
+    @endif
     @foreach($actions as $action)
       @continue (in_array($action, $banned))
       <button id='action-{{$action}}' class='m-2 action btn
