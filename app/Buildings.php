@@ -110,7 +110,7 @@ class Buildings extends Model
     return \App\Buildings::where('userID', $userID)->where("uses", '>', 0)
       ->where('buildingTypeID', $buildingType->id)->count() > 0;
   }
-  
+
   public static function doTheyOwn($buildingName, $userID){
     $buildingType = \App\BuildingTypes::fetchByName($buildingName);
     return \App\Buildings::where('userID', $userID)
@@ -292,6 +292,10 @@ class Buildings extends Model
     return $buildingReqsArr[$actionName];
   }
 
+  public static function howManyBuildingsAndFieldsDoTheyHave($userID){
+    return \App\Buildings::where('userID', $userID)->count();
+  }
+
   public static function howManyFields($fieldName, $userID){
     $buildingType = \App\BuildingTypes::fetchByName($fieldName);
     return \App\Buildings::where('buildingTypeID', $buildingType->id)
@@ -346,8 +350,12 @@ class Buildings extends Model
 
   public static function use($buildingName, $userID){
     $building = \App\Buildings::fetchByName($buildingName, $userID);
+    $user = \App\User::find($userID);
     if ($building == null && \App\BuildingLease::areTheyLeasingThis($buildingName, $userID)){
       return \App\BuildingLease::use($buildingName, $userID);
+    } else if (\App\Buildings::howManyBuildingsAndFieldsDoTheyHave($userID)
+      > $user->buildingSlots){
+      return ['error' => "You can't use any buildings because you're over your building slots limit."];
     }
     $building->uses--;
     $building->save();

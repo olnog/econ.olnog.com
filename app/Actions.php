@@ -20,7 +20,7 @@ class Actions extends Model
     if ($useFood){
       $food = \App\Items::fetchByName('Food', Auth::id());
       if ($food->quantity == 0){
-        echo json_encode(['error' => "You're automating actions but you don't have any more food." ]);
+        return ['error' => "You're automating actions but you don't have any more food." ];
         return;
       }
       $food->quantity--;
@@ -30,10 +30,10 @@ class Actions extends Model
     if ($robotID != null){
       $electricity = \App\Items::fetchByName('Electricity', \Auth::id());
       if ($electricity->quantity < 100){
-        echo json_encode([
+        return [
           'error'
             => "You don't have enough Electricity to operate this Robot."
-          ]);
+          ];
 
       }
       $electricity->quantity -= 100;
@@ -141,6 +141,9 @@ class Actions extends Model
         $modifier = 10;
       }
       $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
+      if (isset($buildingCaption['error'])){
+        return $buildingCaption['error'];
+      }
       $foodCooked = 2 * $modifier;
       if ($robot == null){
         $foodCooked = $action->rank * 2 * $modifier;
@@ -303,6 +306,9 @@ class Actions extends Model
         $modifier = 100;
         $buildingName = 'Gristmill';
         $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
+        if (isset($buildingCaption['error'])){
+          return $buildingCaption['error'];
+        }
       } else if ($robot == null
         && Labor::areTheyEquippedWith('Handmill', $agentID)){
         $equipmentCaption = Equipment::useEquipped('Handmill', $agentID);
@@ -341,6 +347,9 @@ class Actions extends Model
         $modifier = 10;
         $buildingName = 'Sawmill';
         $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
+        if (isset($buildingCaption['error'])){
+          return $buildingCaption['error'];
+        }
       } else if ($robot == null && Labor::areTheyEquippedWith('Saw', $agentID)){
           $equipmentCaption = Equipment::useEquipped('Saw', $agentID);
       }
@@ -377,6 +386,9 @@ class Actions extends Model
       $modifier = 10;
       if (\App\Buildings::doTheyHaveAccessTo('Mine', $contractorID)){
         $buildingCaption = \App\Buildings::use('Mine', $contractorID);
+        if (isset($buildingCaption['error'])){
+          return $buildingCaption['error'];
+        }
         $modifier = 100;
       }
       if ($robot == null && $equipmentAvailable[0] != 'Shovel'){
@@ -431,6 +443,9 @@ class Actions extends Model
       $modifier = 10;
       if (\App\Buildings::doTheyHaveAccessTo('Mine', $contractorID)){
         $buildingCaption = \App\Buildings::use('Mine', $contractorID);
+        if (isset($buildingCaption['error'])){
+          return $buildingCaption['error'];
+        }
         $modifier = 100;
       }
       if ($robot == null && $equipmentAvailable[0] != 'Pickaxe'){
@@ -581,6 +596,9 @@ class Actions extends Model
 
     } else if ($actionName == 'pump-oil'){
       $buildingCaption = \App\Buildings::use('Oil Well', $contractorID);
+      if (isset($buildingCaption['error'])){
+        return $buildingCaption['error'];
+      }
       $landResource = \App\Land::takeResource('Oil',  $agentID, $production,
         true);
       if ($landResource != true){
@@ -595,6 +613,9 @@ class Actions extends Model
 
     } else if ($actionName == 'refine-oil'){
       $buildingCaption = \App\Buildings::use('Oil Refinery', $contractorID);
+      if (isset($buildingCaption['error'])){
+        return $buildingCaption['error'];
+      }
       $output = \App\Items::make('Jet Fuel', 1 * $production, $contractorID,
         $agentID);
       $output .= \App\Items::make('Gasoline', 5 * $production, $contractorID,
@@ -670,6 +691,9 @@ class Actions extends Model
         $production = $action->rank  * $productionModifier;
       }
       $buildingCaption = \App\Buildings::use($buildingName, $contractorID);
+      if (isset($buildingCaption['error'])){
+        return $buildingCaption['error'];
+      }
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName . $buildingName), $contractorID);
       $output = \App\Items::make(\App\Items::fetchItemNameForAction($actionName),
@@ -690,6 +714,9 @@ class Actions extends Model
       $powerPlant->electricity = 0;
       $powerPlant->save();
       $buildingCaption = \App\Buildings::use('Solar Power Plant', $contractorID);
+      if (isset($buildingCaption['error'])){
+        return $buildingCaption['error'];
+      }
       $output = \App\Items::make('Electricity', $production,
         $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $electricityCaption . $foodCaption . $buildingCaption
@@ -710,6 +737,9 @@ class Actions extends Model
     } else {
       $production = \App\Actions::fetchBaseProduction($actionName, $robotID, $agentID);
       $buildingCaption = \App\Buildings::use($reqBuildings[0], $contractorID);
+      if (isset($buildingCaption['error'])){
+        return $buildingCaption['error'];
+      }
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName), $contractorID);
       $output = \App\Items::make(\App\Items
