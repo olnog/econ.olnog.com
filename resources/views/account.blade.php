@@ -29,7 +29,7 @@
   @foreach ($history as $entry)
     <div class='history {{$entry->type}}'>
       <div class='text-center fw-bold'> {{$entry->created_at}}</div>
-      <div class='text-center mb-3'> {{ $entry->status }} </div>
+      <div class='text-center mb-3'> {!! $entry->status !!} </div>
     </div>
   @endforeach
 @endsection
