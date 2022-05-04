@@ -16,26 +16,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  $labor = \App\Labor::fetch();
-
-  $alsoEquipped = null;
-  $mainEquipped = null;
-  if ($labor->equipped != null){
-    $mainEquipped = \App\Equipment::where('equipment.id', $labor->equipped)
-      ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
-      ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
-        'equipment.totalUses')->first();
-  }
-  if ($labor->alsoEquipped != null){
-    $alsoEquipped = \App\Equipment::where('equipment.id', $labor->alsoEquipped)
-      ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
-      ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
-        'equipment.totalUses')->first();
-  }
-  $equipment = \App\Equipment::fetch();
-  foreach($equipment as $item){
-
-  }
+  \App\Land::new(\Auth::id());
 
 });
 

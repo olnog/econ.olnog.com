@@ -132,6 +132,38 @@ class Land extends Model
     public static function fetchMine(){
       return Land::where('userID', Auth::id())->get();
     }
+    public static function fetchResourcesToBeCreated($landType){
+      $resourceArr = ['oil'];
+      $createdResources = [];
+      if ($landType == 'forest'){
+        $resourceArr[] = 'logs';
+      } else if ($landType == 'desert'){
+        $resourceArr['sand'];
+      } else if ($landType == 'mountains'){
+        $resourceArr[] = 'coal';
+        $resourceArr[] = 'copper';
+        $resourceArr[] = 'iron';
+        $resourceArr[] = 'uranium';
+      }
+      foreach($resourceArr as $resource){
+        $howMuch = \App\Land::fetchResourceRange($resource);
+        $createdResources[$resource] = rand($howMuch['min'], $howMuch['max']);
+      }
+      return $createdResources;
+    }
+
+    public static function fetchResourceRange($resource){
+      $resourceArr = [
+        'coal'    => ['min' => 100000, 'max' => 100000000],
+        'copper'  => ['min' => 100000, 'max' => 10000000],
+        'iron'    => ['min' => 100000, 'max' => 100000000],
+        'logs'     => ['min' => 1000, 'max' => 20000],
+        'oil'     => ['min' => 10, 'max' => 100000],
+        'sand'    => ['min' => 1000000, 'max'=> 10000000],
+        'uranium' => ['min' => 100000, 'max' => 1000000],
+      ];
+      return $resourceArr[$resource];
+    }
 
     static public function integrityCheck($userID){
       $user = \App\User::find($userID);
@@ -160,7 +192,11 @@ class Land extends Model
       } else if ($landTypeChance == 10){
         $land->type = 'jungle';
       }
-      $user->buildingSlots += \App\Land::fetchBuildingSlots($land->type);
+      $user->buildingSlots ++;
+      $resources = \App\Land::fetchResourcesToBeCreated($land->type);
+      foreach($resources as $resourceName => $amount){
+        $land[$resourceName] = $amount;
+      }
       $land->save();
       $user->save();
       return ucfirst($land->type);

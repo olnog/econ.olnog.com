@@ -181,7 +181,8 @@ class Items extends Model
       'make-BioMeds'
          => ['HerbMeds' => 10, 'Bio Material' => 10,'Electricity' => 10],
       'make-book'                             => ['Paper' => 100],
-      'make-contract'                          => ['Paper' => 1],
+      'make-contract'                         => ['Paper' => 1],
+      'make-cpu'                              => ['Silicon' => 100, 'Copper Ingots' => 100, 'Electricity' => 1000],
       'make-clone'                            => ['Genetic Material' => 1000, 'Electricity'=> 100000],
       'make-diesel-bulldozer'                 => ['Steel Ingots' => 250,
         'Diesel Engines'=> 1, 'Copper Ingots' => 50, 'Electricity'=> 1000],
