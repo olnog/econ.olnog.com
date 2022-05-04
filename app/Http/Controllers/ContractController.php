@@ -601,7 +601,7 @@ class ContractController extends Controller
           return;
         }
         $msg = \App\Actions::do($contract->action, Auth::id(),
-          $contract->userID, null);
+          $contract->userID, null, false);
 
         if (isset($msg['error'])){
           $status = $msg['error'];
@@ -642,7 +642,7 @@ class ContractController extends Controller
         $user->save();
         $freelancer->clacks += $contract->price;
         $freelancer->save();
-        $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null);
+        $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
         }  else {

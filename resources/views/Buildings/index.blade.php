@@ -33,7 +33,6 @@
    <div id='buildingWarning' class='text-decoration-underline text-center'></div>
    <!--<input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?-->
  </div><div id='buildingListings' class='p-3'>
-{{var_dump($repairable)}}
 @foreach($buildings as $building)
   @continue (in_array($building->name, $fieldsDisplayed))
   <div class='mt-3 @if ($building->farming) fields @endif'>

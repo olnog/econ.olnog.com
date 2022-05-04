@@ -16,7 +16,6 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  \App\Land::new(\Auth::id());
 
 });
 

@@ -84,16 +84,8 @@ class ActionController extends Controller
     public function store(Request $request)
     {
       \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
-      if ($request->automation  == 'true'){
-        $food = \App\Items::fetchByName('Food', Auth::id());
-        if ($food->quantity == 0){
-          echo json_encode(['error' => "You're automating actions but you don't have any more food." ]);
-          return;
-        }
-        $food->quantity--;
-        $food->save();
-      }
-      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null);
+
+      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null, $request->automation  == 'true');
       $status = "";
 
       if (isset($msg['error'])){

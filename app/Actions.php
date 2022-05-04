@@ -12,9 +12,20 @@ class Actions extends Model
 {
   protected $table = 'actions';
 
-  public static function do($actionName, $agentID, $contractorID, $robotID){
+  public static function do($actionName, $agentID, $contractorID, $robotID, $useFood){
     //could possible streamline if statements like I did fetchActionable
     $action = \App\Actions::fetchByName($agentID, $actionName);
+    $foodCaption = "";
+    if ($useFood){
+      $food = \App\Items::fetchByName('Food', Auth::id());
+      if ($food->quantity == 0){
+        echo json_encode(['error' => "You're automating actions but you don't have any more food." ]);
+        return;
+      }
+      $food->quantity--;
+      $food->save();
+      $foodCaption = "Food: <span class='fn'>-1 [" . number_format($food->quantity) . "] ";
+    }
     $buildingCaption = "";
     $equipmentCaption = "";
     $production = \App\Actions::fetchBaseProduction($actionName, $robotID,
@@ -90,7 +101,7 @@ class Actions extends Model
       $output = \App\Items::make('Logs', $production, $contractorID,
         $agentID);
       if ($agentID == $contractorID){
-        $status = "<span class='actionInput'>" . $equipmentCaption
+        $status = "<span class='actionInput'>" . $foodCaption . $equipmentCaption
           . $leaseStatus . "</span> &rarr; ";
       }
       $status .= $output;
@@ -124,7 +135,7 @@ class Actions extends Model
         return ['error' => $itemCaption['error']];
       }
       $output = \App\Items::make('Food', $foodCooked, $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status'] . $buildingCaption
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status'] . $buildingCaption
         . "</span> &rarr; " . $output;
 
 
@@ -165,7 +176,7 @@ class Actions extends Model
       }
       $landFound .= "] " . $minChance . ":" . $numOfParcels . ")";
       if ($satStatus != "" || $equipmentCaption != ""){
-        $status = "<span class='actionInput'>" . $satStatus . $equipmentCaption
+        $status = "<span class='actionInput'>" . $foodCaption . $satStatus . $equipmentCaption
           . "</span> &rarr; " . $landFound;
       }
 
@@ -228,7 +239,7 @@ class Actions extends Model
         $produce->save();
         $totalYield += $yield;
       }
-      $status = "<span class='actionInput'>" . $itemName . $fieldName
+      $status = "<span class='actionInput'>" . $foodCaption . $itemName . $fieldName
         . ": <span class='fn'>-" . $howManyFields . "</span> "
         . $equipmentCaption . "</span> &rarr; " . $itemName
         . ": <span class='fp'>+" . $totalYield . "</span>";
@@ -253,7 +264,7 @@ class Actions extends Model
       $labor->availableSkillPoints--;
       $labor->save();
       $output = \App\Items::make('Books', $action->rank, $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . " <span class='fn'>-1</span> Skill Point "
         . "</span> &rarr; " . $output;
 
@@ -292,7 +303,7 @@ class Actions extends Model
         return ['error' => $itemCaption['error']];
       }
       $output = \App\Items::make('Flour', $production, $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . $buildingCaption . $equipmentCaption
         . "</span> &rarr; " . $output;
 
@@ -326,7 +337,7 @@ class Actions extends Model
         return ['error' => $itemCaption['error']];
       }
       $output = \App\Items::make('Wood', $production, $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . $buildingCaption . $equipmentCaption
         . "</span> &rarr; " . $output;
 
@@ -368,7 +379,7 @@ class Actions extends Model
       $output = \App\Items::make('Sand', $production, $contractorID, $agentID);
       $status = "<span class='actionInput'>";
       if ($agentID == $contractorID){
-        $status .= $equipmentCaption . $leaseStatus;
+        $status .=  $foodCaption . $equipmentCaption . $leaseStatus;
       }
       $status .= $buildingCaption . "</span> &rarr; " . $output;
 
@@ -486,7 +497,7 @@ class Actions extends Model
       $wheatField->save();
       $status = "<span class='actionInput'>";
       if ($contractorID == $agentID){
-        $status .= $leaseStatus;
+        $status .=  $foodCaption . $leaseStatus;
       }
       $status .= "Building Slots: <span class='fn'>-1</span> ["
         . number_format($contractor->buildingSlots)
@@ -519,7 +530,7 @@ class Actions extends Model
       $field[$whichVarName[$actionName]] = $production;
       $field->harvestAfter = date("Y-m-d H:i:s", strtotime('+24 hours'));
       $field->save();
-      $status = "<span class='actionInput'>Building Slots: <span class='fn'>-1</span> ["
+      $status = "<span class='actionInput'>" . $foodCaption . " Building Slots: <span class='fn'>-1</span> ["
         . number_format($contractor->buildingSlots) . "]</span> &rarr; "
         . $itemName . " Field: <span class='fp'>+1</span>";
 
@@ -534,7 +545,7 @@ class Actions extends Model
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName), $contractorID);
       $output = \App\Items::make('Oil', $production, $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . $buildingCaption . "</span> &rarr; " . $output;
 
 
@@ -548,7 +559,7 @@ class Actions extends Model
         $agentID);
       $itemCaption = \App\Items
         ::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . $buildingCaption . "</span> &rarr; " . $output;
 
 
@@ -619,7 +630,7 @@ class Actions extends Model
         ::fetchActionItemInput($actionName . $buildingName), $contractorID);
       $output = \App\Items::make(\App\Items::fetchItemNameForAction($actionName),
         $production, $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . $buildingCaption
         . "</span> &rarr; " . $output;
 
@@ -637,16 +648,20 @@ class Actions extends Model
       $buildingCaption = \App\Buildings::use('Solar Power Plant', $contractorID);
       $output = \App\Items::make('Electricity', $production,
         $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $buildingCaption
+      $status =  "<span class='actionInput'>" . $foodCaption . $buildingCaption
         . "</span> &rarr; " . $output;
 
 
     } else if ($actionName == 'gather-stone' || $actionName == 'gather-wood'
       || $actionName == 'hunt'){
-      $status = \App\Items
+      $whatMade = \App\Items
         ::make(\App\Items::fetchItemNameForAction($actionName), $production,
         $contractorID, $agentID);
-
+      $status = $whatMade;
+      if ($foodCaption != ''){
+        $status = "<span class='actionInput'>" . $foodCaption
+          . "</span> &rarr; " . $whatMade;
+      }
 
     } else {
       $production = \App\Actions::fetchBaseProduction($actionName, $robotID, $agentID);
@@ -656,7 +671,7 @@ class Actions extends Model
       $output = \App\Items::make(\App\Items
         ::fetchItemNameForAction($actionName), $production,
         $contractorID, $agentID);
-      $status =  "<span class='actionInput'>" . $itemCaption['status']
+      $status =  "<span class='actionInput'>" . $foodCaption . $itemCaption['status']
         . $buildingCaption . "</span> &rarr; " . $output;
     }
 
