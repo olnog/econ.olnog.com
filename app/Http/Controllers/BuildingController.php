@@ -16,8 +16,12 @@ class BuildingController extends Controller
     {
       //var_dump(\App\Buildings::destroy(46));
       return view('Buildings.index')->with([
+        'build'         => \App\Actions::fetchByName(\Auth::id(), 'build')->unlocked,
         'buildings'   => \App\Buildings::fetchBuilt(),
+        'buildingSlots' => \App\User::find(\Auth::id())->buildingSlots,
+        'repair'         => \App\Actions::fetchByName(\Auth::id(), 'repair')->unlocked,
         'repairable'  => \App\Buildings::fetchRepairable(),
+
       ]);
       //echo json_encode(\App\Buildings::fetch());
     }

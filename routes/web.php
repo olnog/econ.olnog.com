@@ -34,7 +34,7 @@ Route::get('/test', function(){
   }
   $equipment = \App\Equipment::fetch();
   foreach($equipment as $item){
-    
+
   }
 
 });
@@ -116,7 +116,7 @@ Route::get('/buildingCosts', function(){
   return view('buildingCosts')->with([
     'buildingSlots' => \App\User::find(Auth::id())->buildingSlots,
     'buildingTypes' => \App\BuildingTypes::orderBy('name', 'asc')->get(),
-    'construction' => \App\Skills::fetchByIdentifier('construction', Auth::id()),
+    'build' => \App\Actions::fetchByName(Auth::id(), 'build'),
     'land' => \App\Land::where('userID', Auth::id())->get(),
 
 

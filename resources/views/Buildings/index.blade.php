@@ -1,20 +1,37 @@
 <?php
   $fieldsDisplayed = [];
  ?>
+<div class='text-center'>
+  @if (!$build || !$repair)
+    <div class='mt-3'>
+      <a href='/actionTypes'>[ unlock ]</a>
+    </div>
+  @endif
+  @if (!$build)
+    <div class='mt-3 text-decoration-underline'>
+      You must unlock the <span class='fw-bold'>build</span> action in order to build.
+    </div>
+  @endif
 
- <div>
+  @if (!$repair)
+    <div class='text-decoration-underline'>
+      You must unlock the <span class='fw-bold'>repair</span> action in order to repair your building.
+    </div>
+  @endif
+</div>
+ <div class='mt-5'>
    <span class='fw-bold'>
      buildings
-     (<span class='builtBuildings'></span>)
+     (<span class='builtBuildings'>{{count($buildings)}}</span>)
    </span> -
-   <span id='numOfBuildingSlots'></span>
+   <span id='numOfBuildingSlots'>{{$buildingSlots}}</span>
    free building slots
    <button id='show-buildingListings' class='show btn btn-link d-none'>+</button>
    <button id='hide-buildingListings' class='hide btn btn-link'>-</button>
    <a href='/buildingCosts' class='ms-5'> Why Can't I Build Anything?</a>
  </div><div>
    <div id='buildingWarning' class='text-decoration-underline text-center'></div>
-   <input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?
+   <!--<input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?-->
  </div><div id='buildingListings' class='p-3'>
 
 @foreach($buildings as $building)

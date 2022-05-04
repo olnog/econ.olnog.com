@@ -8,8 +8,8 @@ Why am I not able to build right now?
 </div><div class='text-decoration-underline ms-5'>
   @if (count($land) == 0)
     You don't have any land. Get some land by buying or leasing it, exploring or doing a hostile takeover.
-  @elseif ($construction->rank == 0)
-    You need to level up your Construction skill first. It's at 0.
+  @elseif (!$build->unlocked || $build->unlocked == 0)
+    You need to unlock 'build' action before you can build anything.
   @elseif ($buildingSlots == 0)
     You don't have any building slots left. You'll have to get more land or destroy some buildings before you can build some more.
   @else
@@ -20,7 +20,7 @@ Why am I not able to build right now?
   @foreach($buildingTypes as $buildingType)
     <div class='fw-bold mt-3'>
       {{$buildingType->name}}
-      @if (\App\Buildings::isItBuilt($buildingType->name, \Auth::id()))
+      @if (\App\Buildings::doTheyOwn($buildingType->name, \Auth::id()))
         <span class='fw-bold text-decoration-underline'>(built)</span>
       @endif
       <button id='show-buildingInfo{{$buildingType->id}}' class='show btn btn-link'> [ + ] </button>

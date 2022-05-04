@@ -25,13 +25,13 @@ class ActionController extends Controller
       $labor = \App\Labor::fetch();
       $alsoEquipped = null;
       $mainEquipped = null;
-      if ($labor->equipped != null){
+      if ($labor != null && $labor->equipped != null){
         $mainEquipped = \App\Equipment::where('equipment.id', $labor->equipped)
           ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
           ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
             'equipment.totalUses')->first();
       }
-      if ($labor->alsoEquipped != null){
+      if ($labor != null && $labor->alsoEquipped != null){
         $alsoEquipped = \App\Equipment::where('equipment.id', $labor->alsoEquipped)
           ->join('itemTypes', 'itemTypes.id', 'equipment.itemTypeID')
           ->select('itemTypes.name', 'equipment.id', 'equipment.uses',
