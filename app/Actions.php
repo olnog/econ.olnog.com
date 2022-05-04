@@ -41,7 +41,7 @@ class Actions extends Model
     } else if (!\App\Items::doTheyHaveEnoughFor($actionName)){
       return ['error' => \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName), $contractorID)['error']];
-    } else if (!$action->unlocked || $action->rank == 0){
+    } else if ($robotID == null && (!$action->unlocked || $action->rank == 0)){
       return ['error' => "This action hasn't been unlocked yet.",];
     }
 

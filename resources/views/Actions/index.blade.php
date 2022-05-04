@@ -163,7 +163,7 @@
           <button id='reprogram-{{$robot->id}}' class='reprogram btn btn-link'>
             reprogram
           </button>
-        </div><div id='robotStatus{{$robot->id}}'></div>
+        </div><div id='robotStatus{{$robot->id}}' class='bg-secondary'></div>
         <div id='robotError{{$robot->id}}' class='text-danger'></div>
     @endforeach
 

@@ -57,6 +57,7 @@ class Robot extends Model
       echo json_encode([
         'statusArr' => $status,
         'csrf'      => csrf_token(),
+        'electricity' => \App\Items::fetchByName('Electricity', \Auth::id())->quantity,
         'info'      => \App\User::fetchInfo(),
       ]);
     }

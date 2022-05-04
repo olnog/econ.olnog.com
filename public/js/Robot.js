@@ -13,6 +13,8 @@ class Robot{
       displayHeaders(JSON.parse(data).info)
       csrfToken = JSON.parse(data).csrf
       statusArr = JSON.parse(data).statusArr
+      $("#robotsElectricity").html(JSON.parse(data).electricity.toLocaleString())
+
       let robotStopped = true
       for (let i in statusArr){
         if ('error' in statusArr[i]){
@@ -22,6 +24,10 @@ class Robot{
             robotStopped = false
           }
           $("#robotStatus" + i).html(statusArr[i].status)
+          $("#robotStatus" + i).addClass('fw-bold')
+          setTimeout(function(){
+            $("#robotStatus" + i).removeClass('fw-bold')
+          }, 750)
         }
       }
       if (robotStopped){
