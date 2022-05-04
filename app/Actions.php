@@ -461,20 +461,27 @@ class Actions extends Model
 
 
     } else if ($actionName == 'plant-rubber-plantation'){
+
+
       $leaseStatus = '';
       $landBonus = \App\Land::where('type', 'jungle')
         ->where('userID', $contractorID)->count();
-      if (!\App\Land::doTheyOwn('jungle', $agentID)){
-        $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('jungle', $agentID);
+      if (!\App\Land::doTheyOwn('jungle', $contractorID)){
+        $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('jungle', $contractorID);
         if ($currentlyLeasing){
-          $landBonus = 1;
-          $leaseStatus = \App\Lease::use('jungle', $agentID);
+          $landBonus = \App\Lease::howManyAreTheyLeasing('jungle', $contractorID)
+          $leaseStatus = \App\Lease::use('jungle', $contractorID);
         }
         if ($leaseStatus == false || !$currentlyLeasing){
           return [
             'error' => "You don't have access to any jungles. Sorry."
           ];
         }
+      }
+      if (\App\Buildings::howManyFields('Rubber Plantation', $contractorID) >= $landBonus){
+        return [
+          'error' => "Unfortunately, the number of Rubber Plantations you can have are limited to the number of Jungles you have access to and you're maxed out."
+        ];
       }
       $production = 10;
       if ($robot == null){
@@ -484,8 +491,6 @@ class Actions extends Model
       $contractor = \App\User::find($contractorID);
       if ($contractor->buildingSlots < 1){
         return ['error' => " You don't have enough building slots."];
-      } else if (!Land::doTheyHaveAccessTo('jungle')){
-        return ['error' => "You don't own any jungle."];
       }
       $contractor->buildingSlots--;
       $contractor->save();
@@ -507,20 +512,44 @@ class Actions extends Model
     } else if ($actionName == 'plant-wheat-field'
       || $actionName == 'plant-plant-x-field'
       || $actionName == 'plant-herbal-greens-field'){
+      $contractor = \App\User::find($contractorID);
+      if ($contractor->buildingSlots < 1){
+        return ['error' => " You don't have enough building slots."];
+      }
       $itemName = \App\Items::fetchItemNameForAction($actionName);
       $whichVarName = [
         'plant-wheat-field' => 'wheat',
         'plant-plant-x-field' => 'plantX',
         'plant-herbal-greens-field'=> 'herbalGreens'
       ];
+      $landBonus = \App\Land::where('type', 'plains')
+        ->where('userID', $contractorID)->count();
+      if (!\App\Land::doTheyOwn('plains', $contractorID)){
+        $currentlyLeasing = \App\Lease::areTheyAlreadyLeasing('plains', $contractorID);
+        if ($currentlyLeasing){
+          $landBonus = \App\Lease::howManyAreTheyLeasing('plains', $contractorID)
+          $leaseStatus = \App\Lease::use('plains', $contractorID);
+        }
+        if ($leaseStatus == false || !$currentlyLeasing){
+          return [
+            'error' => "You don't have access to any plains. Sorry."
+          ];
+        }
+      }
+
+
       $production = 10;
       if ($robot == null){
         $production = $action->rank * 10;
       }
       $fieldType = \App\BuildingTypes::fetchByName($itemName . ' Field');
-      $contractor = \App\User::find($contractorID);
-      if ($contractor->buildingSlots < 1){
-        return ['error' => " You don't have enough building slots."];
+
+
+
+      if (\App\Buildings::howManyFields('Plains', $contractorID) >= $landBonus){
+        return [
+          'error' => "Unfortunately, the number of " . $itemName . " Fields you can have are limited to the number of Plains you have access to and you're maxed out."
+        ];
       }
       $contractor->buildingSlots--;
       $contractor->save();
@@ -839,7 +868,8 @@ class Actions extends Model
       } else if (($action == 'plant-wheat-field'
       || $action == 'plant-herbal-greens-field'
       || $action == 'plant-plant-x-field')
-        && \App\User::find(Auth::id())->buildingSlots>0){
+        && \App\User::find(Auth::id())->buildingSlots>0
+        && Land::doTheyHaveAccessTo('jungle')){
         $actionable[] = $action;
 
       } else if ($action == 'program-robot'

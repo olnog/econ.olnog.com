@@ -165,6 +165,10 @@ class Land extends Model
       return $resourceArr[$resource];
     }
 
+
+
+
+
     static public function integrityCheck($userID){
       $user = \App\User::find($userID);
       $user->buildingSlots = \App\Land::where('userID', $userID)->count();
@@ -191,8 +195,7 @@ class Land extends Model
         $land->type = 'forest';
       } else if ($landTypeChance == 10){
         $land->type = 'jungle';
-      }
-      $user->buildingSlots ++;
+      }      $user->buildingSlots ++;
       $resources = \App\Land::fetchResourcesToBeCreated($land->type);
       foreach($resources as $resourceName => $amount){
         $land[$resourceName] = $amount;

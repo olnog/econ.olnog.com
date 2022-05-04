@@ -34,6 +34,11 @@ class Lease extends Model
     return \App\Lease::where('userID', \Auth::id())->where('active', 1)->get();
   }
 
+  public static function howManyAreTheyLeasing($type, $userID){
+    return \App\Lease::where('userID', \Auth::id())->where('active', 1)
+      ->where('landType', $type)->count();
+  }
+
   public static function use($landType, $userID){
     $lease = \App\Lease::where('userID', $userID)->where('active', 1)
       ->where('landType', $landType)->first();
