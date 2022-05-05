@@ -723,7 +723,6 @@ class Actions extends Model
 
     } else if ($actionName == 'gather-stone' || $actionName == 'gather-wood'
       || $actionName == 'hunt'){
-      $production = \App\Actions::fetchBaseProduction($actionName, $robotID, $agentID);
 
       $whatMade = \App\Items
         ::make(\App\Items::fetchItemNameForAction($actionName), $production,
@@ -735,7 +734,6 @@ class Actions extends Model
       }
 
     } else {
-      $production = \App\Actions::fetchBaseProduction($actionName, $robotID, $agentID);
       $buildingCaption = \App\Buildings::use($reqBuildings[0], $contractorID);
       if (isset($buildingCaption['error'])){
         return $buildingCaption['error'];
@@ -1033,7 +1031,7 @@ class Actions extends Model
         'pump-oil'                              => 10,
       ];
       $baseProduction = 1;
-      if (in_array($actionName, $productionArr)){
+      if (isset($productionArr[$actionName])){
         $baseProduction = $productionArr[$actionName];
       }
       if ($robotID != null){
