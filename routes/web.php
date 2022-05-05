@@ -18,6 +18,12 @@ use Illuminate\Http\Request;
 Route::get('/test', function(){
 });
 
+
+Route::post('/metric', function (Request $request){
+  \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
+});
+
+
 Route::get('/read', function(){
   $books = \App\Items::fetchByName('Books', \Auth::id());
   $labor = \App\Labor::fetch();

@@ -74,7 +74,7 @@ $(document).on('click', '.goToLand', function(e) {
 
 
 $(document).on('click', '.market', function(e) {
-  
+
   $(".market").removeClass('active')
   $(this).addClass('active')
   fetchContracts(this.innerHTML)
@@ -108,6 +108,8 @@ $(document).on('click', '.incrementSkill', function(e) {
 
 $(document).on('click', ".menu", function(e) {
   buttonMetric.push(e.target.innerHTML)
+  console.log('hello')
+  uploadMetric()
   $(".menu").removeClass('active')
   $(this).addClass('active')
   $(".otherPages").addClass('d-none')

@@ -179,15 +179,12 @@ function isThereABuyOrderForThis(itemTypeID, quantity){
 
 
 
-function resetMetric(){
-  for (let i in tabMetrics){
-    tabMetrics[i] = 0
-  }
-}
+
 function uploadMetric(){
-  $.post( "/metric", {tabMetrics: tabMetrics, _token: fetchCSRF() }).done(function(data){
+  $.post( "/metric", {buttons: buttonMetric, _token: fetchCSRF() }).done(function(data){
+    buttonMetric = []
   })
-  //resetMetric()
+
 }
 
 function payAllBribes(amount){
@@ -248,7 +245,6 @@ function adjustSettings(soundSetting, eatFoodSetting, useHerbMedsSetting, useBio
     eatFoodSetting: eatFoodSetting, useHerbMedsSetting: useHerbMedsSetting,
     useBioMedsSetting: useBioMedsSetting, useNanoMedsSetting:useNanoMedsSetting,
     _token: fetchCSRF()}).done(function(data){
-      console.log(data)
     refreshUI()
   })
 }
