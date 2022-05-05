@@ -58,14 +58,17 @@ class ContractController extends Controller
           ->where('userID', \Auth::id())->get();
       }
       return view('Contracts.index')->with([
-        'contracts'     => $contracts,
-        'clacks'        => \App\User::find(\Auth::id())->clacks,
-        'filter'        => $request->filter,
-        'landTypes'     => \App\Land::fetchLandTypes(),
-        'ownedLandTypes'=> \App\Land::fetchLandTypesTheyOwn(\Auth::id()),
-        'relevantItems' => \App\Items::fetchItemsInContracts(),
-        'unlocked'      => \App\Actions::fetchUnlocked(\Auth::id(), true),
-        'userID'        => \Auth::id(),
+        'buildableBuildings'    => \App\Buildings::fetchBuildingsYouCanBuild(),
+        'canTheyCreateContract' => \App\Items::fetchByName('Contracts', \Auth::id())->quantity > 0,
+        'contracts'             => $contracts,
+        'clacks'                => \App\User::find(\Auth::id())->clacks,
+        'filter'                => $request->filter,
+        'landTypes'             => \App\Land::fetchLandTypes(),
+        'ownedLandTypes'        => \App\Land::fetchLandTypesTheyOwn(\Auth::id()),
+        'relevantItems'         => \App\Items::fetchItemsInContracts(),
+        'repairableBuildings'   => \App\Buildings::fetchRepairable(false),
+        'unlocked'              => \App\Actions::fetchUnlocked(\Auth::id(), true),
+        'userID'                => \Auth::id(),
       ]);
     }
 
@@ -84,6 +87,7 @@ class ContractController extends Controller
       }
       $defaultCategory = $request->category;
       return view('Contracts.create', [
+        'banned'   => \App\Actions::fetchBanned(),
         'buildingID'      => $request->buildingID,
         'defaultCategory' => $defaultCategory,
         'parcelType'      => $request->parcelType,
@@ -94,7 +98,7 @@ class ContractController extends Controller
         'buildings' => \App\Buildings::fetchBuilt(),
         'constructionSkill' => \App\Skills::fetchByIdentifier('construction', \Auth::id()),
         'hireableActions' => \App\ActionTypes::all(),
-        'freelanceActions' => \App\Actions::fetchUnlocked(\Auth::id()),
+        'freelanceActions' => \App\Actions::fetchUnlocked(\Auth::id(), true),
         'labor' => \App\Labor::fetch(),
         'land' => \App\Land::where('userID', Auth::id())->get(),
       ]);
@@ -485,92 +489,86 @@ class ContractController extends Controller
           . ". You now have " . number_format($buyer->clacks) . " clack(s).");
 
       } else if ($request->type == 'repair'){
-
         $contractor = Auth::user();
         $builder = \App\User::find($contract->userID);
-
         $building = \App\Buildings::find($request->buildingID);
+
         $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
-        $constructionSkill = \App\Skills::fetchByIdentifier('construction', $builder->id);
-        if (!\App\BuildingTypes::canTheyRepair($buildingType->name)){
-          echo json_encode(['error' => "You don't the necessary materials for them to repair this. (10% of build cost)"]);
+        $repair = \App\Actions::fetchByName($builder->id, 'repair');
+        if (!\App\Buildings::canTheyRepair($buildingType->name, $builder->id, $contract->userID)){
+          echo json_encode(['error' => "You don't the necessary materials for them to repair this."]);
           return;
-        } else if ($constructionSkill->rank < $contract->minSkillLevel){
-          echo json_encode(['error' => "They no longer have the necessary skill for this contract. Sorry. "]);
-          \App\History::new($contract->userID, 'contract', "You no longer have the necessary Construction skill for your contract so it was cancelled.");
+        } else if ($repair->rank < 1 || !$repair->unlocked){
+          echo json_encode(['error' => "They no longer have repair unlocked in order to do this contract. Sorry. "]);
+          \App\History::new($contract->userID, 'contract',
+            "You no longer have repair unlocked for your freelance contract so it was cancelled.");
           $contract->active = false;
           $contract->save();
           return;
         } else if ($contractor->clacks < $contract->price){
           echo json_encode(['error' => "You don't have enough money for this contract. "]);
           return;
-        } else if ($building->uses == $building->repairedTo){
-          echo json_encode(['error' => "This building doesn't need to be repaired right now. "]);
-          return;
         }
-
         $msg = \App\Buildings::repair($request->buildingID, $contract->userID, \Auth::id());
-
         if (isset($msg['error'])){
           echo json_encode([
             'error' => $msg['error']
           ]);
-        } else {
-          $status = $builder->name . " repaired " . $buildingType->name
-            . " for you for " . number_format($contract->price)
-            . " clack(s). You now have " . number_format($contractor->clacks) . " clack(s).$request->buildingID";
+          return;
         }
         $contractor->clacks -= $contract->price;
         $contractor->save();
         $builder->clacks += $contract->price;
         $clacks = $builder->clacks;
         $builder->save();
+        $builderStatus = "Freelance Contract - Clacks: <span class='fp'>+"
+        . number_format($contract->price) . "</span> ["
+        . number_format($builder->clacks) . "]";
+        $status = "<span class='fw-bold'>Clacks: <span class='fn'>-"
+          . number_format($contract->price) . "</span> ["
+          . number_format($contractor->clacks) . "]</span> - "
+          . $msg['status'];
+        \App\History::new($contractor->id,  'contract', $builderStatus);
 
 
-      } else if ($request->type == 'construction'){
+
+      } else if ($request->type == 'build'){
         $contractor = Auth::user();
         $builder = \App\User::find($contract->userID);
         $buildingName = $request->buildingName;
-        $constructionSkill = \App\Skills::fetchByIdentifier('construction', $builder->id);
-
+        $build = \App\Actions::fetchByName($builder->id, 'build');
         if ($contractor->clacks < $contract->price){
           echo json_encode(['error' => "You don't have enough money."]);
           return;
         } else if($contractor->buildingSlots < 1){
           echo json_encode(['error' => "You don't have enough building slots."]);
           return;
-        } else if ($constructionSkill->rank < $contract->minSkillLevel){
-          echo json_encode(['error' => "They no longer have their construction skill at this level anymore. Sorry, we cancelled the contract."]);
-          \App\History::new($builder->id, 'contract', "You no longer have the required Construction skill for this contract so it was cancelled.");
+        } else if(!$build->unlocked || $build->rank < 1){
+          echo json_encode(['error' => "They don't have this action anymore. Sorry."]);
           $contract->active = false;
           $contract->save();
+          \App\History::new($contractor->id,  'contract',
+            "You no longer have the build action unlocked so your freelance contract was cancelled.");
           return;
         }
-        if (\App\Buildings::didTheyAlreadyBuildThis($buildingName, $contractor->id) && $buildingName != 'Warehouse' ){
-          $building = fetchByName($buildingName, $contractor->id);
-          $msg = \App\Buildings::rebuild($building->id, $builder->id, $contractor->id);
-        } else {
-          $msg = \App\Buildings::build($buildingName, $builder->id, $contractor->id);
-        }
-
-
+        $msg = \App\Buildings::build($buildingName, $builder->id, $contractor->id);
         if (isset($msg['error'])){
           echo json_encode(['error' => $msg['error']]);
           return;
-        } else {
-          $status = "You built " . $buildingName
-            . " for " . $contractor->name . " for " . number_format($contract->price)
-            . " clack(s).";
         }
-
         $contractor->clacks -= $contract->price;
         $contractor->save();
         $builder->clacks += $contract->price;
         $builder->save();
         $clacks = $builder->clacks;
-        \App\History::new($contractor->id,  'contract', "You paid " . $builder->name . " to build a "
-          . $buildingName . " for " . number_format($contract->price)
-          . " clack(s). You now have " . number_format($contractor->clacks));
+        $builderStatus = "Freelance Contract - Clacks: <span class='fp'>+"
+        . number_format($contract->price) . "</span> ["
+        . number_format($builder->clacks) . "]";
+        $status = "<span class='fw-bold'>Clacks: <span class='fn'>-"
+          . number_format($contract->price) . "</span> ["
+          . number_format($contractor->clacks) . "]</span> - "
+          . $msg['status'];
+        \App\History::new($contractor->id,  'contract', $builderStatus);
 
 
 

@@ -133,8 +133,8 @@
       <select name='action'><option></option>
 
         @foreach($freelanceActions as $action)
-          @if (!in_array($action->name, \App\Robot::fetchBannedActions()))
-            <option>{{ $action->name }}</option>
+          @if (($action == 'build' || $action=='repair') || !in_array($action, $banned))
+            <option>{{ $action }}</option>
           @endif
         @endforeach
 
@@ -169,7 +169,7 @@
     Action:
     <select name='action'> <option></option>
       @foreach($hireableActions as $action)
-        @if (!in_array($action->name, \App\Robot::fetchBannedActions()))
+        @if (!in_array($action->name, $banned))
           <option value='{{ $action }}'>{{ $action->name }}</option>
         @endif
       @endforeach
@@ -196,40 +196,7 @@
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
     <input type='hidden' name='category' value='repair' >
-
-    <div>
-      Willing to pay <input type='number' name='price'> clacks
-    </div><div>
-      Building To Be Repaired:
-      <select name='buildingID'>
-        <option></option>
-          @foreach ($buildings as $building)
-            <option value='{{ $building->id }}'>{{ $building->name }}</option>
-          @endforeach
-      </select>
-    </div><div>
-      Minimum Construction Skill Level Required:
-      <select name='minSkillLevel'>
-        @for($i = 1; $i < 6; $i++)
-          <option value='{{ $i }}'> {{ $i }}</option>
-        @endfor
-      </select>
-    </div><div>
-      Repair If:
-      <input type='radio' name='repairIf' value='Dead' class='me-1 ms-2' checked>At 0%
-      <input type='radio' name='repairIf' value='Less' class='me-1 ms-2'>Less than 100%
-    </div><div class=''>
-      Until:
-    </div><div>
-      <input type='radio' name='until' value='gone'> Money runs out
-    </div><div>
-      <input type='radio' name='until' value='finite' checked>
-      It's been repaired this many times.
-      <input type='number' name='condition' value='1'>
-
-    </div><div class='mt-5'>
-      <button class='form-select btn-primary'>create contract</button>
-    </div>
+    Willing to repair buildings
   </form>
 </div><div id='constructionSection' class='ms-3 contractSection d-none'>
   <form method='POST' action={{ route('contracts.store')}}>

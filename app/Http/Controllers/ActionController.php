@@ -60,6 +60,7 @@ class ActionController extends Controller
           ->whereIn('action', $actionable)->orderBy('action')
           ->orderBy('price', 'desc')->get(),
         'relevantFuel'        => \App\Equipment::fetchFuel(),
+        'repairableBuildings' => \App\Buildings::fetchRepairable(false),
         'skillPointCent'      => $labor->actions / $labor->actionsUntilSkill * 100,
         'robots'              => \App\Robot::fetch(),
       ]);

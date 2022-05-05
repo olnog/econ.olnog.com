@@ -1,9 +1,11 @@
-$(document).on('click', 'button.buildContract', function(e) {
-  if ($("#buildContractBuilding-" + this.id.split('-')[1]).val() == ""){
+$(document).on('click', 'button.freelanceBuild', function(e) {
+  if ($("#contractBuildableBuildings-" + this.id.split('-')[1] + "-"
+    + this.id.split('-')[2]).val() == ""){
     displayError("You still need to select which building you want to build.")
     return
   }
-  construction(this.id.split('-')[1], $("#buildContractBuilding-" + this.id.split('-')[1]).val())
+  contractBuild(this.id.split('-')[1], $("#contractBuildableBuildings-"
+    + this.id.split('-')[1] + "-" + this.id.split('-')[2]).val(), this.id.split('-')[2])
 })
 
 $(document).on('click', 'button.buyFromSellContract', function(e) {
@@ -59,12 +61,15 @@ $(document).on('click', 'button.leaseBuilding', function(e) {
 })
 
 
-$(document).on('click', 'button.repairContract', function(e) {
-  if ($("#repairContractBuilding-" + this.id.split('-')[1]).val() == ""){
+$(document).on('click', 'button.freelanceRepair', function(e) {
+  if ($("#contractRepairableBuildings-" + this.id.split('-')[1] + "-"
+    + this.id.split('-')[2]).val() == ""){
     displayError("You still need to select which building you want to repair.")
     return
   }
-  repairContract(this.id.split('-')[1], $("#repairContractBuilding-" + this.id.split('-')[1]).val())
+  repairContract(this.id.split('-')[1], $("#contractRepairableBuildings-"
+    + this.id.split('-')[1]  + "-" + this.id.split('-')[2]).val(),
+    this.id.split('-')[2])
 })
 
 $(document).on('click', '.reproduction', function(e) {

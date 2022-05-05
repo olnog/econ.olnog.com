@@ -65,24 +65,21 @@ function cancelContract(contractID){
   })
 }
 
-function construction(contractID, buildingName){
-
-  $.post( "/contracts/" + contractID, {type: 'construction', buildingName: buildingName, _token: fetchCSRF(),
+function contractBuild(contractID, buildingName, page){
+  $.post( "/contracts/" + contractID, {type: 'build', buildingName: buildingName, _token: fetchCSRF(),
     _method: 'PUT' }).done(function(data){
     if (JSON.parse(data).error != undefined){
       displayError(JSON.parse(data).error)
-
-      return;
+      return
     }
     status(JSON.parse(data).status)
-    clacks = JSON.parse(data).clacks
-    history = JSON.parse(data).history
-    items = JSON.parse(data).items
-    actions = JSON.parse(data).actions
-    contracts = JSON.parse(data).contracts
-    refreshUI()
+    displayHeaders(JSON.parse(data).info)
+    if (page == 'actions'){
+      loadPage('actions')
+      return
+    }
+    fetchContracts('labor')
   })
-
 }
 
 
@@ -153,6 +150,23 @@ function leaseBuilding(contractID){
 
 }
 
+function repairContract(contractID, buildingID, page){
+  console.log(contractID, buildingID, page)
+  $.post( "/contracts/" + contractID, {type: 'repair', buildingID: buildingID, _token: fetchCSRF(),
+    _method: 'PUT' }).done(function(data){
+    if (JSON.parse(data).error != undefined){
+      displayError(JSON.parse(data).error)
+      return
+    }
+    status(JSON.parse(data).status)
+    displayHeaders(JSON.parse(data).info)
+    if (page == 'actions'){
+      loadPage('actions')
+      return
+    }
+    fetchContracts('labor')
+  })
+}
 
 function reproduction(contractID){
   $.post( "/contracts/" + contractID, {type: 'reproduction', _token: fetchCSRF(),

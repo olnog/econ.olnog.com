@@ -20,7 +20,7 @@ class BuildingController extends Controller
         'buildings'   => \App\Buildings::fetchBuilt(),
         'buildingSlots' => \App\User::find(\Auth::id())->buildingSlots,
         'repair'         => \App\Actions::fetchByName(\Auth::id(), 'repair')->unlocked,
-        'repairable'  => \App\Buildings::fetchRepairable(),
+        'repairable'  => \App\Buildings::fetchRepairable(true),
 
       ]);
       //echo json_encode(\App\Buildings::fetch());

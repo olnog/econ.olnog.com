@@ -27,18 +27,17 @@ class Buildings extends Model
     }
     \App\Labor::doAction($agentID, $action->id);
     $numOfUses = 100 * $action->rank;
-    $contractorStatus = "<span class='actionInput'>";
+    $status = "<span class='actionInput'>";
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
     foreach ($buildingCosts as $material => $cost){
       $buildingCost = \App\Items::fetchByName($material, $contractorID);
       $buildingCost->quantity -= $cost;
       $buildingCost->save();
-      $contractorStatus .=  $material . ": <span class='fn'>-"
+      $status .=  $material . ": <span class='fn'>-"
         . number_format($cost) . "</span>  ["
         . number_format($buildingCost->quantity) . "] ";
     }
-    $contractorStatus .= "</span> &rarr; " . $buildingName;
-    $agentStatus = "+1 " . $buildingName;
+    $status .= "</span> &rarr; " . $buildingName;
     $buildingType = \App\BuildingTypes::fetchByName($buildingName);
     $building = new \App\Buildings;
     $building->buildingTypeID = $buildingType->id;
@@ -48,11 +47,7 @@ class Buildings extends Model
     $building->save();
     $contractor->buildingSlots--;
     $contractor->save();
-    \App\History::new($contractorID, 'buildings', $contractorStatus);
-    if ($agentID == $contractorID){
-      return ['status' => $contractorStatus];
-    }
-    return ['status' => $agentStatus];
+    return ['status' => $status];
   }
 
   public static function canYouBuild($buildingName, $userID){
@@ -79,16 +74,7 @@ class Buildings extends Model
     if ($action->rank == 0 || !$action->unlocked){
       return false;
     }
-    $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
-    foreach ($buildingCosts as $material=>$cost){
-
-      $item = \App\Items::fetchByName($material, $contractorID);
-
-      if ($item->quantity < ceil($cost * ($action->rank * .5))){
-        return false;
-      }
-    }
-    return true;
+    return \App\Buildings::doTheyHaveEnoughToRepair($buildingName, $agentID, $contractorID);
   }
 
   public static function destroyBuilding($id){
@@ -103,6 +89,22 @@ class Buildings extends Model
       return true;
     }
     return \App\Buildings::doTheyHaveAWorking($buildingName, $userID);
+  }
+
+  public static function doTheyHaveEnoughToRepair($buildingName, $agentID, $contractorID){
+    $multiplier = .5;
+    if ($agentID != null){
+      $action = \App\Actions::fetchByName($agentID, 'repair');
+      $multiplier = $action->rank * .5;
+    }
+    $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
+    foreach ($buildingCosts as $material=>$cost){
+      $item = \App\Items::fetchByName($material, $contractorID);
+      if ($item->quantity < ceil($cost * ($multiplier))){
+        return false;
+      }
+    }
+    return true;
   }
 
   public static function doTheyHaveAWorking($buildingName, $userID){
@@ -172,16 +174,21 @@ class Buildings extends Model
       ->where('buildingTypeID', $buildingType->id)->first();
   }
 
-  public static function fetchRepairable(){
+  public static function fetchRepairable($justNames){
     $buildings = \App\Buildings::
     join('buildingTypes', 'buildings.buildingTypeID', 'buildingTypes.id')
-    ->where('userID', Auth::id())->where('farming', false)
+    ->where('userID', Auth::id())->where('farming', false)->whereColumn('uses', '<', 'totalUses')
     ->select('buildings.id', 'name')->orderBy('name')->get();
     $repairableBuildings = [];
     foreach ($buildings as $building){
 
-      if (\App\Buildings::canTheyRepair($building->name, \Auth::id(), \Auth::id())){
-        $repairableBuildings[] = $building->id;
+      if (\App\Buildings::doTheyHaveEnoughToRepair($building->name, null, \Auth::id())){
+        if ($justNames){
+          $repairableBuildings[] = $building->name;
+        } else {
+          $repairableBuildings[] = $building;
+        }
+
       }
     }
 
@@ -322,7 +329,8 @@ class Buildings extends Model
     foreach($buildingCosts as $material => $cost){
       $item = \App\Items::fetchByName($material, $contractorID);
       $item->quantity -= ceil($cost*$repairCostMultiplier);
-      $status .= $material . ": <span class='fn'>-" . number_format(ceil($cost))
+      $status .= $material . ": <span class='fn'>-"
+        . number_format(ceil($cost*$repairCostMultiplier))
         . "</span> [" . number_format($item->quantity) . "] ";
       $item->save();
     }

@@ -1,3 +1,9 @@
+@if ($canTheyCreateContract)
+<div class='text-center mt-3 mb-3'>
+
+  <a href='/contracts/create'>Post on market</a>
+</div>
+@endif
 <div>
   <ul class="nav nav-tabs">
     <li class="nav-item ">
@@ -125,7 +131,7 @@
 
   @elseif ($contract->category == 'freelance')
     {{$username}}  available to <span class='fw-bold'>freelance</span> {{$contract->action}}
-     for {{number_format($contract->price)}} clack(s) until"
+     for {{number_format($contract->price)}} clack(s) until
     @if ($contract->until == 'workHours')
        there are no more work hours available.
     @elseif ($contract->until == 'food')
@@ -141,9 +147,34 @@
         <button id='cancelContract-{{$contract->id}}'
           class='cancelContract btn btn-warning'>cancel</button>
       @elseif ($clacks >= $contract->price)
-        <button id='freelance-{{$contract->id}}-market' class='freelance btn btn-danger'>
-          {{implode(' ', explode('-', $contract->action))}}
-        </button>
+        @if($contract->action == 'build')
+          <select id='contractBuildableBuildings-{{$contract->id}}-market' @if (count($buildableBuildings) < 1) disabled @endif>
+            <option></option>
+            @foreach($buildableBuildings as $building)
+              <option value='{{$building}}'>{{$building}}</option>
+            @endforeach
+          </select>
+          <button id='freelanceBuild-{{$contract->id}}-market'
+            class='freelanceBuild btn btn-danger' @if (count($buildableBuildings) < 1) disabled @endif>
+            {{$contract->action}} (-{{$contract->price}})
+          </button>
+        @elseif($contract->action == 'repair')
+          <select id='contractRepairableBuildings-{{$contract->id}}-market' @if (count($repairableBuildings) < 1) disabled @endif>
+            <option></option>
+            @foreach($repairableBuildings as $building)
+              <option value='{{$building->id}}'>{{$building->name}}</option>
+            @endforeach
+          </select>
+          <button id='freelanceRepair-{{$contract->id}}-market'
+            class='freelanceRepair btn btn-danger' @if (count($repairableBuildings) < 1) disabled @endif>
+            {{$contract->action}} (-{{$contract->price}})
+          </button>
+        @else
+          <button id='freelance-{{$contract->id}}-market'
+            class='freelance btn btn-danger'>
+            {{implode(' ', explode('-', $contract->action))}}
+          </button>
+        @endif
       @endif
     </div>
 

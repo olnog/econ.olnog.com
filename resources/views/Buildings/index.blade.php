@@ -37,6 +37,7 @@
   @continue (in_array($building->name, $fieldsDisplayed))
   <div class='mt-3 @if ($building->farming) fields @endif'>
     <div>
+      
       @if ($building->uses < $building->totalUses
         && in_array($building->id, $repairable ))
         <button id='repair-{{$building->id}}' class='repair btn'>

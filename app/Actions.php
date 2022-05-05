@@ -68,9 +68,7 @@ class Actions extends Model
         == 0){
       return ['error' => "Sorry, you're doing this too often."];
     }
-    if ($robotID == null){
-      \App\Labor::doAction($agentID, $action->id);
-    }
+
     \App\Metric::newAction($agentID, $actionName);
 
     if ($actionName == 'chop-tree'){
@@ -640,11 +638,11 @@ class Actions extends Model
         return ['error' => "You don't have enough "
           . $itemInputArr[$actionName] . "."];
       } else if(!\App\Buildings
-          ::didTheyAlreadyBuildThis('Small Furnace', $contractorID)
+          ::doTheyHaveAccessTo('Small Furnace', $contractorID)
         && !\App\Buildings
-          ::didTheyAlreadyBuildThis('Large Furnace', $contractorID)
+          ::doTheyHaveAccessTo('Large Furnace', $contractorID)
         && \App\Buildings
-          ::didTheyAlreadyBuildThis('Electric Arc Furnace', $contractorID)
+          ::doTheyHaveAccessTo('Electric Arc Furnace', $contractorID)
         && ($electricity->quantity < 1000 || $input->quantity < 1000)){
         return [
           'error'
@@ -725,6 +723,8 @@ class Actions extends Model
 
     } else if ($actionName == 'gather-stone' || $actionName == 'gather-wood'
       || $actionName == 'hunt'){
+      $production = \App\Actions::fetchBaseProduction($actionName, $robotID, $agentID);
+
       $whatMade = \App\Items
         ::make(\App\Items::fetchItemNameForAction($actionName), $production,
         $contractorID, $agentID);
@@ -749,7 +749,9 @@ class Actions extends Model
         . $buildingCaption . "</span> &rarr; " . $output;
     }
 
-
+    if ($robotID == null){
+      \App\Labor::doAction($agentID, $action->id);
+    }
     if ($robot == null){
       $user = \App\User::find($agentID);
       $user->lastAction = date("Y-m-d H:i:s");

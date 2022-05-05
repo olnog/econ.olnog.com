@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-
+  \App\Buildings::doTheyOwn('Campfire',5);
 });
 
 Route::get('/read', function(){
