@@ -52,6 +52,8 @@
     </div>
     <button class='btn btn-primary form-select mt-5'>create contract</button>
   </form>
+
+
 </div><div id='leaseSection' class='ms-3 contractSection mb-5 d-none '>
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
@@ -90,13 +92,14 @@
     Want <input type='number' name='price' value='1'> clack(s) for
     <select name='landID'>
       <option></option>
-
       @foreach($land as $parcel)
         <option value='{{$parcel->id}}' @if ($parcelID == $parcel->id) selected @endif > Parcel #{{$parcel->id}} - {{$parcel->type}}</option>
       @endforeach
     </select>
     <button class='btn btn-primary form-select mt-5'>create contract</button>
   </form>
+
+
 </div><div id='buyLandSection' class='ms-3 contractSection @if ($defaultCategory != 'buyLand') d-none @endif'>
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
@@ -110,7 +113,6 @@
         <option @if($parcelType == 'mountains') selected @endif >mountains</option>
         <option @if($parcelType == 'plains') selected @endif >plains</option>
         <option @if($parcelType == 'jungle') selected @endif >jungle</option>
-
       </select>
     </div><div>
       Until:
@@ -122,6 +124,8 @@
       <button class='btn btn-primary form-control'>create contract</button>
     </div>
   </form>
+
+
 </div><div id='freelanceSection' class='ms-3 contractSection @if ($defaultCategory != 'freelance') d-none @endif'>
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
@@ -130,21 +134,18 @@
       Available to freelance at <input type='number' name='price' value='1'> clack(s) per action
     </div><div>
       Freelance Action:
-      <select name='action'><option></option>
-
+      <select name='action'>
+        <option></option>
         @foreach($freelanceActions as $action)
           @if (($action == 'build' || $action=='repair') || !in_array($action, $banned))
             <option>{{ $action }}</option>
           @endif
         @endforeach
-
       </select>
     </div><div>
       Until:
     </div><div>
-      <input type='radio' name='until' value='workHours'> You run out of work hours.
-    </div><div>
-      <input type='radio' name='until' value='food'> You run out of food. (Otherwise, you will keep going without food at 2h per action instead of 1h.)
+      <input type='radio' name='until' value='workHours'> Indefinitely
     </div><div>
       <input type='radio' name='until' value='finite' checked> You do the action <input type='number' name='condition' value='1'> times.
     </div><div>
@@ -155,9 +156,7 @@
   <form method='POST' action={{ route('contracts.store')}}>
     @csrf()
     <input type='hidden' name='category' value='hire' >
-
   <div>
-
     Hiring at
     <input type='number' name='price' value='1'>
     clack(s)
@@ -167,7 +166,8 @@
     per skill level
   </div><div>
     Action:
-    <select name='action'> <option></option>
+    <select name='action'>
+      <option></option>
       @foreach($hireableActions as $action)
         @if (!in_array($action->name, $banned))
           <option value='{{ $action }}'>{{ $action->name }}</option>
@@ -190,28 +190,9 @@
   </div><div class='mt-5'>
     <button class='form-select btn-primary'>create contract</button>
   </div>
-
 </form>
-</div><div id='repairSection' class='ms-3 contractSection d-none'>
-  <form method='POST' action={{ route('contracts.store')}}>
-    @csrf()
-    <input type='hidden' name='category' value='repair' >
-    Willing to repair buildings
-  </form>
-</div><div id='constructionSection' class='ms-3 contractSection d-none'>
-  <form method='POST' action={{ route('contracts.store')}}>
-    @csrf()
-    <input type='hidden' name='category' value='construction' >
 
-    <div>
-      You have a Construction skill of {{$constructionSkill->rank}}. You will use your work hours to build and repair buildings for other players using their resources.
-    </div><div>
-      How much do you want to charge to repair and build?
-      <input type='number' name='price' value='2'> clacks each time
-    </div><div class='mt-5'>
-      <button class='form-select btn-primary'>create contract</button>
-    </div>
-  </form>
+
 </div><div id='buyOrderSection' class='ms-3 contractSection
   @if ($defaultCategory != 'buyOrder') d-none @endif'>
   <div>
@@ -238,13 +219,15 @@
       <input type='radio' class='buyUntil' name='until' value='bought'> I have bought [ amount ] of this item.
     </div><div class='ms-3'>
       <input type='radio' class='buyUntil' name='until' value='inventory'> I have [ amount ] of this item.
-
     </div><div id='buyCondition' class='mt-3 d-none'>
       Amount: <input type='number' name='condition' >
     </div><div class='mt-5'>
       <button id='createContract' class='btn btn-primary form-control' >Create Contract</button>
     </div>
   </form>
+
+
+
 </div><div id='sellOrderSection' class='ms-3 contractSection
   @if ($defaultCategory != 'sellOrder') d-none @endif'>
   <div>
@@ -254,11 +237,11 @@
       Selling: <select name='itemTypeID'>
       <option></option>
       @foreach($items as $item)
+        <option></option>
         @if ($item->name != 'Nuclear Waste')
         <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif>
           {{number_format($item->quantity)}}
           {{ $item->name }}
-
         </option>
         @endif
       @endforeach
@@ -278,5 +261,7 @@
     </div>
   </form>
 </div>
+
+
 
 @endsection

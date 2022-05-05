@@ -77,9 +77,7 @@ class ContractController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
-    {
-
+    public function create(Request $request){
       $contract = \App\Items::fetchByName('Contracts', Auth::id());
       if ($contract->quantity < 1){
         echo "You need to have a contract in order to create one.";
@@ -125,10 +123,6 @@ class ContractController extends Controller
         echo "You don't have enough clacks to cover the contract price.";
         return;
 
-      } else if ($request->category == 'freelance'
-        && ($request->until == 'food' && \App\Items::fetchByName('Food', Auth::id()) == 0)){
-        echo "You can't set up a contract to continue until you run out of food when you have no food. Sorry.";
-        return;
       } else if ($request->category == 'construction'
         && (\App\Skills::fetchByIdentifier('construction', \Auth::id())->rank < 1)){
         echo "You aren't able to do Construction.";
@@ -634,7 +628,6 @@ class ContractController extends Controller
         $user = Auth::user();
         $freelancer = \App\User::find($contract->userID);
         $freelanceLabor = \App\Labor::where('userID', $contract->userID)->first();
-
         $user->clacks -= $contract->price;
         $clacks = $user->clacks;
         $user->save();
@@ -651,14 +644,7 @@ class ContractController extends Controller
         }
 
 
-        if ($contract->until == 'food'){
-          $food = \App\Items::fetchByName('Food', $freelancer->id);
-          if ($food->quantity < 1){
-            \App\History::new($freelanceLabor->id, 'contract', "You ran out of food so your freelance contract was cancelled.");
-            $contract->active = false;
-
-          }
-        } else if ($contract->until == 'finite'){
+        if ($contract->until == 'finite'){
           $contract->conditionFulfilled++;
         }
         if ($contract->condition != null && $contract->conditionFulfilled >= $contract->condition){
