@@ -365,7 +365,6 @@ class ContractController extends Controller
           echo json_encode(['error' => "You're already leasing a " . $contract->landType . ". Sorry."]);
           return;
         }
-
         $newLease = new \App\Lease;
         $newLease->contractID = $contract->id;
         $newLease->landType = $contract->landType;
@@ -373,8 +372,9 @@ class ContractController extends Controller
         $newLease->save();
         $status = "You are now leasing " . $contract->landType . " from " . $contractor->name . " for " . number_format($contract->price) . " clack(s) per use. You may cancel at any time.";
         $clacks = $user->clacks;
-      } else if ($request->type == 'reproduction'){
 
+
+      } else if ($request->type == 'reproduction'){
         $surrogate = \Auth::user();
         $surrogateLabor = \App\Labor::where('userID', $surrogate->id)->first();
         $contractor = \App\User::find($contract->userID);
@@ -393,7 +393,6 @@ class ContractController extends Controller
         $surrogateLabor->escrow += $contract->price;
         $surrogateLabor->rebirth = true;
         $surrogateLabor->save();
-
         $contract->active = false;
         $contract->save();
         \App\History::new($contractor->id, 'contract', $surrogate->name
@@ -416,7 +415,6 @@ class ContractController extends Controller
           echo json_encode(['error' => "You don't have enough money."]);
           return;
         }
-
         $buyer->clacks -= $contract->price;
         $buyer->save();
         $seller->clacks += $contract->price;
@@ -435,10 +433,10 @@ class ContractController extends Controller
           . " from " . $seller->name . " for " . number_format($contract->price)
           . ". You now have " . number_format($buyer->clacks) . ' clack(s).';
 
+
       } else if ($request->type == 'buyLand'){
         $buyer = \App\User:: find($contract->userID);
         $seller = Auth::user();
-
         if (!\App\Land::doTheyHaveAccessTo($contract->landType)){
           echo json_encode(['error' => "You do not have this type of land."]);
           return;
@@ -481,6 +479,7 @@ class ContractController extends Controller
         \App\History::new($buyer->id, 'contract', "You bought land parcel #" . $land->id
           . " from " . $seller->name . " for " . number_format($contract->price)
           . ". You now have " . number_format($buyer->clacks) . " clack(s).");
+
 
       } else if ($request->type == 'repair'){
         $contractor = Auth::user();
@@ -534,7 +533,8 @@ class ContractController extends Controller
         if ($contractor->clacks < $contract->price){
           echo json_encode(['error' => "You don't have enough money."]);
           return;
-        } else if($contractor->buildingSlots < 1){
+        } else if(\App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractor->id)
+          >= $contractor->buildingSlots ){
           echo json_encode(['error' => "You don't have enough building slots."]);
           return;
         } else if(!$build->unlocked || $build->rank < 1){
