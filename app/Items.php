@@ -335,4 +335,31 @@ class Items extends Model
     }
     return ['status' => $status];
   }
+
+  public static function useMeds($itemID){
+    $item = \App\Items::find($itemID);
+    if ($item->quantity < 1){
+      echo json_encode(['error' => "You don't have any of meds to take."]);
+      return;
+    }
+    $itemType = \App\ItemTypes::find($item->itemTypeID);
+    if ($itemType->name == 'HerbMeds'){
+      $minutes = 5;
+      $caption = "5 minutes ";
+    } else if ($itemType->name == 'BioMeds'){
+      $minutes = 5 * 60;
+      $caption = "5 hours ";
+    } else if ($itemType->name == 'NanoMeds'){
+      $minutes = 5 * 60 * 24;
+      $caption = '5 days ';
+    }
+    $item->quantity--;
+    $item->save();
+    $user = \App\User::find(\Auth::id());
+    $user->minutes += $minutes;
+    $user->save();
+    return ['status' => "<span class='actionInput'>" . $itemType->name
+      . ": <span class='fn'>-1</span> [" . number_format($item->quantity)
+      . "]</span> &rarr; Offline Time: <span class='fp'>+" . $caption . "</span>"];
+  }
 }

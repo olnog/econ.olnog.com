@@ -1,7 +1,5 @@
 <?php
 namespace App;
-
-
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Database\Eloquent\Model;
@@ -12,13 +10,13 @@ class Actions extends Model
 {
   protected $table = 'actions';
 
-  public static function do($actionName, $agentID, $contractorID, $robotID, $useFood){
+  public static function do($actionName, $agentID, $contractorID, $robotID, $useFood, $offline){
     //could possible streamline if statements like I did fetchActionable
     $action = \App\Actions::fetchByName($agentID, $actionName);
     $electricityCaption = "";
     $foodCaption = "";
     if ($useFood){
-      $food = \App\Items::fetchByName('Food', Auth::id());
+      $food = \App\Items::fetchByName('Food', $agentID);
       if ($food->quantity == 0){
         return ['error' => "You're automating actions but you don't have any more food." ];
         return;
@@ -28,7 +26,7 @@ class Actions extends Model
       $foodCaption = "Food: <span class='fn'>-1 [" . number_format($food->quantity) . "] ";
     }
     if ($robotID != null){
-      $electricity = \App\Items::fetchByName('Electricity', \Auth::id());
+      $electricity = \App\Items::fetchByName('Electricity', $agentID);
       if ($electricity->quantity < 100){
         return [
           'error'
@@ -750,7 +748,7 @@ class Actions extends Model
     if ($robotID == null){
       \App\Labor::doAction($agentID, $action->id);
     }
-    if ($robot == null){
+    if ($robot == null && !$offline){
       $user = \App\User::find($agentID);
       $user->lastAction = date("Y-m-d H:i:s");
       $user->save();
@@ -1056,6 +1054,35 @@ class Actions extends Model
       }
       return $robotActions;
     }
+
+
+    public static function offline(){
+      $users = \App\User::where('minutes', '>', 0)
+        ->where('lastAction', '<', date("Y-m-d H:i:s", strtotime("-5 minutes")))
+        ->whereNotNull('action')->get();
+      foreach($users as $user){
+        for($i = 0; $i < 15; $i++){
+          $msg = \App\Actions::do($user->action, $user->id, $user->id, null,
+            true, true);
+          if (isset($msg['error'])){
+            $user->action = null;
+            $user->save();
+            \App\History::new($user->id, 'action',
+              "Offline Automation Stopped Due To: " . $msg['error']);
+            break;
+          }
+          \App\History::new($user->id, 'action', $msg['status']);
+        }
+        $user->minutes--;
+        $user->save();
+        if ($user->minutes == 0){
+          $user->action = null;
+          $user->save();
+          continue;
+        }
+      }
+    }
+
 
     public static function reset($legacy){
       $actions = \App\Actions::where('userID', \Auth::id())->get();

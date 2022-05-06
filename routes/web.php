@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -16,8 +15,19 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
+  $users = \App\User::get();
+  foreach($users as $user){
+    var_dump($user['lastAction'], new DateTime('2022-04-01 00:00:00') > new DateTime ($user['lastAction']));
+    echo "<BR>";
+    //if (new DateTime() > newDateTime ($user->lastAction) )
+  }
 });
 
+Route::get('/stop', function(){
+  $user = \App\User::find(\Auth::id);
+  $user->action = null;
+  $user->save();
+});
 
 Route::post('/metric', function (Request $request){
   \App\Metric::logAllButtons(\Auth::id(), $request->buttons);

@@ -86,7 +86,7 @@ class ActionController extends Controller
     {
       \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
 
-      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null, $request->automation  == 'true');
+      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null, $request->automation  == 'true', false);
       $status = "";
 
       if (isset($msg['error'])){
@@ -99,6 +99,13 @@ class ActionController extends Controller
       }
       $user = \App\User::find(\Auth::id());
       $lastAction = null;
+      if ($request->automation  == 'true'){
+        $user->action = $request->name;
+
+      } else {
+        $user->action = null;
+      }
+      $user->save();
       if (in_array($request->name, \App\Actions::fetchActionable(\Auth::id(), true, $request->name))){
         $lastAction = $request->name;
       }

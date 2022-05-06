@@ -259,6 +259,10 @@ $(document).on('click', '.updateSkillType', function(e) {
   window.location.hash = '#skillTypeForm';
 })
 
+$(document).on('click', '.useMeds', function(e) {
+  useMeds(e.target.id.split("-")[1])
+})
+
 $(document).on('click', '#workHoursCent', function(e) {
   updateWorkHoursStop()
 

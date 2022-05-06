@@ -57,8 +57,20 @@
       <button id='startAutomation'class='btn btn-success' disabled>&#9658;</button>
       <button id='stopAutomation'class='btn btn-danger d-none' disabled>&#128721;</button>
     </div><div class='text-center mt-2'>
-
+      <div>
       Stop after doing this <input type='number' id='workHoursCent' min=0  value=0> times
+      </div><div>
+        @if ($offlineMinutes > 0)
+          You will continue to do actions offline for
+          @if ($offlineMinutes < 60)
+            {{$offlineMinutes}} minutes.
+          @elseif ($offlineMinutes < 1440)
+            {{round($offlineMinutes / 60, 1)}} hours.
+          @else
+            {{round($offlineMinutes / 1440, 1)}} days.
+          @endif
+        @endif
+      </div>
     </div>
   </div><div id='land' class='d-none otherPages ms-3 mt-3 '>
 

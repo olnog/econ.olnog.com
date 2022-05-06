@@ -39,7 +39,7 @@ class Robot extends Model
           continue;
         }
         $msg = \App\Actions::do($actionType->name, \Auth::id(), \Auth::id(),
-          $robotID, false);
+          $robotID, false, false);
         if (isset($msg['status'])){
           $robot->uses--;
 

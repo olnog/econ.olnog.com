@@ -61,7 +61,7 @@ $(document).on('click', '#stopAutomation', function(e) {
 
 function stopAutomation(){
   if (!stopButtonPressed && settings.sound){
-    let audio = new Audio('js/stop.wav')
+    let audio = new Audio('audio/stop.wav')
     audio.play()
   }
   clearInterval(automation)
@@ -80,4 +80,8 @@ function stopAutomation(){
       autoActions = null
     }
   }
+  $.get("/stop", function(data){
+    console.log(data)
+  })
+
 }

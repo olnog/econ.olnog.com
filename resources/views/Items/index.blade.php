@@ -49,6 +49,10 @@
               <option option='{{$action}}'>{{str_replace('-', ' ', $action)}}
             @endforeach
           </select>
+        @elseif ($item->name == 'HerbMeds' || $item->name == 'BioMeds' || $item->name == 'NanoMeds')
+          <button id='useMeds-{{$item->id}}' class='btn btn-info useMeds'>
+            Consume
+          </button>
         @endif
       </div><div class='col'>
         <a href='/contracts/create?category=buyOrder&itemID={{$item->itemTypeID}}'

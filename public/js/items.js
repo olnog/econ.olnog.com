@@ -79,3 +79,12 @@ function howManyItems(itemTypeID){
   }
   return 0
 }
+
+function useMeds(itemID){
+  $.post( "/items/" + itemID, {what: 'useMeds',
+    _token: fetchCSRF(), _method: 'PUT' }).done(function(data){
+    displayHeaders(JSON.parse(data).info)
+    loadPage('items')
+    status(JSON.parse(data).status)
+  })
+}

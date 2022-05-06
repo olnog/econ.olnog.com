@@ -85,9 +85,17 @@ class ItemController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, $id){
+      if ($request->what == 'useMeds'){
+        $msg = \App\Items::useMeds($id);
+      }
+      if (isset($msg['error'])){
+        return;
+      }
+      echo json_encode([
+        'info'  => \App\User::fetchInfo(),
+        'status'=> $msg['status'],
+      ]);
     }
 
     /**

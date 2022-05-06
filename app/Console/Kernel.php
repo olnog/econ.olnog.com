@@ -35,6 +35,9 @@ class Kernel extends ConsoleKernel
           \App\Land::checkBribes();
           \App\Report::new();
         })->daily();
+        $schedule->call(function(){
+          \App\Actions::offline();
+        })->everyMinute();
     }
 
     /**
