@@ -184,7 +184,7 @@ class Land extends Model
       $land->protected = true;
       $land->userID = $userID;
       $landTypeChance = rand(1, 10);
-      $user = \App\User::find($userID);
+
       if ($landTypeChance <= 3){
         $land->type = 'plains';
       } else if ($landTypeChance == 4){
@@ -195,13 +195,14 @@ class Land extends Model
         $land->type = 'forest';
       } else if ($landTypeChance == 10){
         $land->type = 'jungle';
-      }      $user->buildingSlots ++;
+      }
+
       $resources = \App\Land::fetchResourcesToBeCreated($land->type);
       foreach($resources as $resourceName => $amount){
         $land[$resourceName] = $amount;
       }
       $land->save();
-      $user->save();
+      \App\Land::integrityCheck($userID);
       return ucfirst($land->type);
     }
 

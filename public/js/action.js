@@ -6,7 +6,10 @@ function action (actionName){
     bioMeds: $("#useBioMeds").is(':checked'),
     nanoMeds: $("#useNanoMeds").is(':checked')
   }
-  $.post( "/actions", {name: actionName, buttons: buttonMetric, automation: automation != null, consumption: JSON.stringify(consumption), _token: csrf }).done(function(data){
+  $.post( "/actions", {name: actionName, buttons: buttonMetric,
+      automation: automation != null, consumption: JSON.stringify(consumption),
+      _token: csrf }).done(function(data){
+    console.log(data)
     loadPage('actions')
     buttonMetric = []
     if (JSON.parse(data).error != undefined){

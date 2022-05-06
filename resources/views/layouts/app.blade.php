@@ -61,6 +61,9 @@
       .contracts{
         border: 1px black solid;
       }
+      #error{
+        color:LightCoral;
+      }
       #status{
         color:white;
       }

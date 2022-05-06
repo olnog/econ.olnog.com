@@ -33,7 +33,7 @@
       <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
     </div><div class='col-11'>
       <div id='status' class='p-1 text-center  '></div>
-      <div id='error' class='p-1 text-center text-danger'></div>
+      <div id='error' class='p-1 text-center'></div>
     </div>
   </div>
   <span id='csrf'>@csrf()</span>
