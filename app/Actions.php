@@ -736,7 +736,9 @@ class Actions extends Model
       }
 
     } else {
-      $buildingCaption = \App\Buildings::use($reqBuildings[0], $contractorID);
+      if (isset($reqBuildings[0])){
+        $buildingCaption = \App\Buildings::use($reqBuildings[0], $contractorID);
+      }
       if (isset($buildingCaption['error'])){
         return $buildingCaption;
       }
