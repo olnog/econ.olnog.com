@@ -257,9 +257,9 @@ class Items extends Model
       'smelt-ironElectric Arc Furnace'      => ['Electricity'=>1000, 'Iron Ore'=>1000],
       'smelt-ironLarge Furnace'             => ['Coal'=>100, 'Iron Ore'=>100],
       'smelt-ironSmall Furnace'             => ['Coal'=>10, 'Iron Ore'=>10],
-      'smelt-steelElectric Arc Furnace'      => ['Electricity'=>1000, 'Steel Ingots'=>1000],
-      'smelt-steelLarge Furnace'             => ['Coal'=>100, 'Steel Ingots'=>100],
-      'smelt-steelSmall Furnace'             => ['Coal'=>10, 'Steel Ingots'=>10],
+      'smelt-steelElectric Arc Furnace'      => ['Electricity'=>1000, 'Iron Ingots'=>1000],
+      'smelt-steelLarge Furnace'             => ['Coal'=>100, 'Iron Ingots'=>100],
+      'smelt-steelSmall Furnace'             => ['Coal'=>10, 'Iron Ingots'=>10],
     ];
     if(!in_array($actionName, array_keys($actionReqs))){
       return null;

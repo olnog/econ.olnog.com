@@ -44,6 +44,8 @@ class ActionController extends Controller
         'allEquipment'        => \App\Equipment::fetch(),
         'banned'              => \App\Actions::fetchBanned(),
         'buildableBuildings'  => \App\Buildings::fetchBuildingsYouCanBuild(),
+        'canTheyBuild'       => \App\User::find(\Auth::id())->buildingSlots
+          < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave(\Auth::id()),
         'electricity'         => \App\Items
           ::fetchByName('Electricity', \Auth::id())->quantity,
         'equipped'            => [
