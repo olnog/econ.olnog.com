@@ -23,7 +23,7 @@ class Actions extends Model
       }
       $food->quantity--;
       $food->save();
-      $foodCaption = "Food: <span class='fn'>-1 [" . number_format($food->quantity) . "] ";
+      $foodCaption = "Food: <span class='fn'>-1</span> [" . number_format($food->quantity) . "] ";
     }
     if ($robotID != null){
       $electricity = \App\Items::fetchByName('Electricity', $agentID);
@@ -180,6 +180,9 @@ class Actions extends Model
             return ['error' => "Something technical went wrong with your car. Sorry."];
           }
         }
+      }
+      if ($foodCaption != "" || $electricityCaption != ""){
+        $status .= "<span class='actionInput'>" . $foodCaption . $electricityCaption . "</span> &rarr; ";
       }
       $status .= "[&empty;] (" . $minChance . ":" . $numOfParcels . ")";
       $landFound = " [";
