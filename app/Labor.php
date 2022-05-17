@@ -28,6 +28,7 @@ class Labor extends Model
 
     public static function couldTheySwitch($itemName, $userID){
         $allEquipment = \App\Equipment::fetch();
+
         foreach ($allEquipment as $equipment){
           if (substr($equipment->name, 0, strlen($itemName)) == $itemName){
             return true;
@@ -57,24 +58,21 @@ class Labor extends Model
     public static function feedChildren($userID){
       $children = \App\Items::fetchByName('Children', $userID);
       $food = \App\Items::fetchByName('Food', $userID);
-      $status = "";
-      if ($children->quantity > 0 ){
-        if ($children->quantity > $food->quantity){
-          $children->quantity = 0;
-          $children->save();
-          $status .= "You didn't have enough food to feed your Children, so they all died. Dang, that sucks, sorry.";
-        } else {
-          $food->quantity -= $children->quantity;
-          $food->save();
-          if ($children->quantity > 1){
-            $status .= "You fed each of your " . $children-> quantity . " children food.";
-          } else {
-            $status .= "You fed your " . $children-> quantity . " child food.";
-          }
 
-        }
+      if ($children->quantity < 1){
+        return null;
       }
-      return $status;
+      if ($children->quantity > $food->quantity){
+        $children->quantity = 0;
+        $children->save();
+        return false;
+      }
+      $food->quantity -= $children->quantity;
+      $food->save();
+      return $children->quantity;
+
+
+
     }
 
     public static function fetch(){

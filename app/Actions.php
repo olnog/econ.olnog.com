@@ -15,14 +15,31 @@ class Actions extends Model
     $action = \App\Actions::fetchByName($agentID, $actionName);
     $electricityCaption = "";
     $foodCaption = "";
-    if ($useFood){
+    $feedingChildren = \App\Labor::feedChildren($agentID);
+
+    if ($useFood || $feedingChildren !== null){
+      $foodUsed = 0;
       $food = \App\Items::fetchByName('Food', $agentID);
-      if ($food->quantity == 0){
-        return ['error' => "You're automating actions but you don't have any more food." ];
+
+      if ($useFood){
+        if ($food->quantity == 0){
+          return ['error' => "You're automating actions but you don't have any more food." ];
+        }
+
+        $food->quantity--;
+        $food->save();
+        $foodUsed = 1;
       }
-      $food->quantity--;
-      $food->save();
-      $foodCaption = "Food: <span class='fn'>-1</span> [" . number_format($food->quantity) . "] ";
+      if ($feedingChildren === false ){
+        $childrenStatus = " Children: 0 ";
+      } else if ($feedingChildren === null){
+        $childrenStatus = '';
+      } else {
+        $childrenStatus = " (Children) ";
+        $foodUsed += $feedingChildren;
+      }
+      $foodCaption = $childrenStatus . "Food: <span class='fn'>-" . $foodUsed
+        . "</span> [" . number_format($food->quantity) . "] ";
     }
     if ($robotID != null){
       $electricity = \App\Items::fetchByName('Electricity', $agentID);
@@ -482,7 +499,7 @@ class Actions extends Model
         $status .=  "<span class='actionInput'>";
       }
       if ($agentID == $contractorID){
-        $status .= $equipmentCaption  . $leaseStatus;
+        $status .= $foodCaption . $equipmentCaption  . $leaseStatus;
       }
       if ($buildingCaption != ""){
         $status .= " " . $buildingCaption . "</span> &rarr; ";
@@ -759,8 +776,7 @@ class Actions extends Model
       $user->lastAction = date("Y-m-d H:i:s");
       $user->save();
     }
-    $childrenStatus = \App\Labor::feedChildren($agentID);
-    return ['status' => $status . " " . $childrenStatus];
+    return ['status' => $status ];
   }
 
 

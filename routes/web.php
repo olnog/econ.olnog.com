@@ -15,12 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  $users = \App\User::get();
-  foreach($users as $user){
-    var_dump($user['lastAction'], new DateTime('2022-04-01 00:00:00') > new DateTime ($user['lastAction']));
-    echo "<BR>";
-    //if (new DateTime() > newDateTime ($user->lastAction) )
-  }
+  \App\Equipment::useEquipped('Pickaxe', 5);
 });
 
 Route::get('/stop', function(){

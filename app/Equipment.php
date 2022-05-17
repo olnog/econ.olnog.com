@@ -53,6 +53,12 @@ class Equipment extends Model
     if ($labor->equipped == null && !$couldTheySwitch){
       return false;
     }
+    if ($labor->equipped == null && $couldTheySwitch){
+      $switch = \App\Labor::switchEquipped($itemName, $userID);
+      if (!$switch){
+        return $switch;
+      }
+    }
     $equipment = Equipment::find($labor->equipped);
     $itemType = ItemTypes::find($equipment->itemTypeID);
     if (substr($itemType->name, 0, strlen($itemName)) != $itemName){
