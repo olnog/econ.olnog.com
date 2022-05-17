@@ -294,7 +294,7 @@ class Buildings extends Model
         => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
       "transfer-electricity-from-solar-power-plant" => ['Solar Power Plant'],
     ];
-    if (! in_array($actionName, $buildingReqsArr)){
+    if (!in_array($actionName, array_keys($buildingReqsArr))){
       return null;
     }
     return $buildingReqsArr[$actionName];

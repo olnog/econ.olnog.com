@@ -66,6 +66,27 @@ class User extends Authenticatable
       ];
     }
 
+    public static function register($userID){
+      $labor = new Labor;
+      $labor->userID = $userID;
+      $labor->save();
+
+      $actionTypes = \App\ActionTypes::all();
+      foreach($actionTypes as $actionType){
+        $action = new \App\Actions;
+        $action->actionTypeID = $actionType->id;
+        $action->userID = $userID;
+        $action->save();
+      }
+      $itemTypes = \App\ItemTypes::all();
+      foreach($itemTypes as $itemType){
+        $item = new \App\Items;
+        $item->itemTypeID = $itemType->id;
+        $item->userID = $userID;
+        $item->save();
+      }
+    }
+
     public static function reset(){
       $leases = \App\Lease::fetch();
       foreach($leases as $lease){
@@ -102,7 +123,7 @@ class User extends Authenticatable
       $labor->equipped = null;
       $labor->availableSkillPoints = 4;
       $labor->allocatedSkillPoints = 0;
-      $labor->actions=0;
+      $labor->actions = 0;
       $labor->actionsUntilSkill = 30;
       $labor->rebirth = false;
       $labor->legacy = null;

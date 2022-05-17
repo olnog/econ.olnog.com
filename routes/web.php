@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  \App\Equipment::useEquipped('Pickaxe', 5);
+  var_dump(\App\Actions::fetchActionable(234, false, 'make-CPU'));
 });
 
 Route::get('/stop', function(){

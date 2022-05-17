@@ -67,32 +67,9 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'password' => Hash::make($data['password']),
         ]);
-        $id = $user->id;
+        \App\User::register($user->id);
 
-        $labor = new Labor;
-        $labor->userID = $id;
-        $labor->actionsUntilSkill = 1000;
-        $labor->save();
 
-        $labor = \App\Labor::find($labor->id);
-        $labor->actionsUntilSkill = $labor->workHours / $labor->maxSkillPoints;
-        $labor->save();
-
-        $skillTypes = \App\SkillTypes::all();
-        foreach($skillTypes as $skillType){
-          $skill = new \App\Skills;
-          $skill->skillTypeID = $skillType->id;
-          $skill->userID = $id;
-          $skill->save();
-        }
-        $itemTypes = \App\ItemTypes::all();
-        foreach($itemTypes as $itemType){
-          $item = new \App\Items;
-          $item->itemTypeID = $itemType->id;
-          $item->countable = $itemType->countable;
-          $item->userID = $id;
-          $item->save();
-        }
 
 
 
