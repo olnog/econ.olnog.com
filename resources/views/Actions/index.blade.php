@@ -145,7 +145,7 @@
               <select id='contractRepairableBuildings-{{$contract->id}}-actions' @if (count($repairableBuildings) < 1) disabled @endif>
                 <option></option>
                 @foreach($repairableBuildings as $building)
-                  <option value='{{$building->id}}'>{{$building->name}}</option>
+                  <option value='{{$building->id}}'>{{$building->name}} ({{$building->uses / $building->totalUses * 100}}%)</option>
                 @endforeach
               </select>
               <button id='freelanceRepair-{{$contract->id}}-actions'

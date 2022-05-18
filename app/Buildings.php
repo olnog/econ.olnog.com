@@ -176,7 +176,7 @@ class Buildings extends Model
     $buildings = \App\Buildings::
     join('buildingTypes', 'buildings.buildingTypeID', 'buildingTypes.id')
     ->where('userID', Auth::id())->where('farming', false)->whereColumn('uses', '<', 'totalUses')
-    ->select('buildings.id', 'name')->orderBy('name')->get();
+    ->select('buildings.id', 'name', 'uses', 'totalUses')->orderBy('name')->get();
     $repairableBuildings = [];
     foreach ($buildings as $building){
 
