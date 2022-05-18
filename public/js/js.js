@@ -226,11 +226,8 @@ function sellToState(buyOrderID){
   $.post( "/buyOrders", {buyOrderID: buyOrderID, _token: fetchCSRF() }).done(function(data){
     status(JSON.parse(data).status)
     actions = JSON.parse(data).actions
-    buyOrders = JSON.parse(data).buyOrders
-    clacks = JSON.parse(data).clacks
-    history = JSON.parse(data).history
-    items = JSON.parse(data).items
-    refreshUI()
+    displayHeaders(JSON.parse(data).info)
+    loadPage('items')
   })
 }
 
