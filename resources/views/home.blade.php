@@ -32,27 +32,27 @@
     <div class='col-1'>
       <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
     </div><div class='col-11'>
-      <div id='status' class='p-1 text-center  '></div>
-      <div id='error' class='p-1 text-center'></div>
+      <div id='status' class='text-center  '></div>
+      <div id='error' class='text-center'></div>
     </div>
   </div>
   <span id='csrf'>@csrf()</span>
   <div class='ms-2 row'>
-    <div class='col-lg-3'>
+    <div class='col-3 '>
       <span id='clacks' ></span> clacks
-
-    </div><div class='col-lg-6 text-center'>
-      <span id='hostileTakeover' class='text-danger d-none'>
-        You are currently experiencing a hostile takeover. Go to land page to see more info.
-      </span>
-    </div><div class='col-lg-3 text-right'>
-      <form id="logout-form" action="{{ route('logout') }}" method="POST"  class='text-right'>
+    </div><div class='col-9 text-end'>
+      <form id="logout-form" action="{{ route('logout') }}" method="POST"  class='text-end'>
           {{ csrf_field() }}
-          Logged in as: <a href='/account'><span id='username' class='fw-bold'></span></a>
-          <button class='btn btn-link'>[ logout ]</button>
+          Logged in as: <a href='/account'><span id='username' class='fw-bold'></span></a><button class='btn btn-link'>[ logout ]</button>
       </form>
 
-    </div><div class='text-center'>
+    </div>
+  </div><div class='row text-center' >
+    <span id='hostileTakeover' class='text-danger d-none'>
+      You are currently experiencing a hostile takeover. Go to land page to see more info.
+    </span>
+  </div><div class='row'>
+    <div class='text-center mt-3'>
       <button id='lastAction'class='btn btn-primary' disabled>Last Action?</button>
       <button id='startAutomation'class='btn btn-success' disabled>&#9658;</button>
       <button id='stopAutomation'class='btn btn-danger d-none' disabled>&#128721;</button>
