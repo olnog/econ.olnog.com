@@ -1049,8 +1049,6 @@ class Actions extends Model
         'convert-wheat-to-Bio-Material'         => 10,
         'convert-wood-to-carbon-nanotubes'      => 10,
         'convert-wood-to-coal'                  => 100,
-        'gather-stone'                          => 1,
-        'gather-wood'                           => 10,
         'generate-electricity-with-coal'        => 1000,
         'generate-electricity-with-plutonium'   => 1000000,
         'hunt'                                  => 2,
