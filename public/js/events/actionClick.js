@@ -25,7 +25,6 @@ $(document).on('click', '#lastAction', function(e) {
 })
 
 $(document).on('click', '#startAutomation', function(e) {
-  console.log('starting.click')
   $("#stopAutomation").removeClass('d-none')
   $("#stopAutomation").prop('disabled', false)
   $("#lastAction").prop('disabled', true)
@@ -82,7 +81,6 @@ function stopAutomation(){
     }
   }
   $.get("/stop", function(data){
-    console.log(data)
   })
 
 }

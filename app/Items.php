@@ -130,7 +130,8 @@ class Items extends Model
       'Chainsaw (electric)', 'Chainsaw (gasoline)', 'Handmill (iron)',
       'Handmill (stone)', 'Handmill (steel)', 'Jackhammer (electric)',
       'Jackhammer (gasoline)', 'Pickaxe (iron)', 'Pickaxe (stone)',
-      'Pickaxe (steel)', 'Radiation Suit', 'Shovel (iron)', 'Shovel (steel)',
+      'Pickaxe (steel)', 'Radiation Suit', 'Saw (iron)', 'Saw (steel)',
+      'Saw (stone)', 'Shovel (iron)', 'Shovel (steel)',
       'Shovel (stone)', 'Tractor (diesel)', 'Tractor (gasoline)',
     ];
   }

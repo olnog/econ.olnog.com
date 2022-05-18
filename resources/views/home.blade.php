@@ -32,8 +32,8 @@
     <div class='col-1'>
       <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
     </div><div class='col-11'>
-      <div id='status' class='text-center  '></div>
-      <div id='error' class='text-center'></div>
+      <div id='status' class='text-center p-1 '></div>
+      <div id='error' class='text-center p-1'></div>
     </div>
   </div>
   <span id='csrf'>@csrf()</span>
