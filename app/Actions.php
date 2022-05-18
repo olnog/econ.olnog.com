@@ -623,6 +623,9 @@ class Actions extends Model
       }
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $output = \App\Items::make('Oil', $production, $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $electricityCaption . $foodCaption . $itemCaption['status']
         . $buildingCaption . "</span> &rarr; " . $output;
@@ -641,6 +644,9 @@ class Actions extends Model
         $agentID);
       $itemCaption = \App\Items
         ::use(\App\Items::fetchActionItemInput($actionName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $status =  "<span class='actionInput'>" . $electricityCaption . $foodCaption . $itemCaption['status']
         . $buildingCaption . "</span> &rarr; " . $output;
 
@@ -713,6 +719,9 @@ class Actions extends Model
       }
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName . $buildingName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $output = \App\Items::make(\App\Items::fetchItemNameForAction($actionName),
         $production, $contractorID, $agentID);
       $status =  "<span class='actionInput'>" . $electricityCaption . $foodCaption . $itemCaption['status']
@@ -761,6 +770,9 @@ class Actions extends Model
       }
       $itemCaption = \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName), $contractorID);
+      if (isset($itemCaption['error'])){
+        return ['error' => $itemCaption['error']];
+      }
       $output = \App\Items::make(\App\Items
         ::fetchItemNameForAction($actionName), $production,
         $contractorID, $agentID);

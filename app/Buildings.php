@@ -284,11 +284,11 @@ class Buildings extends Model
       "refine-oil"                          => ['Oil Refinery'],
       "repair"                              => null,
       "smelt-copper"
-        => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
+        => ['Small Furnace', 'Large Furnace', 'Electric Arc Furnace'],
       "smelt-iron"
-        => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
+        => ['Small Furnace', 'Large Furnace', 'Electric Arc Furnace'],
       "smelt-steel"
-        => ['Small Furnace', 'Small Furnace', 'Electric Arc Furnace'],
+        => ['Small Furnace', 'Large Furnace', 'Electric Arc Furnace'],
       "transfer-electricity-from-solar-power-plant" => ['Solar Power Plant'],
     ];
     if (!in_array($actionName, array_keys($buildingReqsArr))){

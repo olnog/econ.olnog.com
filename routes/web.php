@@ -19,7 +19,7 @@ Route::get('/test', function(){
 });
 
 Route::get('/stop', function(){
-  $user = \App\User::find(\Auth::id);
+  $user = \App\User::find(\Auth::id());
   $user->action = null;
   $user->save();
 });
