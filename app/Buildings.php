@@ -27,7 +27,7 @@ class Buildings extends Model
       return ['error' => "You haven't unlocked the build action yet." ];
     }
     \App\Labor::doAction($agentID, $action->id);
-    $numOfUses = 100 * $action->rank;
+    $numOfUses = 1000 * $action->rank;
     $status = "<span class='actionInput'>";
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
     foreach ($buildingCosts as $material => $cost){
