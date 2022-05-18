@@ -25,6 +25,7 @@ $(document).on('click', '#lastAction', function(e) {
 })
 
 $(document).on('click', '#startAutomation', function(e) {
+  console.log('starting.click')
   $("#stopAutomation").removeClass('d-none')
   $("#stopAutomation").prop('disabled', false)
   $("#lastAction").prop('disabled', true)
@@ -47,7 +48,7 @@ $(document).on('click', '#startAutomation', function(e) {
       --autoActions
       $("#workHoursCent").val(autoActions)
     }
-    if (autoActions == 0){
+    if (autoActions != null && autoActions < 1){
       updateWorkHoursStop()
       stopAutomation()
     }
@@ -60,7 +61,7 @@ $(document).on('click', '#stopAutomation', function(e) {
 })
 
 function stopAutomation(){
-  if (!stopButtonPressed && settings.sound){
+  if (!stopButtonPressed){
     let audio = new Audio('audio/stop.wav')
     audio.play()
   }

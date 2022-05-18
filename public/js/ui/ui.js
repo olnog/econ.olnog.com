@@ -136,5 +136,4 @@ function updateWorkHoursStop(){
   if (stopWorkHours != 0){
     autoActions = stopWorkHours
   }
-  refreshUI()
 }
