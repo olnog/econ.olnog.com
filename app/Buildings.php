@@ -357,7 +357,7 @@ class Buildings extends Model
   public static function use($buildingName, $userID){
     $building = \App\Buildings::fetchByName($buildingName, $userID);
     $user = \App\User::find($userID);
-    if ($building == null && \App\BuildingLease::areTheyLeasingThis($buildingName, $userID)){
+    if (($building == null || $building->uses == 0) && \App\BuildingLease::areTheyLeasingThis($buildingName, $userID)){
       return \App\BuildingLease::use($buildingName, $userID);
     } else if (\App\Buildings::howManyBuildingsAndFieldsDoTheyHave($userID)
       > $user->buildingSlots){

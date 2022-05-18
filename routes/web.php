@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  var_dump(\App\Buildings::howManyBuildingsAndFieldsDoTheyHave(5));
+  var_dump(\App\Buildings::doTheyHaveAccessTo('Kitchen', 5));
 });
 
 Route::get('/stop', function(){
