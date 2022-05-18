@@ -137,6 +137,8 @@ class BuildingController extends Controller
       echo json_encode([
         'actions'       => \App\Actions::fetch(\Auth::id()),
         'buildings'     => \App\Buildings::fetch(),
+        'info'       => \App\User::fetchInfo(),
+
         'itemCapacity'  => \App\User::find(Auth::id()),
         'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
         'status'        => "You destroyed your " . $buildingType->name,

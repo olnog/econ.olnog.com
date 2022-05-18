@@ -28,6 +28,8 @@ function destroyBuilding(buildingID){
     */
     status(JSON.parse(data).status)
     loadPage('buildings')
+    displayHeaders(JSON.parse(data).info)
+
     /*
     refreshUI()
 */

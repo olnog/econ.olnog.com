@@ -15,8 +15,8 @@ class Buildings extends Model
     $action = \App\Actions::fetchByName($agentID, 'build');
     if (\App\Buildings::doTheyOwn($buildingName, $contractorID)){
       return ['error' => "A " . $buildingName . " is already built."];
-    } else if ($contractor->buildingSlots
-      >= \App\Land::howManyBuildingsAndFieldsDoTheyHave($contractorID)){
+    } else if (\App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)
+      >= $contractor->buildingSlots){
       return [
         'error'
           => "You don't have enough building slots to build this. Either buy more land or explore."
@@ -46,8 +46,7 @@ class Buildings extends Model
     $building->uses = $numOfUses;
     $building->totalUses = $numOfUses;
     $building->save();
-    $contractor->buildingSlots--;
-    $contractor->save();
+
     return ['status' => $status];
   }
 
@@ -80,9 +79,7 @@ class Buildings extends Model
 
   public static function destroyBuilding($id){
     \App\Buildings::destroy($id);
-    $user = Auth::user();
-    $user->buildingSlots++;
-    $user->save();
+
   }
 
   public static function doTheyHaveAccessTo($buildingName, $userID){
@@ -135,7 +132,7 @@ class Buildings extends Model
   public static function fetch(){
     return [
       'built' => \App\Buildings::fetchBuilt(),
-      'repairable' => \App\Buildings::fetchRepairable(),
+      'repairable' => \App\Buildings::fetchRepairable(true),
       'possible' => \App\BuildingTypes::all(),
       'costs' => \App\BuildingTypes::fetchBuildingCost(null),
       'leases'  => \App\Contracts::where('userID', \Auth::id())

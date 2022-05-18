@@ -9,7 +9,6 @@ function action (actionName){
   $.post( "/actions", {name: actionName, buttons: buttonMetric,
       automation: automation != null, consumption: JSON.stringify(consumption),
       _token: csrf }).done(function(data){
-    console.log(data)
     loadPage('actions')
     buttonMetric = []
     if (JSON.parse(data).error != undefined){

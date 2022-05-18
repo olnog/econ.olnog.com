@@ -108,7 +108,6 @@ $(document).on('click', '.incrementSkill', function(e) {
 
 $(document).on('click', ".menu", function(e) {
   buttonMetric.push(e.target.innerHTML)
-  console.log('hello')
   uploadMetric()
   $(".menu").removeClass('active')
   $(this).addClass('active')

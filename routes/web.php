@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  var_dump(\App\Actions::fetchActionable(234, false, 'make-CPU'));
+  var_dump(\App\Buildings::howManyBuildingsAndFieldsDoTheyHave(5));
 });
 
 Route::get('/stop', function(){
