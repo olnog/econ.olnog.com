@@ -1,14 +1,23 @@
 robot = new Robot()
 
-loadPage('actions')
+loadPage('land')
 
+function loadLand(){
+  let landFilter = $(".landFilter:checked").val()
+  let landTypeFilter = $("#landTypeFilter").val()
+  let landSort = $("#landSortByFilter").val()
+  console.log(landTypeFilter, landFilter, landSort)
+  $.get("/land?filter=" + landFilter + "&landType=" + landTypeFilter + "&sort=" + landSort , function(data){
+    $("#land").html(data)
+
+  })
+}
 
 function loadPage (page){
+  console.log(page)
   let landTypes = ['jungle', 'forest', 'desert', 'plains', 'mountains']
   let url = page
-  if (page == 'land'){
-    url = "land?landType=" + landTypes[Math.round(Math.random() * (landTypes.length - 1 - 0) + 0)];
-  } else if (page == 'market'){
+  if (page == 'market'){
     url = 'contracts'
   }
   $.get("/" + url, function(data){

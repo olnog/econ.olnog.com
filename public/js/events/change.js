@@ -116,12 +116,10 @@ $(document).on('change', '.historyFilter', function(e) {
 $(document).on('change', '.stateFilter', function(e) {
   formatBuyOrders()
 })
-$(document).on('change', '.landFetch', function(e) {
-  fetchLand()
-})
 
-$(document).on('change', '.landFilter', function(e) {
-  formatLand()
+$(document).on('change', '.loadLand', function(e) {
+  loadLand()
+
 })
 
 $(document).on('keydown', '#landOwnerFilter', function(e) {

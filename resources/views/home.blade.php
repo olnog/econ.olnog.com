@@ -72,11 +72,10 @@
         @endif
       </div>
     </div>
-  </div><div id='land' class='d-none otherPages ms-3 mt-3 '>
+  </div><div id='land' class=' otherPages ms-3 mt-3 '>
 
 
-
-  </div><div id='actions' class='otherPages ms-3'>
+  </div><div id='actions' class='d-none otherPages ms-3'>
 
   </div><div id='buildings' class='d-none otherPages ms-3'>
 

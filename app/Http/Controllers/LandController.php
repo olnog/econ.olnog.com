@@ -14,33 +14,63 @@ class LandController extends Controller
     public function index(Request $request)
     {
       $landType = $request->landType;
-      if ($request->sort == 'valuation'){
-        $land = Land::join('users', 'land.userID', 'users.id')
-          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
-          ->where('type', $landType)->orderBy('valuation')->get();
-      } else if ($request->sort == 'name'){
-        $land = Land::join('users', 'land.userID', 'users.id')
-          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
-          ->where('type', $landType)->orderBy('name')->get();
-      } else if ($request->sort == 'type'){
-        $land = Land::join('users', 'land.userID', 'users.id')
-          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
-          ->where('type', $landType)->orderBy('type')->get();
-      } else {
-        $land = Land::join('users', 'land.userID', 'users.id')
-          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
-          ->where('type', $landType)->get();
+      $filter  = $request->filter;
+      $sort = $request->sort;
+      $landTypes = \App\Land::fetchLandTypes();
+      if ($filter == null && $landType == null){
+        $filter = 'mine';
+        $landType = 'all';
+        $sort = 'id';
+      } else if ($filter == 'all' && $landType == 'all'){
+        $landType = $landTypes[rand(0, count($landTypes) -1)];
       }
 
+      if ($filter == 'mine' ){
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->where('userID', \Auth::id())->orderBy($sort)->get();
+        if ($landType != 'all'){
+          $land = Land::join('users', 'land.userID', 'users.id')
+            ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+            'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+            'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+            ->where('type', $landType)->where('userID', \Auth::id())
+            ->orderBy($sort)->get();
+        }
+      } else if ($filter == 'hostile'){
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->whereNotNull('hostileTakeoverBy')->orderBy($sort)->get();
+        if ($landType != 'all'){
+          $land = Land::join('users', 'land.userID', 'users.id')
+            ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+            'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+            'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+            ->where('type', $landType)->whereNotNull('hostileTakeoverBy')
+            ->orderBy($sort)->get();
+        }
+      } else if ($filter == 'all'){
+        $land = Land::join('users', 'land.userID', 'users.id')
+          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+          ->orderBy($sort)->get();
+        if ($landType != 'all'){
+          $land = Land::join('users', 'land.userID', 'users.id')
+            ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
+            'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
+            'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
+            ->where('type', $landType)->orderBy($sort)->get();
+        }
+      }
+
+
       return view('Land.index')->with([
+        'filter'    => $filter,
         'land'      => $land,
         'landType'  => $landType,
         'sort'      => $request->sort,

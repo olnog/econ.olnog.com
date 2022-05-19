@@ -31,51 +31,53 @@
 </div>
 </div>
 
-
-<div class='row'>
+<div class=''>
     <span class='fw-bold me-3'>Filter:</span>
-</div><div class='row'>
-  <div class='col'>
+  </div><div class='row'>
+    <div class='col'>
+    <input type='radio'  name='landFilter' class='landFilter loadLand' value='all' @if ($filter != 'mine' && $filter != 'hostile')checked @endif> All
 
-    <input type='radio'  name='landFilter' class='landFilter' value='all' checked> All
+    <input type='radio' name='landFilter' class='landFilter loadLand' value='mine' @if ($filter == 'mine') checked @endif> Your Land?
+
+    <input type='radio' name='landFilter' class='landFilter loadLand' value='hostile' @if ($filter == 'hostile') checked @endif> Hostile Takeovers?
   </div><div class='col'>
-
-    <input type='radio' name='landFilter' class='landFilter ' value='yours'> Your Land?
+    Land Type:
+    <select name='landTypeFilter' id='landTypeFilter' class='loadLand'>
+      @if ($filter != 'all')
+      <option value='all' @if ($landType == 'all') selected @endif>all</option>
+      @endif
+      <option value='jungle' @if ($landType == 'jungle') selected @endif>Jungle</option>
+      <option value='forest' @if ($landType == 'forest') selected @endif>Forest</option>
+      <option value='mountains' @if ($landType == 'mountains') selected @endif >Mountains</option>
+      <option value='plains' @if ($landType == 'plains') selected @endif>Plains</option>
+      <option value='desert' @if ($landType == 'desert') selected @endif>Desert</option>
+    </select>
   </div><div class='col'>
-
-    <input type='radio' name='landFilter' class='landFilter ' value='takeovers'> Hostile Takeovers?
-  </div>
-</div><div class='row'>
-  <div class='col text-center'>
     Owner:
     <input type='text' id='landOwnerFilter' class='landFilter'>
 
     <button id='clearLandOwnerFilter' class='btn btn-outline-danger'>x</button>
+
   </div>
 </div><div class='row'>
-  <div class='col'>
-    <span>
-      Show Only:
-    </span>
-      <select name='landTypeFilter' id='landTypeFilter' class='landFetch'>
-        <option value='jungle' @if ($landType == 'jungle') selected @endif>Jungle</option>
-        <option value='forest' @if ($landType == 'forest') selected @endif>Forest</option>
-        <option value='mountains' @if ($landType == 'mountains') selected @endif >Mountains</option>
-        <option value='plains' @if ($landType == 'plains') selected @endif>Plains</option>
-        <option value='desert' @if ($landType == 'desert') selected @endif>Desert</option>
-        </select>
-    </div><div class='col'>
+  <div class='col text-center'>
+  </div>
+</div><div class='fw-bold'>
       Sort By:
-      <select id='landSortByFilter' class='landFetch'>
-        <option value='null' @if ($sort == null) selected @endif>Parcel #</option>
+      <select id='landSortByFilter' class='loadLand'>
+        <option value='id' @if ($sort == 'id') selected @endif>Parcel #</option>
         <option value='valuation'@if ($sort == 'valuation') selected @endif >Value</option>
         <option value='name' @if ($sort == 'name') selected @endif>Owner</option>
       </select>
     </div>
-  </div>
 <div id='landTable'>
 
-
+@if (count($land) < 1 && $filter == 'mine')
+  <div class='text-center fw-bold'>You don't own any parcels of land
+    @if($landType != 'all') of this type. @else. @endif Explore, buy some land or initiate a hostile takeover for an unprotected parcel.</div>
+@elseif (count($land) < 1 && $filter == 'hostile')
+  <div class='text-center fw-bold'>There are no hostile takeovers taking place right now.</div>
+@endif
 @foreach ($land as $parcel)
   <?php
   $landForSale = \App\Land::aretheySellingThis($parcel->id);
