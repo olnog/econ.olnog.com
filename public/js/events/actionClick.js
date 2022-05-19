@@ -28,12 +28,11 @@ $(document).on('click', '#startAutomation', function(e) {
   $("#stopAutomation").removeClass('d-none')
   $("#stopAutomation").prop('disabled', false)
   $("#lastAction").prop('disabled', true)
-  $(".action").prop('disabled', true)
   $("#startAutomation").addClass('d-none')
   $("#workHoursCent").prop('disabled', true)
-  $("build").prop('disabled', true)
-  $("#buildingsThatCanBeBuilt").prop('disabled', true)
+  disableForAutomation()
   automation = setInterval(function(){
+
     if (lastAction != null){
       action(lastAction)
     } else if(lastContractAction != null){
@@ -43,6 +42,7 @@ $(document).on('click', '#startAutomation', function(e) {
         freelance(lastContractAction.freelance)
       }
     }
+
     if (autoActions != null){
       --autoActions
       $("#workHoursCent").val(autoActions)
@@ -59,6 +59,17 @@ $(document).on('click', '#stopAutomation', function(e) {
   stopAutomation()
 })
 
+function disableForAutomation(){
+  $(".freelanceBuild").prop('disabled', true)
+  $(".freelanceRepair").prop('disabled', true)
+  $(".freelanceBuildSelect").prop('disabled', true)
+  $(".freelanceRepairSelect").prop('disabled', true)
+  $("#buildingsThatCanBeBuilt").prop('disabled', true)
+  $(".action").prop('disabled', true)
+  $("#build").prop('disabled', true)
+
+}
+
 function stopAutomation(){
   if (!stopButtonPressed){
     let audio = new Audio('audio/stop.wav')
@@ -73,6 +84,10 @@ function stopAutomation(){
   $(".action:not('.impossible')").prop('disabled', false)
   $("#startAutomation").removeClass('d-none')
   $("#workHoursCent").prop('disabled', false)
+  $(".freelanceBuild").prop('disabled', false)
+  $(".freelanceRepair").prop('disabled', false)
+  $(".freelanceBuildSelect").prop('disabled', false)
+  $(".freelanceRepairSelect").prop('disabled', false)
   stopButtonPressed = false
   if (autoActions != null){
     workHoursStop = autoActions

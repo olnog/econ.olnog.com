@@ -23,8 +23,7 @@ function loadPage (page){
   $.get("/" + url, function(data){
     $("#" + page).html(data)
     if (page == 'actions' && automation != null){
-      $("#buildingsThatCanBeBuilt").prop('disabled', true)
-      $(".action").prop('disabled', true)
+      disableForAutomation()
     }
   })
 

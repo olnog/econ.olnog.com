@@ -127,14 +127,17 @@
         @if($contract->action == 'build' )
           @if(count($buildableBuildings) > 0 && $canTheyBuild)
             <div>
-              <select id='contractBuildableBuildings-{{$contract->id}}-actions' @if (count($buildableBuildings) < 1) disabled @endif>
+              <select id='contractBuildableBuildings-{{$contract->id}}-actions'
+                class='freelanceBuildSelect'
+                @if (count($buildableBuildings) < 1) disabled @endif>
                 <option></option>
                 @foreach($buildableBuildings as $building)
                   <option value='{{$building}}'>{{$building}}</option>
                 @endforeach
               </select>
               <button id='freelanceBuild-{{$contract->id}}-actions'
-                class='freelanceBuild btn btn-danger' @if (count($buildableBuildings) < 1) disabled @endif>
+                class='freelanceBuild btn btn-danger'
+                @if (count($buildableBuildings) < 1) disabled @endif>
                 {{$contract->action}} (-{{$contract->price}})
               </button>
             </div>
@@ -142,7 +145,7 @@
         @elseif($contract->action == 'repair')
           @if (count($repairableBuildings) > 0)
             <div>
-              <select id='contractRepairableBuildings-{{$contract->id}}-actions' @if (count($repairableBuildings) < 1) disabled @endif>
+              <select id='contractRepairableBuildings-{{$contract->id}}-actions' class='freelanceRepairSelect' @if (count($repairableBuildings) < 1) disabled @endif>
                 <option></option>
                 @foreach($repairableBuildings as $building)
                   <option value='{{$building->id}}'>{{$building->name}} ({{$building->uses / $building->totalUses * 100}}%)</option>
