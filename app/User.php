@@ -55,6 +55,7 @@ class User extends Authenticatable
         'numOfContracts'  => $numOfContracts,
         'numOfItems'      => $numOfItems,
         'numOfParcels'    => $numOfParcels,
+        'numOfUnlocked'   => count(\App\Actions::fetchUnlocked(\Auth::id(), true)),
         'settings'        => [
                               'sound'=>$user->soundSetting,
                               'eatFood'=>$user->eatFoodSetting,

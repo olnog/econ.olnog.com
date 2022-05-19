@@ -10,7 +10,7 @@
     </li>
     <li class="nav-item text-center">
       <a class="nav-link active menu" href="#">actions</a>
-      (<span id ='numOfPoints'></span>)
+      (<span id='numOfUnlocked'></span>/<span id ='numOfPoints'></span>)
     </li>
     <li class="nav-item text-center">
       <a class="nav-link menu" href="#">items</a>

@@ -29,6 +29,7 @@ function displayHeaders(info){
   $("#buildingSlots").html(info.buildingSlots.toLocaleString())
   $("#clacks").html(info.clacks.toLocaleString())
   $("#numOfParcels").html(info.numOfParcels.toLocaleString())
+  $("#numOfUnlocked").html(info.numOfUnlocked.toLocaleString())
   $("#numOfPoints").html(info.numOfActions.toLocaleString())
   $(".builtBuildings").html(info.numOfBuildings.toLocaleString())
   $("#numOfContracts").html(info.numOfContracts.toLocaleString())
