@@ -1,6 +1,6 @@
 robot = new Robot()
 
-loadPage('land')
+loadPage('actions')
 
 function loadLand(){
   let landFilter = $(".landFilter:checked").val()
