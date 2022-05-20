@@ -14,7 +14,6 @@ function loadLand(){
 }
 
 function loadPage (page){
-  console.log(page)
   let landTypes = ['jungle', 'forest', 'desert', 'plains', 'mountains']
   let url = page
   if (page == 'market'){

@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  var_dump(\App\Buildings::doTheyHaveAccessTo('Kitchen', 5));
+  var_dump(\App\Buildings::fetchRepairable(true));
 });
 
 Route::get('/stop', function(){
@@ -99,7 +99,7 @@ Route::get('/changes', function(){
 Route::get('/help', function(){
   return view('help')->with([
     'actionTypes'   => \App\ActionTypes::orderBy('name')->get(),
-    'itemTypes' => \App\ItemTypes::orderBy('name')->get(),    
+    'itemTypes' => \App\ItemTypes::orderBy('name')->get(),
   ]);
 });
 

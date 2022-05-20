@@ -179,7 +179,6 @@ class Buildings extends Model
     ->select('buildings.id', 'name', 'uses', 'totalUses')->orderBy('name')->get();
     $repairableBuildings = [];
     foreach ($buildings as $building){
-
       if (\App\Buildings::doTheyHaveEnoughToRepair($building->name, null, \Auth::id())){
         if ($justNames){
           $repairableBuildings[] = $building->name;

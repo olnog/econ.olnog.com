@@ -488,15 +488,15 @@ class ContractController extends Controller
 
         $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
         $repair = \App\Actions::fetchByName($builder->id, 'repair');
-        if (!\App\Buildings::canTheyRepair($buildingType->name, $builder->id, $contract->userID)){
-          echo json_encode(['error' => "You don't the necessary materials for them to repair this."]);
-          return;
-        } else if ($repair->rank < 1 || !$repair->unlocked){
+        if ($repair->rank < 1 || !$repair->unlocked){
           echo json_encode(['error' => "They no longer have repair unlocked in order to do this contract. Sorry. "]);
           \App\History::new($contract->userID, 'contract',
             "You no longer have repair unlocked for your freelance contract so it was cancelled.");
           $contract->active = false;
           $contract->save();
+          return;
+        } else if (!\App\Buildings::canTheyRepair($buildingType->name, $builder->id, \Auth::id())){
+          echo json_encode(['error' => "You don't have the necessary materials for them to repair this."]);
           return;
         } else if ($contractor->clacks < $contract->price){
           echo json_encode(['error' => "You don't have enough money for this contract. "]);

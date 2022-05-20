@@ -151,9 +151,9 @@ function leaseBuilding(contractID){
 }
 
 function repairContract(contractID, buildingID, page){
-  console.log(contractID, buildingID, page)
   $.post( "/contracts/" + contractID, {type: 'repair', buildingID: buildingID, _token: fetchCSRF(),
     _method: 'PUT' }).done(function(data){
+      console.log(data)
     if (JSON.parse(data).error != undefined){
       displayError(JSON.parse(data).error)
       return
