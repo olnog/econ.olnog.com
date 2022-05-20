@@ -98,7 +98,8 @@ Route::get('/changes', function(){
 
 Route::get('/help', function(){
   return view('help')->with([
-    'itemTypes' => \App\ItemTypes::orderBy('name')->get()
+    'actionTypes'   => \App\ActionTypes::orderBy('name')->get(),
+    'itemTypes' => \App\ItemTypes::orderBy('name')->get(),    
   ]);
 });
 

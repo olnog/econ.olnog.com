@@ -31,6 +31,7 @@
   <div class='fixed-top bg-opacity-100 row bg-secondary'>
     <div class='col-1'>
       <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
+      <a href='/help'><img src='/img/icons8-help-24.png'></a>
     </div><div class='col-11'>
       <div id='status' class='text-center p-1 '></div>
       <div id='error' class='text-center p-1'></div>
@@ -94,6 +95,7 @@
       <a target="_blank" href="https://icons8.com/icon/61247/rent">Rent</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
       <a target="_blank" href="https://icons8.com/icon/hCFmpYC60qKc/feedback">Feedback</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
       <a target="_blank" href="https://icons8.com/icon/61517/job">Job</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+      <a target="_blank" href="https://icons8.com/icon/83244/help">Help</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
     </div><div>
       <a href='https://freesound.org/people/suzenako/sounds/320905/'>The Ding</a>
       <a href='https://freesound.org/people/InspectorJ/sounds/415510/'>Bell, Counter,</a>
