@@ -75,12 +75,16 @@ class Equipment extends Model
         continue;
       }
       $fuel = \App\Items::fetchByName($fuelName, $userID);
-      if ($fuel->quantity < 100){
+      $fuelReq = 100;
+      if ($fuelName == 'Electricity'){
+        $fuelReq = 1000;
+      }
+      if ($fuel->quantity < $fuelReq){
         return false;
       }
-      $fuel->quantity -= 100;
+      $fuel->quantity -= $fuelReq;
       $fuel->save();
-      $fuelStatus = $fuelName . ": <span class='fn'> -100 </span> ["
+      $fuelStatus = $fuelName . ": <span class='fn'> -" . $fuelReq . " </span> ["
         . number_format($fuel->quantity) . "]";
     }
     $equipment->uses--;

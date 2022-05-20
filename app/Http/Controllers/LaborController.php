@@ -76,7 +76,7 @@ class LaborController extends Controller
         || substr($toolItem['name'], 0, strlen('Tractor'))    == 'Tractor'
         || substr($toolItem['name'], 0, strlen('Bulldozer'))  == 'Bulldozer'
       ){
-        $numOfUses = 1000;
+        $numOfUses = 100;
       }
       $equipment->uses = $numOfUses;
       $equipment->totalUses = $numOfUses;
