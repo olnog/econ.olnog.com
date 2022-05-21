@@ -15,7 +15,8 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  var_dump(\App\Buildings::fetchRepairable(true));
+  $labor = \App\Labor::fetch();
+  ((strtotime('now') - strtotime($labor->lastRebirth)) / 3600);
 });
 
 Route::get('/stop', function(){
@@ -164,6 +165,20 @@ Route::get('/rebirth', function () {
   ]);
 })->name('rebirth');
 
+Route::get('/reborn', function(Request $request){
+  $labor = \App\Labor::fetch();
+  if ((strtotime('now') - strtotime($labor->lastRebirth)) / 3600 < 1){
+    echo "<div><a href='/' style='text-align:center;'>go back</a></div><div>You need to wait at least an hour until you can Rebirth. You have "
+      . round( 60 - ((strtotime('now') - strtotime($labor->lastRebirth)) / 60))
+      . " minutes to wait.</div>";
+    return;
+  }
+  //$labor->rebirth = true;
+  $labor->save();
+  return redirect()->route('rebirth');
+
+});
+
 Route::post('/rebirth', function(Request $request){
   $labor = \App\Labor::fetch();
   if (!$labor->rebirth ){
@@ -171,7 +186,6 @@ Route::post('/rebirth', function(Request $request){
   }
   \App\Labor::rebirth($request->legacy == "on", $request->immortality == "on");
   return redirect()->route('home');
-
 });
 
 Route::post('/reset', function(){

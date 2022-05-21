@@ -223,10 +223,8 @@ function playSkill(){
 
 
 
-function reset(){
-  $.post( "/reset/", { _token: fetchCSRF() }).done(function(data){
-    location.reload()
-  })
+function rebirth(){
+  window.location.href = "/reborn"  
 }
 
 function sellToState(buyOrderID){

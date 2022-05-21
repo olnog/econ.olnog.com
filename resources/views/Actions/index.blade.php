@@ -221,6 +221,6 @@
     We understand that you might get yourself into bad spots so you can
     Rebirth at any time. You will still get the 50% estate tax clack penalty.
   </div><div class='text-center'>
-    <button id='reset' class='btn btn-danger form-control'>Rebirth</button>
+    <button id='rebirth' class='btn btn-danger form-control'>Rebirth</button>
   </div>
 </div>

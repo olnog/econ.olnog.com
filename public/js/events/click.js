@@ -152,9 +152,9 @@ $(document).on('click', '.repair', function(e) {
 
 
 
-$(document).on('click', '#reset', function(e) {
+$(document).on('click', '#rebirth', function(e) {
   if (confirm('You will reset your skills but you will no longer have anything. Are you sure you want to do this?')){
-    reset()
+    rebirth()
   }
 })
 

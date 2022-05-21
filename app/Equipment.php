@@ -115,7 +115,11 @@ class Equipment extends Model
           continue;
         }
         $fuelRequired = true;
-        if (\App\Items::fetchByName($itemName, $userID)->quantity >= 100){
+        $fuelAmountReq = 100;
+        if ($itemName == 'Electricity'){
+          $fuelAmountReq = 1000;
+        }
+        if (\App\Items::fetchByName($itemName, $userID)->quantity >= $fuelAmountReq){
           $enoughFuel = true;
         }
       }
