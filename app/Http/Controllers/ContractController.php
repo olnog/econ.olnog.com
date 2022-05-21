@@ -426,12 +426,14 @@ class ContractController extends Controller
         \App\Land::integrityCheck($buyer->id);
         $contract->active = false;
         $contract->save();
-        \App\History::new($seller->id, 'contract', "You sold land parcel #" . $land->id
-          . " to " . $buyer->name . " for " . number_format($contract->price)
-          . ". You now have " . number_format($seller->clacks) .  ' clack(s).');
-        $status = "You bought land parcel #" . $land->id
-          . " from " . $seller->name . " for " . number_format($contract->price)
-          . ". You now have " . number_format($buyer->clacks) . ' clack(s).';
+        \App\History::new($seller->id, 'contract', "<span class='actionInput'><span class='fn'>Parcel #" . $land->id
+          . "</span></span> &rarr; Clacks: <span class='fp'>+"
+          . number_format($contract->price) . "</span> ["
+          . number_format($seller->clacks) .  ']');
+        $status = "<span class='actionInput'>Clacks: <span class='fn'>-"
+          . number_format($contract->price) . "</span> ["
+          . number_format($buyer->clacks) . "]</span> &rarr;  +Parcel #"
+          . $land->id;
 
 
       } else if ($request->type == 'buyLand'){
@@ -453,9 +455,10 @@ class ContractController extends Controller
         $land->userID = $buyer->id;
         $land->valuation = $contract->price;
         $land->save();
-        $status = "You sold land parcel #" . $land->id
-          . " to " . $buyer->name . " for " . number_format($contract->price)
-          . ". You now have " . number_format($seller->clacks) . " clack(s).";
+        $status = "<span class='actionInput'><span class='fn'>Parcel #" . $land->id
+          . "</span></span> &rarr; Clacks: <span class='fp'>+"
+          . number_format($contract->price) . "</span> ["
+          . number_format($seller->clacks) . "]";
         $seller->clacks += $contract->price;
         $clacks = $seller->clacks;
         $seller->save();
@@ -476,9 +479,11 @@ class ContractController extends Controller
           }
         }
         $contract->save();
-        \App\History::new($buyer->id, 'contract', "You bought land parcel #" . $land->id
-          . " from " . $seller->name . " for " . number_format($contract->price)
-          . ". You now have " . number_format($buyer->clacks) . " clack(s).");
+        \App\History::new($buyer->id, 'contract',
+          "<span class='actionInput'>Clacks: <span class='fn'>-"
+          . number_format($contract->price) . "</span> ["
+          . number_format($buyer->clacks) . "] </span> &rarr; Parcel #"
+          . $land->id);
 
 
       } else if ($request->type == 'repair'){
@@ -688,9 +693,11 @@ class ContractController extends Controller
         $buyerItem->save();
         $buyer->clacks -= ($contract->price * $request->quantity);
         $buyer->save();
-        $status = "You bought " . $request->quantity . " " . $itemType->name
-          . " from " . $seller->name . " for " . number_format($contract->price)
-          . " clack(s) each. You now have " . number_format($buyer->clacks) . ' clack(s).';
+        $status = "<span class='actionInput'>Clacks: <span class='fn'>-"
+          . number_format($contract->price * $request->quantity) . "</span> ["
+          . number_format($buyer->clacks) . "]</span> &rarr; ". $itemType->name
+          . ": <span class='fp'>+" . number_format($request->quantity) . " ["
+          . number_format($buyerItem->quantity) . "]";
 
         if ($sellerItem->quantity < $request->quantity){
           \App\History::new($contract->userID, 'contract', "You ran out of items to sell so your contract selling " . $itemType->name . " was cancelled.");
@@ -711,9 +718,12 @@ class ContractController extends Controller
           $contract->save();
         }
         $clacks = $buyer->clacks;
-        \App\History::new($seller->id, 'contract', "You sold " . $request->quantity . " " . $itemType->name
-          . " to " . $buyer->name . " for " . $contract->price
-          . " clack(s) each. You now have " . $seller->clacks . " clack(s).");
+        \App\History::new($seller->id, 'contract', "<span class='actionInput'>"
+          . $itemType->name . ": <span class='fn'>-" . $request->quantity
+          . "</span> [" . $sellerItem->quantity
+          . "]</span> &rarr; Clacks: <span class='fp'>+" . $contract->price
+          . "</span> [" . $seller->clacks . "]");
+
 
 
       } else if ($request->type == 'sellToBuyOrder'){
@@ -798,9 +808,13 @@ class ContractController extends Controller
             $contract->save();
           }
         }
-        $status = "You sold " . number_format($request->quantity) . " " . $itemType->name
-          . " to " . $buyer->name . " for " . number_format($contract->price)
-          . " clack(s) each. You now have " . number_format($seller->clacks) . " clack(s).";
+        $status = "<span class='actionInput'>"
+          . $itemType->name . ": <span class='fn'>-" . $request->quantity
+          . "</span> [" . $sellerItem->quantity
+          . "]</span> &rarr; Clacks: <span class='fp'>+" . number_format($contract->price)
+          . "</span> [" . number_format($seller->clacks) . "]";
+
+
 
         $sellerItem->save();
         $seller->save();
@@ -809,9 +823,11 @@ class ContractController extends Controller
 
         $buyer->save();
         $clacks = $seller->clacks;
-        \App\History::new($buyer->id, 'contract', "You bought " . $request->quantity . " "
-          . $itemType->name . " from " . $seller->name . " for " . number_format($contract->price)
-          . " clack(s) each. You now have " . number_format($buyer->clacks) . " clack(s).");
+        \App\History::new($buyer->id, 'contract', "<span class='actionInput'>Clacks: <span class='fn'>-"
+          . number_format($contract->price) . "</span> ["
+          . number_format($buyer->clacks) . "]</span> &rarr; ". $itemType->name
+          . ": <span class='fp'>+" . number_format($request->quantity) . " ["
+          . number_format($buyerItem->quantity) . "]");
 
 
       }

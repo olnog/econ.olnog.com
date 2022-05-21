@@ -71,13 +71,14 @@ class BuyOrderController extends Controller
         $newBuyOrder->itemTypeID = $buyOrder->itemTypeID;
         $newBuyOrder->save();
 
-        $chat = new \App\Chat;
-        $chat->message = $user->name . ' sold ' . $buyOrder->quantity
-          . $itemType->name . " to The State for " . $buyOrder->cost . " clacks.";
-        $chat->save();
 
-        $status = 'You sold ' . $buyOrder->quantity . " "
-          . $itemType->name . " to The State for " . $buyOrder->cost . " clacks.";
+
+        $status = "<span class='actionInput'>" . $itemType->name
+          . ": <span class='fn'>-" . number_format($buyOrder->quantity)
+          . "</span> [" . number_format($item->quantity)
+          . "]</span> &rarr;  Clacks: <span class='fp'>+"
+          . number_format($buyOrder->cost) . " ["
+          . number_format($user->clacks) . "]";
         \App\History::new(Auth::id(), 'state', $status);
         echo json_encode([
           'status'  => $status,

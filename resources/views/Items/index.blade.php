@@ -88,6 +88,16 @@
           dump 1,000x
         </button>
       @endif
+      @if ($item->quantity >= 10000)
+        <button id='dump-{{$item->id}}-10000' class='btn btn-danger m-2 d-none dump'>
+          dump 10,000x
+        </button>
+      @endif
+      @if ($item->quantity >= 100000)
+        <button id='dump-{{$item->id}}-100000' class='btn btn-danger m-2 d-none dump'>
+          dump 100,000x
+        </button>
+      @endif
     </div><div id='buyingAndSelling{{$item->id}}' class='d-none'>
       @if ($buyContract != null)
         <button id='sellToBuyOrder-{{$buyContract->id}}-1'
@@ -114,6 +124,18 @@
           sell 1,000x
           (<span class='fp'>+{{number_format($buyContract->price * 1000)}} clacks</span>)
         </button>
+        <button id='sellToBuyOrder-{{$buyContract->id}}-10000'
+          class='sellToBuyOrder btn btn-success m-2
+          @if ($item->quantity < 10000) disabled @endif '>
+          sell 10,000x
+          (<span class='fp'>+{{number_format($buyContract->price * 10000)}} clacks</span>)
+        </button>
+        <button id='sellToBuyOrder-{{$buyContract->id}}-100000'
+          class='sellToBuyOrder btn btn-success m-2
+          @if ($item->quantity < 100000) disabled @endif '>
+          sell 100,000x
+          (<span class='fp'>+{{number_format($buyContract->price * 100000)}} clacks</span>)
+        </button>
       @endif
       @if ($sellContract != null)
         <button id='buyFromSellOrder-{{$sellContract->id}}-1'
@@ -138,7 +160,19 @@
           class='buyFromSellOrder btn btn-danger m-2'
           @if ($clacks < $sellContract->price * 1000) disabled @endif>
           buy 1,000x
-          (-{{$sellContract->price * 1000}} clacks)
+          (-{{number_format($sellContract->price * 1000)}} clacks)
+        </button>
+        <button id='buyFromSellOrder-{{$sellContract->id}}-10000'
+          class='buyFromSellOrder btn btn-danger m-2'
+          @if ($clacks < $sellContract->price * 10000) disabled @endif>
+          buy 10,000x
+          (-{{number_format($sellContract->price * 10000)}} clacks)
+        </button>
+        <button id='buyFromSellOrder-{{$sellContract->id}}-100000'
+          class='buyFromSellOrder btn btn-danger m-2'
+          @if ($clacks < $sellContract->price * 100000) disabled @endif>
+          buy 100,000x
+          (-{{number_format($sellContract->price * 100000)}} clacks)
         </button>
       @endif
 
