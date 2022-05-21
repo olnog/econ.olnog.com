@@ -22,6 +22,8 @@ function action (actionName){
     csrfToken = JSON.parse(data).csrf
     displayHeaders(JSON.parse(data).info)
     displayAutomation(JSON.parse(data).lastAction)
+  }).fail(function(){ // DID THIS WORK? 05/21/22
+    location.reload()
   })
 }
 

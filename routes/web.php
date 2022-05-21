@@ -167,13 +167,14 @@ Route::get('/rebirth', function () {
 
 Route::get('/reborn', function(Request $request){
   $labor = \App\Labor::fetch();
-  if ((strtotime('now') - strtotime($labor->lastRebirth)) / 3600 < 1){
+  if ($labor->lastRebirth != null && (strtotime('now') - strtotime($labor->lastRebirth)) / 3600 < 1){
     echo "<div><a href='/' style='text-align:center;'>go back</a></div><div>You need to wait at least an hour until you can Rebirth. You have "
       . round( 60 - ((strtotime('now') - strtotime($labor->lastRebirth)) / 60))
       . " minutes to wait.</div>";
     return;
   }
-  //$labor->rebirth = true;
+  $labor->rebirth = true;
+  $labor->lastRebirth = date('Y-m-d H:i:s');
   $labor->save();
   return redirect()->route('rebirth');
 
@@ -192,7 +193,7 @@ Route::post('/reset', function(){
   //\App\User::reset();
 
   $labor = \App\Labor::fetch();
-  $labor->rebirth = true;
+  //$labor->rebirth = true;
   $labor->save();
 
   return redirect()->route('home');

@@ -19,7 +19,8 @@
     </div>
   @endif
 </div>
- <div class='mt-5'>
+ <div class='mt-5 row'>
+  <div class='col-md-2'>
    <span class='fw-bold'>
      buildings
      (<span class='builtBuildings'>{{count($buildings)}}</span>)
@@ -28,7 +29,9 @@
    free building slots
    <button id='show-buildingListings' class='show btn btn-link d-none'>+</button>
    <button id='hide-buildingListings' class='hide btn btn-link'>-</button>
-   <a href='/buildingCosts' class='ms-5'> Why Can't I Build Anything?</a>
+ </div><div class='col-md'>
+   <a href='/buildingCosts' class=''> Why Can't I Build Anything?</a>
+  </div>
  </div><div>
    <div id='buildingWarning' class='text-decoration-underline text-center'></div>
    <!--<input type='checkbox' id='filterFields' class='filterBuildings'> Hide Fields?-->
@@ -37,7 +40,7 @@
   @continue (in_array($building->name, $fieldsDisplayed))
   <div class='mt-3 @if ($building->farming) fields @endif'>
     <div>
-      
+
       @if ($building->uses < $building->totalUses
         && in_array($building->id, $repairable ))
         <button id='repair-{{$building->id}}' class='repair btn'>

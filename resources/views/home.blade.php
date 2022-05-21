@@ -29,10 +29,10 @@
 
   </ul>
   <div class='fixed-top bg-opacity-100 row bg-secondary'>
-    <div class='col-1'>
+    <div class='col-md-1 col-3'>
       <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
       <a href='/help'><img src='/img/icons8-help-24.png'></a>
-    </div><div class='col-11'>
+    </div><div class='col'>
       <div id='status' class='text-center p-1 '></div>
       <div id='error' class='text-center p-1'></div>
     </div>

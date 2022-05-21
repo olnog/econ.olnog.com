@@ -12,7 +12,7 @@ class BuildingTypes extends Model
 
 
   public static function fetch(){
-      return \App\BuildingTypes::where('farming', false)->get();
+      return \App\BuildingTypes::where('farming', false)->orderBy("name", 'asc')->get();
   }
 
   public static function fetchBuildingCost($buildingType){
