@@ -300,11 +300,31 @@ class Buildings extends Model
     return \App\Buildings::where('userID', $userID)->count();
   }
 
-  public static function howManyFields($fieldName, $userID){
-    $buildingType = \App\BuildingTypes::fetchByName($fieldName);
+  public static function howManyFields($field, $userID){
+    $buildingType = \App\BuildingTypes::fetchByName($field);
     return \App\Buildings::where('buildingTypeID', $buildingType->id)
       ->where('userID', $userID)->count();
   }
+  public static function howManyFieldsForThisLandType($land, $userID){
+    $fieldsArr = ['jungle' => ['Rubber Plantation'],
+      'plains' => ['Plant X Field', 'Wheat Field', 'Herbal Greens Field']];
+    $fieldCount = 0;
+    foreach ($fieldsArr[$land] as $field){
+      $buildingType = \App\BuildingTypes::fetchByName($field);
+      $fieldCount += \App\Buildings::where('buildingTypeID', $buildingType->id)
+        ->where('userID', $userID)->count();
+    }
+    return $fieldCount;
+  }
+
+  public static function howManyFieldsCanTheyHave($land, $userID){
+    $landCount = \App\Land::where('type', $land)
+      ->where('userID', $userID)->count();
+    if ($landCount == 0){
+      $landCount = \App\Lease::howManyAreTheyLeasing($land, $userID);
+    }
+  }
+
 
   public static function repair($id, $agentID, $contractorID){
     $action = \App\Actions::fetchByName($agentID, 'repair');

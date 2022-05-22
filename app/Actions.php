@@ -508,8 +508,6 @@ class Actions extends Model
 
 
     } else if ($actionName == 'plant-rubber-plantation'){
-
-
       $leaseStatus = '';
       $landBonus = \App\Land::where('type', 'jungle')
         ->where('userID', $contractorID)->count();
@@ -525,7 +523,7 @@ class Actions extends Model
           ];
         }
       }
-      if (\App\Buildings::howManyFields('Rubber Plantation', $contractorID) >= $landBonus){
+      if (\App\Buildings::howManyFieldsForThisLandType('jungle', $contractorID) >= $landBonus){
         return [
           'error' => "Unfortunately, the number of Rubber Plantations you can have are limited to the number of Jungles you have access to and you're maxed out."
         ];
@@ -589,7 +587,7 @@ class Actions extends Model
         $production = $action->rank * 10;
       }
       $fieldType = \App\BuildingTypes::fetchByName($itemName . ' Field');
-      if (\App\Buildings::howManyFields('Plains', $contractorID) >= $landBonus){
+      if (\App\Buildings::howManyFieldsForThisLandType('plains', $contractorID) >= $landBonus){
         return [
           'error' => "Unfortunately, the number of " . $itemName . " Fields you can have are limited to the number of Plains you have access to and you're maxed out."
         ];
@@ -933,16 +931,20 @@ class Actions extends Model
 
       } else if ($action == 'plant-rubber-plantation'
         && \App\User::find(Auth::id())->buildingSlots
-        < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)
-        && Land::doTheyHaveAccessTo('jungle')){
+        < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($userID)
+        && Land::doTheyHaveAccessTo('jungle')
+        && \App\Buildings::howManyFieldsForThisLandType('jungle', $userID)
+        < \App\Buildings::howManyFieldsCanTheyHave('jungle', $userID)){
         $actionable[] = $action;
 
       } else if (($action == 'plant-wheat-field'
       || $action == 'plant-herbal-greens-field'
       || $action == 'plant-plant-x-field')
         && \App\User::find(Auth::id())->buildingSlots
-        < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)
-        && Land::doTheyHaveAccessTo('jungle')){
+        < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($userID)
+        && Land::doTheyHaveAccessTo('jungle')
+        && \App\Buildings::howManyFieldsForThisLandType('plains', $userID)
+          < \App\Buildings::howManyFieldsCanTheyHave('plains', $userID)){
         $actionable[] = $action;
 
       } else if ($action == 'program-robot'
