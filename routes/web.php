@@ -15,8 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  $labor = \App\Labor::fetch();
-  ((strtotime('now') - strtotime($labor->lastRebirth)) / 3600);
+  \App\Land::integrityCheck(5);
 });
 
 Route::get('/stop', function(){

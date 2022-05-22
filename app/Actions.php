@@ -536,11 +536,11 @@ class Actions extends Model
       }
       $rubberPlantationType = \App\BuildingTypes::fetchByName('Rubber Plantation');
       $contractor = \App\User::find($contractorID);
-      if ($contractor->buildingSlots < 1){
+      if ($contractor->buildingSlots
+        >= \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)){
         return ['error' => " You don't have enough building slots."];
       }
-      $contractor->buildingSlots--;
-      $contractor->save();
+
       $wheatField = new \App\Buildings;
       $wheatField->buildingTypeID = $rubberPlantationType->id;
       $wheatField->userID = $contractorID;
@@ -560,7 +560,8 @@ class Actions extends Model
       || $actionName == 'plant-plant-x-field'
       || $actionName == 'plant-herbal-greens-field'){
       $contractor = \App\User::find($contractorID);
-      if ($contractor->buildingSlots < 1){
+      if ($contractor->buildingSlots
+        >= \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)){
         return ['error' => " You don't have enough building slots."];
       }
       $itemName = \App\Items::fetchItemNameForAction($actionName);
@@ -583,23 +584,16 @@ class Actions extends Model
           ];
         }
       }
-
-
       $production = 10;
       if ($robot == null){
         $production = $action->rank * 10;
       }
       $fieldType = \App\BuildingTypes::fetchByName($itemName . ' Field');
-
-
-
       if (\App\Buildings::howManyFields('Plains', $contractorID) >= $landBonus){
         return [
           'error' => "Unfortunately, the number of " . $itemName . " Fields you can have are limited to the number of Plains you have access to and you're maxed out."
         ];
       }
-      $contractor->buildingSlots--;
-      $contractor->save();
       $field = new \App\Buildings;
       $field->buildingTypeID = $fieldType->id;
       $field->userID = $contractorID;
@@ -938,14 +932,16 @@ class Actions extends Model
         $actionable[] = $action;
 
       } else if ($action == 'plant-rubber-plantation'
-        && \App\User::find(Auth::id())->buildingSlots>0
+        && \App\User::find(Auth::id())->buildingSlots
+        < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)
         && Land::doTheyHaveAccessTo('jungle')){
         $actionable[] = $action;
 
       } else if (($action == 'plant-wheat-field'
       || $action == 'plant-herbal-greens-field'
       || $action == 'plant-plant-x-field')
-        && \App\User::find(Auth::id())->buildingSlots>0
+        && \App\User::find(Auth::id())->buildingSlots
+        < \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)
         && Land::doTheyHaveAccessTo('jungle')){
         $actionable[] = $action;
 

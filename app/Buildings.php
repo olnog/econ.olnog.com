@@ -79,7 +79,7 @@ class Buildings extends Model
 
   public static function destroyBuilding($id){
     \App\Buildings::destroy($id);
-
+    \App\Land::integrityCheck(\Auth::id());
   }
 
   public static function doTheyHaveAccessTo($buildingName, $userID){
