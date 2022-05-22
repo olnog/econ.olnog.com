@@ -323,6 +323,7 @@ class Buildings extends Model
     if ($landCount == 0){
       $landCount = \App\Lease::howManyAreTheyLeasing($land, $userID);
     }
+    return $landCount;
   }
 
 
