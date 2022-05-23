@@ -142,6 +142,47 @@ FAQ
 </div>
 
 
+
+<h1 id='buildings' class='text-center'>
+  Buildings
+</h1>
+@foreach ($buildingTypes as $buildingType)
+  <div class='mb-3'>
+    <div>
+      <span id='building-{{$buildingType->id}}' class='fw-bold'>
+        {{$buildingType->name}}
+      </span>
+
+      <a href='#helpTOC'>[ top ]</a>
+    </div>
+    <div class='ms-3'><span class='fw-bold text-secondary'>Description</span>: {{$buildingType->description}}</div>
+    <div class='ms-3'><span class='fw-bold text-secondary'>Associated Actions</span>:
+    <?php
+      $actionArr = explode(',', $buildingType->actions);
+    ?>
+    @foreach($actionArr as $action)
+      <?php
+        $actionType = \App\ActionTypes::where('name', trim($action))->first();
+        $actionName = $action;
+        if ($actionType != null){
+          $actionName = "<a href='#actionType-" . $actionType->id
+          . "'>" . $action . "</a>";
+        }
+      ?>
+       <span class='me-3'>{!!$actionName!!}</span>
+    @endforeach
+    </div>
+    <?php $buildingCost = \App\BuildingTypes::fetchBuildingCost($buildingType->name); ?>
+    @if ($buildingCost != null)
+      <div class='ms-3 fw-bold text-secondary'>Build Cost:</div>
+      @foreach ($buildingCost as $material=>$cost)
+        <div class='ms-4'>
+          <span class='text-decoration-underline'>{{$material}}</span>: {{number_format($cost)}}
+        </div>
+      @endforeach
+    @endif
+  </div>
+@endforeach
 <h1 id='items' class='text-center'>
   Items
 </h1>
@@ -183,7 +224,7 @@ FAQ
   let myIDs = document.querySelectorAll('*[id]')
   let html = ''
   for (let i in myIDs){
-    let headingArr = ['Concepts', 'FAQ', 'Items', 'Any more questions?', 'Actions']
+    let headingArr = ['Concepts', 'FAQ', 'Items', 'Any more questions?', 'Actions', 'Buildings']
     let headingsClass = 'ms-5'
     if ($('#' + myIDs[i].id).html() == undefined){
       continue

@@ -214,17 +214,12 @@ $(document).on('click', '.updateActionType', function(e) {
 $(document).on('click', '.updateBuildingType', function(e) {
   let buildingTypeID = e.target.id.split('-')[1]
   let buildingTypeName = $("#buildingName-" + buildingTypeID).html().trim()
-  let buildingTypeSkill = $("#buildingSkill-" + buildingTypeID).html().trim()
   let buildingTypeActions = $("#buildingActions-" + buildingTypeID).html().trim()
-  let buildingTypeCost = $("#buildingCost-" + buildingTypeID).html().trim()
-
   let buildingTypeDescription = $("#buildingDescription-" + buildingTypeID).html().trim()
   $("#updateBuildingTypeForm").html($("#updateBuildingTypeForm").html() + "<input type='hidden' name='_method' value='PUT'>")
   $("#buildingName").val(buildingTypeName)
   $("#buildingDescription").val(buildingTypeDescription)
-  $("#buildingSkill").val(buildingTypeSkill)
   $("#buildingActions").val(buildingTypeActions)
-  $("#buildingCost").val(buildingTypeCost)
 
   $("#buildingTypeSubmit").html('update')
   $("#updateBuildingTypeForm").attr('action', '/buildingTypes/' + buildingTypeID )

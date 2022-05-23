@@ -2,20 +2,16 @@
   $fieldsDisplayed = [];
  ?>
 <div class='text-center'>
-  @if (!$build || !$repair)
-    <div class='mt-3'>
-      <a href='/actionTypes'>[ unlock ]</a>
-    </div>
-  @endif
+
   @if (!$build)
     <div class='mt-3 text-decoration-underline'>
-      You must unlock the <span class='fw-bold'>build</span> action in order to build.
+      You must <a href='/actionTypes'>unlock</a> the <span class='fw-bold'>build</span> action in order to build.
     </div>
   @endif
 
   @if (!$repair)
     <div class='text-decoration-underline'>
-      You must unlock the <span class='fw-bold'>repair</span> action in order to repair your building.
+      You must <a href='/actionTypes'>unlock</a> the <span class='fw-bold'>repair</span> action in order to repair your building.
     </div>
   @endif
 </div>
@@ -23,10 +19,9 @@
   <div class='col-md-2'>
    <span class='fw-bold'>
      buildings
-     (<span class='builtBuildings'>{{count($buildings)}}</span>)
-   </span> -
-   <span id='numOfBuildingSlots'>{{$buildingSlots}}</span>
-   free building slots
+     (<span class='builtBuildings'>{{count($buildings)}} / {{$buildingSlots}}</span>)
+   </span>
+
    <button id='show-buildingListings' class='show btn btn-link d-none'>+</button>
    <button id='hide-buildingListings' class='hide btn btn-link'>-</button>
  </div><div class='col-md'>
@@ -55,7 +50,21 @@
         {{round($building->uses / $building->totalUses * 100, 2)}}%
        @elseif ($building->farming && !in_array($building->name, $fieldsDisplayed))
         [{{\App\Buildings::howManyFields($building->name, \Auth::id())}}]
-        <?php array_push($fieldsDisplayed, $building->name); ?>
+        <?php
+          array_push($fieldsDisplayed, $building->name);
+          $harvest = strtotime(\App\Buildings::fetchOldestField($building->name, \Auth::id())->harvestAfter) - strtotime('now');
+          $harvestCaption = " - " . $harvest . "s";
+          if ($harvest > 86400){
+            $harvestCaption = " - " . round($harvest / 86400, 1) . "d";
+          } else if ($harvest > 3600){
+            $harvestCaption = " - " . round($harvest / 3600, 1) . "h";
+          } else if ($harvest > 3600){
+            $harvestCaption = " - " . round($harvest / 60, 1) . "m";
+          } else if ($harvest <= 0){
+            $harvestCaption = "";
+          }
+         ?>
+         {{$harvestCaption}}
        @endif
      </span>
 

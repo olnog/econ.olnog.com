@@ -104,7 +104,8 @@ Route::get('/changes', function(){
 Route::get('/help', function(){
   return view('help')->with([
     'actionTypes'   => \App\ActionTypes::orderBy('name')->get(),
-    'itemTypes' => \App\ItemTypes::orderBy('name')->get(),
+    'buildingTypes' => \App\BuildingTypes::orderBy('name', 'asc')->get(),
+    'itemTypes'     => \App\ItemTypes::orderBy('name')->get(),
   ]);
 });
 

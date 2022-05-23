@@ -171,6 +171,12 @@ class Buildings extends Model
       ->where('harvestAfter', '<', date('Y-m-d H:i:s'))
       ->where('buildingTypeID', $buildingType->id)->first();
   }
+  public static function fetchOldestField($fieldName, $userID){
+    $buildingType = \App\BuildingTypes::fetchByName($fieldName);
+    return \App\Buildings::where('userID', $userID)
+      ->where('buildingTypeID', $buildingType->id)
+      ->orderBy('harvestAfter', 'asc')->first();
+  }
 
   public static function fetchRepairable($justNames){
     $buildings = \App\Buildings::

@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<div class='sticky-top bg-opacity-100 row bg-secondary'>
+  <div class='col-md-1 col-3'>
+    <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
+    <a href='/help'><img src='/img/icons8-help-24.png'></a>
+  </div><div class='col'>
+    <div id='status' class='text-center p-1 '></div>
+    <div id='error' class='text-center p-1'></div>
+  </div>
+</div>
 <div class='main'>
   <ul class="nav justify-content-center nav-tabs mt-5">
     <li class="nav-item text-center">
@@ -28,15 +37,7 @@
     </li>
 
   </ul>
-  <div class='fixed-top bg-opacity-100 row bg-secondary'>
-    <div class='col-md-1 col-3'>
-      <button class='feedback btn'><img src='/img/icons8-feedback-24.png'></button>
-      <a href='/help'><img src='/img/icons8-help-24.png'></a>
-    </div><div class='col'>
-      <div id='status' class='text-center p-1 '></div>
-      <div id='error' class='text-center p-1'></div>
-    </div>
-  </div>
+
   <span id='csrf'>@csrf()</span>
   <div class='ms-2 row'>
     <div class='col-3 '>
