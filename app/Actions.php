@@ -941,7 +941,7 @@ class Actions extends Model
       || $action == 'plant-herbal-greens-field'
       || $action == 'plant-plant-x-field')
         && \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($userID)
-        < \App\User::find(Auth::id())->buildingSlots        
+        < \App\User::find(Auth::id())->buildingSlots
         && Land::doTheyHaveAccessTo('jungle')
         && \App\Buildings::howManyFieldsForThisLandType('plains', $userID)
           < \App\Buildings::howManyFieldsCanTheyHave('plains', $userID)){
@@ -1047,8 +1047,8 @@ class Actions extends Model
         'convert-wheat-to-Bio-Material'         => 10,
         'convert-wood-to-carbon-nanotubes'      => 10,
         'convert-wood-to-coal'                  => 100,
-        'generate-electricity-with-coal'        => 1000,
-        'generate-electricity-with-plutonium'   => 1000000,
+        'generate-electricity-with-coal'        => 100,
+        'generate-electricity-with-plutonium'   => 100000,
         'hunt'                                  => 2,
         'make-paper'                            => 10,
         'mill-log'                              => 100,

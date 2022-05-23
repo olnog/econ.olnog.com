@@ -177,8 +177,8 @@ class Items extends Model
       'convert-wheat-to-Bio-Material'         => ['Wheat' => 100, 'Electricity' => 100],
       'convert-wood-to-carbon-nanotubes'      => ['Wood' => 1000, 'Electricity'=> 100],
       'convert-wood-to-coal'                  => ['Wood' => 1000, 'Electricity'=> 1000],
-      'generate-electricity-with-coal'        => ['Coal' => 1000],
-      'generate-electricity-with-plutonium'   => ['Plutonium' => 1000],
+      'generate-electricity-with-coal'        => ['Coal' => 100],
+      'generate-electricity-with-plutonium'   => ['Plutonium' => 100],
       'make-BioMeds'
          => ['HerbMeds' => 10, 'Bio Material' => 10,'Electricity' => 10],
       'make-book'                             => ['Paper' => 100],
