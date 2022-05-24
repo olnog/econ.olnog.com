@@ -250,7 +250,7 @@ class Items extends Model
       'mill-flourGristmill'                   => ['Wheat'=>100],
       'mill-log'                              => ['Logs'=>10],
       'mill-logSawmill'                       => ['Logs'=>100],
-      'pump-oil'                              => ['Electricity'=>10],
+      'pump-oil'                              => ['Electricity'=>100],
       'refine-oil'                            => ['Electricity'=>100, 'Oil'=>100],
       'smelt-copperElectric Arc Furnace'      => ['Electricity'=>1000, 'Copper Ore'=>1000],
       'smelt-copperLarge Furnace'             => ['Coal'=>100, 'Copper Ore'=>100],

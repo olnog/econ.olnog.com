@@ -1056,7 +1056,7 @@ class Actions extends Model
         'plant-wheat-field'                     => 10,
         'plant-plant-x-field'                   => 10,
         'plant-herbal-greens-field'             => 10,
-        'pump-oil'                              => 10,
+        'pump-oil'                              => 100,
       ];
       $baseProduction = 1;
       if (isset($productionArr[$actionName])){
