@@ -204,7 +204,7 @@ class Buildings extends Model
       "chop-tree"                           => null,
       "convert-coal-to-carbon-nanotubes"    => ['Chem Lab'],
       "convert-corpse-to-Bio-Material"      => ['Bio Lab'],
-      "convert-corpse-to-genetic-material"  => ['Clone Vat'],
+      "convert-corpse-to-genetic-material"  => ['Bio Lab'],
       "convert-herbal-greens-to-Bio-Material"
         => ['Bio Lab'],
       "convert-meat-to-Bio-Material"        => ['Bio Lab'],

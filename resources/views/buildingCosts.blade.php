@@ -18,16 +18,24 @@ Why am I not able to build right now?
 </div>
 <div class='ms-3'>
   @foreach($buildingTypes as $buildingType)
+  <?php
+    $buildingCost = \App\BuildingTypes::fetchBuildingCost($buildingType->name);
+    $total = 0;
+    foreach ($buildingCost as $material=>$cost){
+      $total += $cost;
+    }
+  ?>
     <div class='fw-bold mt-3'>
       {{$buildingType->name}}
       @if (\App\Buildings::doTheyOwn($buildingType->name, \Auth::id()))
         <span class='fw-bold text-decoration-underline'>(built)</span>
       @endif
+      {{ number_format($total) }}
       <button id='show-buildingInfo{{$buildingType->id}}' class='show btn btn-link'> [ + ] </button>
       <button id='hide-buildingInfo{{$buildingType->id}}' class='hide btn btn-link d-none'> [ + ] </button>
     </div>
     <div id='buildingInfo{{ $buildingType->id }}' class='d-none ms-3'>
-      <?php $buildingCost = \App\BuildingTypes::fetchBuildingCost($buildingType->name); ?>
+
       <div>Skill: {{$buildingType->skill}}</div>
       <div>Associated Action(s): {{$buildingType->actions}}</div>
 
