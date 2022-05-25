@@ -303,7 +303,7 @@ class Items extends Model
     $item->save();
     $status = $itemName . ": <span class='fp'>+" . number_format($quantity) . "</span> ";
     if ($contractorID == $agentID){
-      $status .= " [" . number_format($item->quantity) . "]";
+      $status .= " [" . number_format($item->quantity) . "] ";
     }
     return $status;
   }

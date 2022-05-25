@@ -4,14 +4,14 @@
 <div class='text-center'>
 
   @if (!$build)
-    <div class='mt-3 text-decoration-underline'>
-      You must <a href='/actionTypes'>unlock</a> the <span class='fw-bold'>build</span> action in order to build.
+    <div class='mt-3 text-secondary'>
+      You must <a href='/actionTypes'>unlock</a> the <span class='fw-bold'>build</span> action or hire a freelancer in the market section in order to build.
     </div>
   @endif
 
   @if (!$repair)
-    <div class='text-decoration-underline'>
-      You must <a href='/actionTypes'>unlock</a> the <span class='fw-bold'>repair</span> action in order to repair your building.
+    <div class='text-secondary'>
+      You must <a href='/actionTypes'>unlock</a> the <span class='fw-bold'>repair</span> action  or hire a freelancer in the market section in order to repair your building.
     </div>
   @endif
 </div>
