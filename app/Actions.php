@@ -234,7 +234,7 @@ class Actions extends Model
         'harvest-herbal-greens'=> 'herbalGreens',
         'harvest-rubber'=> 'rubber',
       ];
-      if (\App\Buildings
+      if (!\App\Buildings
         ::canTheyHarvest($itemName . $fieldName, $contractorID)){
         return ['error' => "You either do not have a " . $itemName . $fieldName
           . " or cannot harvest one right now. Sorry."];
@@ -266,8 +266,7 @@ class Actions extends Model
         }
         \App\Buildings::destroy($field->id);
         $user = \App\User::find($contractorID);
-        $user->buildingSlots++;
-        $user->save();
+
         $produce->quantity += $yield;
         $produce->save();
         $totalYield += $yield;

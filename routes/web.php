@@ -16,11 +16,7 @@ use Illuminate\Http\Request;
 
 Route::get('/test', function(){
 
-  var_dump(\App\Buildings::howManyBuildingsAndFieldsDoTheyHave(5)
-  < \App\User::find(Auth::id())->buildingSlots,
-  \App\Land::doTheyHaveAccessTo('jungle'),
-  \App\Buildings::howManyFieldsForThisLandType('jungle', 5),
-   \App\Buildings::howManyFieldsCanTheyHave('jungle', 5));
+  var_dump(\App\Land::integrityCheck(5));
 });
 
 Route::get('/stop', function(){
