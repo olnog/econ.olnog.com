@@ -177,19 +177,19 @@ class Actions extends Model
       $electricity = \App\Items::fetchByName('Electricity', $contractorID);
       $satStatus = "";
       $minChance = 1;
-      if ($satellite->quantity > 0 && $electricity->quantity >= 100){
-        $minChance = 100;
-        $electricity->quantity -= 100;
+      if ($satellite->quantity > 0 && $electricity->quantity >= 10000){
+        $minChance = 10000;
+        $electricity->quantity -= 10000;
         $electricity->save();
-        $satStatus = " Electricity:<span class='fn'>-100</span>  (Satellite) "
+        $satStatus = " Electricity:<span class='fn'>-10,000</span>  (Satellite) "
         . number_format($electricity->quantity) . "] " ;
-        if (rand(1, 1000) == 1){
+        if (rand(1, 10000) == 1){
           $satellite->quantity--;
           $satellite->save();
           $satStatus .= "Satellites: <span class='fn'>-1</span> ";
         }
       } else if (count($equipmentAvailable) > 0){
-        $minChance = 10;
+        $minChance = 100;
         if ($robot == null){
           $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $agentID);
           if (!$equipmentCaption){
