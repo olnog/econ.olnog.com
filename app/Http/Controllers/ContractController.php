@@ -608,8 +608,9 @@ class ContractController extends Controller
           if ($user->clacks > 1){
             $clackCaption = ' clacks. ';
           }
-          $status .= $employer->name . " hired you to  " . $contract->action
-            . " for " . number_format($cost) . " clack(s). You now have " . number_format($user->clacks)  . $clackCaption;
+          $status = "<span class='fw-bold'>Clacks: <span class='fp'>+"
+            . number_format($contract->price) . "</span> ["
+            . number_format($user->clacks) . "]</span> &rarr; " . $contract->action . " (" . $employer->name . ")";
         }
         if ($contract->until == 'finite'){
           $contract->conditionFulfilled++;
@@ -624,7 +625,8 @@ class ContractController extends Controller
         }
         \App\History::new($employer->id,  'contract', "You paid " . $user->name . " to "
           . $contract->action . " for " . $cost
-          . " clack(s). You now have " . number_format($employer->clacks) . $clackCaption);
+          . " clack(s). You now have " . number_format($employer->clacks)
+          . $clackCaption . " " . $msg['status']);
 
 
 
@@ -642,12 +644,11 @@ class ContractController extends Controller
         if (isset($msg['error'])){
           $status = $msg['error'];
         }  else {
-          $status = "You paid " . $freelancer->name . " to "
-            . $contract->action . " for " . number_format($contract->price)
-            . " clack(s). (" . $msg['status'] . ") You now have "
-            . number_format($user->clacks) . " clack(s).";
+          $status = "<span class='fw-bold'>Clacks: <span class='fn'>-"
+            . number_format($contract->price) . "</span> ["
+            . number_format($user->clacks) . "]</span> - "
+            . $msg['status'];
         }
-
 
         if ($contract->until == 'finite'){
           $contract->conditionFulfilled++;
