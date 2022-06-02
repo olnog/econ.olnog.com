@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 
 Route::get('/test', function(){
 
-  var_dump(\App\Land::integrityCheck(5));
+  var_dump(\App\Actions::do('make-tire', 5, 5, null, false, false));
 });
 
 Route::get('/stop', function(){

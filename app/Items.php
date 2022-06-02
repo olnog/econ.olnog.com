@@ -104,7 +104,7 @@ class Items extends Model
       "make-stone-pickaxe"                  => 'Pickaxe (stone)',
       "make-stone-saw"                      => 'Saw (stone)',
       "make-stone-shovel"                   => 'Shovel (stone)',
-      "make-tire"                           => 'Chem Lab',
+      "make-tire"                           => 'Tires',
       "mill-flour"                          => 'Flour',
       "mill-log"                            => 'Logs',
       "mine-coal"                           => 'Coal',
@@ -298,6 +298,7 @@ class Items extends Model
   }
 
   public static function make($itemName, $quantity, $contractorID, $agentID){
+    //var_dump($itemName, $quantity);
     $item = \App\Items::fetchByName($itemName, $contractorID);
     $item->quantity += $quantity;
     $item->save();

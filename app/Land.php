@@ -165,10 +165,6 @@ class Land extends Model
       return $resourceArr[$resource];
     }
 
-
-
-
-
     static public function integrityCheck($userID){
       $user = \App\User::find($userID);
       $user->buildingSlots = \App\Land::where('userID', $userID)->count();
