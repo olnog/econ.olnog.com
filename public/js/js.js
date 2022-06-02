@@ -6,7 +6,6 @@ function loadLand(){
   let landFilter = $(".landFilter:checked").val()
   let landTypeFilter = $("#landTypeFilter").val()
   let landSort = $("#landSortByFilter").val()
-  console.log(landTypeFilter, landFilter, landSort)
   $.get("/land?filter=" + landFilter + "&landType=" + landTypeFilter + "&sort=" + landSort , function(data){
     $("#land").html(data)
 
@@ -224,7 +223,7 @@ function playSkill(){
 
 
 function rebirth(){
-  window.location.href = "/reborn"  
+  window.location.href = "/reborn"
 }
 
 function sellToState(buyOrderID){
@@ -275,7 +274,6 @@ function takeover(landID, amount){
     clacks = JSON.parse(data).clacks
     land = JSON.parse(data).land
     status(JSON.parse(data).status)
-    refreshUI()
-
+    loadLand()
   })
 }
