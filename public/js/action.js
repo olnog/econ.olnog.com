@@ -9,12 +9,16 @@ function action (actionName){
   $.post( "/actions", {name: actionName, buttons: buttonMetric,
       automation: automation != null, consumption: JSON.stringify(consumption),
       _token: csrf }).done(function(data){
+        $(".action").prop('disabled', true)
+    if (automation == null){
+      setTimeout( function (){$(".action").prop('disabled', false)}, 1000)
+    }
     loadPage('actions')
     buttonMetric = []
     if (JSON.parse(data).error != undefined){
       displayError(JSON.parse(data).error)
       if (automation != null){
-        stopAutomation()
+        stopAutomation(true)
       }
       return;
     }

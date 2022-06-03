@@ -53,7 +53,7 @@ class User extends Authenticatable
         'numOfActions'    => $numOfActions,
         'numOfBuildings'  => $numOfBuildings,
         'numOfContracts'  => $numOfContracts,
-        'numOfItems'      => $numOfItems,
+        'numOfItems'      => intval($numOfItems),
         'numOfParcels'    => $numOfParcels,
         'numOfUnlocked'   => count(\App\Actions::fetchUnlocked(\Auth::id(), true)),
         'settings'        => [
@@ -89,6 +89,11 @@ class User extends Authenticatable
     }
 
     public static function reset(){
+      $buildingLeases = \App\BuildingLease::fetch();
+      foreach($buildingLeases as $buildingLease){
+        \App\BuildingLease::destroy($buildingLease->id);
+      }
+
       $leases = \App\Lease::fetch();
       foreach($leases as $lease){
         \App\Lease::destroy($lease->id);
@@ -142,5 +147,28 @@ class User extends Authenticatable
       $user->save();
 
       \App\History::new(Auth::id(), 'reset', "Reset!");
+    }
+
+    public static function resetAll(){
+      $users = \App\User::all();
+      foreach($users as $user){
+        $user->buildingSlots = 0;
+        $user->clacks = 0;
+        $user->minutes = 0;
+        $user->save();
+      }
+      $labors = \App\Labor::all();
+      foreach($labors as $labor){
+        $labor->equipped = null;
+        $labor->availableSkillPoints = 4;
+        $labor->allocatedSkillPoints = 0;
+        $labor->actions = 0;
+        $labor->actionsUntilSkill = 30;
+        $labor->rebirth = false;
+        $labor->legacy = null;
+        $labor->escrow = 0;
+        $labor->alsoEquipped = null;
+        $labor->save();
+      }
     }
 }

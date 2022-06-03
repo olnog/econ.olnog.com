@@ -26,6 +26,7 @@ function displayAutomation(){
 
 
 function displayHeaders(info){
+
   $("#buildingSlots").html(info.buildingSlots.toLocaleString())
   $("#clacks").html(info.clacks.toLocaleString())
   $("#numOfParcels").html(info.numOfParcels.toLocaleString())
@@ -35,7 +36,7 @@ function displayHeaders(info){
   $("#numOfContracts").html(info.numOfContracts.toLocaleString())
   let numOfItems = 0
   if (info.numOfItems < 1000 ){
-    numOfItems = (info.numOfItems).toFixed(1).toLocaleString()
+    numOfItems = (info.numOfItems).toLocaleString()
   } else if (info.numOfItems < 1000000 ){
     numOfItems = (info.numOfItems / 1000).toFixed(1).toLocaleString() + "k"
   } else if (info.numOfItems < 1000000000 ){

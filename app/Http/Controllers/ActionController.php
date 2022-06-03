@@ -62,6 +62,7 @@ class ActionController extends Controller
           ->where('category', 'hire')
           ->whereIn('action', $actionable)->orderBy('action')
           ->orderBy('price', 'desc')->get(),
+        'actionBeingDoneNow'       => strtotime('now') - strtotime(\App\User::find(\Auth::id())->lastAction) == 0,
         'relevantFuel'        => \App\Equipment::fetchFuel(),
         'repairableBuildings' => \App\Buildings::fetchRepairable(false),
         'skillPointCent'      => $labor->actions / $labor->actionsUntilSkill * 100,

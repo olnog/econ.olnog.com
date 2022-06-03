@@ -70,7 +70,7 @@ function disableForAutomation(){
 
 }
 
-function stopAutomation(){
+function stopAutomation(wasThereAnError){
   if (!stopButtonPressed){
     let audio = new Audio('audio/stop.wav')
     audio.play()
@@ -89,6 +89,10 @@ function stopAutomation(){
   $(".freelanceBuildSelect").prop('disabled', false)
   $(".freelanceRepairSelect").prop('disabled', false)
   stopButtonPressed = false
+  if (wasThereAnError == true){
+    $("#startAutomation").prop('disabled', true)
+    $("#lastAction").prop('disabled', true)
+  }
   if (autoActions != null){
     workHoursStop = autoActions
     if (autoActions == 0){

@@ -55,7 +55,7 @@
     </span>
   </div><div class='row'>
     <div class='text-center mt-3'>
-      <button id='lastAction'class='btn btn-primary' disabled>Last Action?</button>
+      <button id='lastAction'class='btn btn-primary action' disabled>Last Action?</button>
       <button id='startAutomation'class='btn btn-success' disabled>&#9658;</button>
       <button id='stopAutomation'class='btn btn-danger d-none' disabled>&#128721;</button>
     </div><div class='text-center mt-2'>

@@ -112,7 +112,7 @@
       @else
         btn-warning
       @endif
-      '>
+      ' @if ($actionBeingDoneNow) disabled @endif>
         {{implode(' ', explode('-', $action))}}
       </button>
     @endforeach
@@ -159,7 +159,7 @@
           @endif
         @else
           <button id='freelanceAction-{{$contract->id}}-actions'
-            class='freelance btn btn-danger'>
+            class='freelance btn btn-danger  action' @if ($actionBeingDoneNow) disabled @endif>
             {{$contract->action}} (-{{$contract->price}})
           </button>
         @endif
@@ -175,7 +175,7 @@
       @foreach($hireableContracts as $contract)
         @if(in_array($contract->action, $actions))
           <button id='hireAction-{{$contract->id}}-actions'
-            class='hire btn btn-success'>
+            class='hire btn btn-success  action' @if ($actionBeingDoneNow) disabled @endif>
             {{$contract->action}} (+{{$contract->price}})
           </button>
         @endif

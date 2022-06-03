@@ -200,18 +200,26 @@ class Actions extends Model
       if ($foodCaption != "" || $electricityCaption != ""){
         $status .= "<span class='actionInput'>" . $foodCaption . $electricityCaption . "</span> &rarr; ";
       }
-      $status .= "[&empty;] (" . $minChance . ":" . $numOfParcels . ")";
+
+      $numOfLandfound = 0;
       $landFound = " [";
       if (rand(1, $numOfParcels) <= $minChance){
         for ($i=0; $i < $production; $i++){
           $landFound .=  "+" . \App\Land::new($contractorID) . " ";
+          $numOfLandfound++;
         }
       }
       $landFound .= "] " . $minChance . ":" . $numOfParcels . ")";
+      if ($numOfLandfound > 0 ){
+        $status .= $landFound;
+      } else {
+        $status .= "[&empty;] (" . $minChance . ":" . $numOfParcels . ")";
+      }
       if ($satStatus != "" || $equipmentCaption != ""){
         $status = "<span class='actionInput'>" . $electricityCaption . $foodCaption . $satStatus . $equipmentCaption
           . "</span> &rarr; " . $landFound;
       }
+
 
 
     } else if ($actionName == 'harvest-wheat'

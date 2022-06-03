@@ -23,6 +23,10 @@ class HomeController extends Controller
      */
     public function index()
     {
+      if (\Auth::id() == null){
+        return redirect('/');
+      }
+      /*
       $labor = \App\Labor::fetch();
       if ($labor->rebirth){
         return redirect()->route('rebirth');
@@ -30,6 +34,6 @@ class HomeController extends Controller
       return view('home')->with([
         'offlineMinutes' => \App\User::find(\Auth::id())->minutes,
       ]);
-
+*/
     }
 }
