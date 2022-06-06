@@ -88,7 +88,27 @@ If owner loses
     • Challenger loses all bids, but gains property at new valuation
 </div>
 
+<div id='materialDurability' class='fw-bold'>
+  Tool Material Durability (Stone, Iron, Steel)
+</div><div>
+  Stone tools will give you 100 uses, iron tools will give you 1,000 uses and
+  steel tools will give you 10,000 uses.
+</div>
 
+<div id='land' class='fw-bold'>
+  Land
+</div><div>
+  Land can be found by exploring. You can increase your minimum chance from
+  1 to 100 by having a Car equipped with the associated fuel in supply or
+  increase it to 10,000 by owning a satellite with the pre-requisite amount of
+  Electricity.
+</div><div>
+  You can also take over other player's land by launching a
+  <a href='#hostileTakeover'>hostile takeover</a>.
+</div><div>
+  Alternatively, if you're trying to get land to get a certain building,
+  maybe someone is already leasing out that building out?
+</div>
 
 <div id='landBonus' class='fw-bold'>
   Land Bonus
@@ -155,7 +175,7 @@ FAQ
 
       <a href='#helpTOC'>[ top ]</a>
     </div>
-    <div class='ms-3'><span class='fw-bold text-secondary'>Description</span>: {{$buildingType->description}}</div>
+    <div class='ms-3'><span class='fw-bold text-secondary'>Description</span>: {!!$buildingType->description!!}</div>
     <div class='ms-3'><span class='fw-bold text-secondary'>Associated Actions</span>:
     <?php
       $actionArr = explode(',', $buildingType->actions);
@@ -183,6 +203,8 @@ FAQ
     @endif
   </div>
 @endforeach
+
+
 <h1 id='items' class='text-center'>
   Items
 </h1>
@@ -207,14 +229,22 @@ FAQ
 </h1>
 <div>
   If you have any more questions, feel free to post them in chat. Or hit me up on
-  <a href='https://www.reddit.com/user/olnog/'>reddit</a> or <a href='https://twitter.com/therealolnog'>twitter</a>
+  <a href='https://www.reddit.com/user/olnog/'>reddit</a> or <a href='https://twitter.com/therealolnog'>twitter</a> or <a href='https://discord.gg/CjETTDYKdU'>Discord</a>
 </div>
+
 <h1 id='actions'>Actions</h1>
 @foreach($actionTypes as $actionType)
+  <?php
+    $item = \App\Items::fetchItemNameForAction($actionType->name);
+  ?>
   <div id='actionType-{{$actionType->id}}' class='actionType fw-bold'>
     {{$actionType->name}} <a href='#helpTOC'>[ top ]</a>
   </div><div class='ms-3 mb-3 me-3'>
-    {{$actionType->description}}
+    HELLO
+    {!!$actionType->description!!}
+    @if ($item != null)
+      <a href='#item{{$item->itemTypeID}}'>{{$item->name}}</a>
+    @endif
   </div>
 @endforeach
 

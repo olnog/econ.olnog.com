@@ -124,6 +124,9 @@ class Items extends Model
       "smelt-steel"                         => 'Steel Ingots',
       "transfer-electricity-from-solar-power-plant" => 'Electricity',
     ];
+    if (!isset($itemNameArr[$actionName])){
+      return null;
+    }
     return $itemNameArr[$actionName];
   }
 
