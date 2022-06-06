@@ -631,8 +631,13 @@ class ContractController extends Controller
 
 
       } else if ($request->type == 'freelance'){
+
         $status = "";
         $user = Auth::user();
+        if ($user->clacks < $contract->price){
+          echo json_encode(['error'=> "You do not have enough clacks. "]);
+          return;          
+        }
         $freelancer = \App\User::find($contract->userID);
         $freelanceLabor = \App\Labor::where('userID', $contract->userID)->first();
 

@@ -589,9 +589,9 @@ class Actions extends Model
           ];
         }
       }
-      $production = 10;
+      $production = 100;
       if ($robot == null){
-        $production = $action->rank * 10;
+        $production = $action->rank * 100;
       }
       $fieldType = \App\BuildingTypes::fetchByName($itemName . ' Field');
       if (\App\Buildings::howManyFieldsForThisLandType('plains', $contractorID) >= $landBonus){
@@ -605,8 +605,7 @@ class Actions extends Model
       $field[$whichVarName[$actionName]] = $production;
       $field->harvestAfter = date("Y-m-d H:i:s", strtotime('+24 hours'));
       $field->save();
-      $status = "<span class='actionInput'>" . $electricityCaption . $foodCaption . " Building Slots: <span class='fn'>-1</span> ["
-        . number_format($contractor->buildingSlots) . "]</span> &rarr; "
+      $status = "<span class='actionInput'>" . $electricityCaption . $foodCaption . "</span> &rarr; "
         . $itemName . " Field: <span class='fp'>+1</span>";
 
 
