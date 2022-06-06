@@ -6,6 +6,15 @@
 </div>
 
 <div class='fw-bold mt-3'>
+  06/05/22
+</div>
+<div class='ms-3 mb-1'>
+  So I stopped updating this a while back. I mainly update the changes through
+  the Git Hub, but I will be updating major changes in the 
+  <a href='https://discord.com/invite/CjETTDYKdU'>Discord</a>. If you guys
+  -really- want me to put changes on here, I will. Just let me know.
+</div>
+<div class='fw-bold mt-3'>
   04/20/22
 </div><div class='ms-3 mb-1'>
   Forgot to actually implemented land deductions for chop tree, mine sand and pump oil.

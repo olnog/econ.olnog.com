@@ -223,7 +223,8 @@ class Land extends Model
       $user->save();
       return ['status' => "<span class='actionInput'>Clacks: <span class='fn'>-"
         . (count($land) * $amount) . "</span> [" . number_format($user->clacks)
-        . "]</span> &rarr; " . count($land) . " Parcels' Bribes: <span class='fp'>+" . $amount] . "</span>";
+        . "]</span> &rarr; " . count($land)
+        . " Parcels' Bribes: <span class='fp'>+" . $amount . "</span>"];
     }
 
     static public function payAutoBribe($userID){
