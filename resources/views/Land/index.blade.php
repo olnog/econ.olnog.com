@@ -20,17 +20,17 @@
   <button id='payAllBribes-100' class='payAllBribes btn btn-danger'>+100</button>
 </div><div class='m-1 text-center autoBribes'>
   Auto-Bribe:
-  <input type='number' id='autoBribe' value='0'>
+  <input type='number' id='autoBribe' value='{{$autobribe}}'>
   <button id='setAutoBribe' class='btn btn-primary '>set</button>
-</div><div class='mb-3'>
+</div><div class='mb-3 text-center'>
   This is the amount that you will automatically pay when bribes are checked to see if you are protected.
 </div>
+
+</div>
 <div class='m-1 text-center payAllBribes'>
-  The average bribe now is <span id='avgBribe'></span> clack(s).
+  The average bribe now is <span id='avgBribe'>{{\App\Land::averageBribe()}}</span> clack(s).
 
 </div>
-</div>
-
 <div class=''>
     <span class='fw-bold me-3'>Filter:</span>
   </div><div class='row'>

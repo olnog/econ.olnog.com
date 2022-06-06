@@ -70,6 +70,7 @@ class LandController extends Controller
 
 
       return view('Land.index')->with([
+        'autobribe' => \App\User::find(\Auth::id())->autoBribe,
         'filter'    => $filter,
         'land'      => $land,
         'landType'  => $landType,
