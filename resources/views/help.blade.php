@@ -235,16 +235,23 @@ FAQ
 <h1 id='actions'>Actions</h1>
 @foreach($actionTypes as $actionType)
   <?php
-    $item = \App\Items::fetchItemNameForAction($actionType->name);
+    $item = trim(\App\Items::fetchItemNameForAction($actionType->name));
+    $itemType = \App\ItemTypes::where('name', $item)->first();
+    if (str_contains($actionType->description, $item) && $itemType != null){
+      $actionType->description = str_replace($item, "<a href='#item" . $itemType->id . "' >" . $item . "</a>", $actionType->description);
+    }
+    $buildings = \App\Buildings::fetchRequiredBuildingsFor($actionType->name);
+    if ($buildings != null){
+      foreach($buildings as $building){
+        $buildingType = \App\BuildingTypes::where('name', $building)->first();
+        $actionType->description = str_replace($building, "<a href='#building-" . $buildingType->id . "' >" . $building . "</a>", $actionType->description);
+      }
+    }
   ?>
   <div id='actionType-{{$actionType->id}}' class='actionType fw-bold'>
     {{$actionType->name}} <a href='#helpTOC'>[ top ]</a>
   </div><div class='ms-3 mb-3 me-3'>
-    HELLO
     {!!$actionType->description!!}
-    @if ($item != null)
-      <a href='#item{{$item->itemTypeID}}'>{{$item->name}}</a>
-    @endif
   </div>
 @endforeach
 
