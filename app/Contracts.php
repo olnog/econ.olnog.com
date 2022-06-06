@@ -123,6 +123,14 @@ class Contracts extends Model
     return true;
   }
 
+  public static function endContract($status){
+    \App\History::new(Auth::id(), 'contract', $status);
+    echo json_encode([
+      'status'      => $status,
+      'info'        => \App\User::fetchInfo()
+    ]);
+  }
+
   public static function fetch(){
     return \App\Contracts
       ::join('users', 'contracts.userID', 'users.id')

@@ -159,7 +159,7 @@
           @endif
         @else
           <button id='freelanceAction-{{$contract->id}}-actions'
-            class='freelance btn btn-danger  action' @if ($actionBeingDoneNow) disabled @endif>
+            class='freelance btn btn-danger' @if ($actionBeingDoneNow) disabled @endif>
             {{$contract->action}} (-{{$contract->price}})
           </button>
         @endif

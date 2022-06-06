@@ -57,6 +57,9 @@
       </span>
     </div>
   @endif
+  <div class='text-center text-danger fw-bold'>
+    
+  </div>
   <div class='row'>
     <div class='text-center mt-3'>
       <button id='lastAction'class='btn btn-primary action' disabled>Last Action?</button>

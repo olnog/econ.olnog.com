@@ -639,6 +639,8 @@ class ContractController extends Controller
         $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null, false, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
+          \App\Contracts::endContract($status);
+          return;
         }  else {
           $status = "<span class='fw-bold'>Clacks: <span class='fn'>-"
             . number_format($contract->price) . "</span> ["
@@ -832,12 +834,8 @@ class ContractController extends Controller
 
 
       }
-      \App\History::new(Auth::id(), 'contract', $status);
-      echo json_encode([
-        'status'      => $status,
-        'info'        => \App\User::fetchInfo()
+      \App\Contracts::endContract($status);
 
-      ]);
 
     }
 

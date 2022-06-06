@@ -441,8 +441,8 @@ class Actions extends Model
       $itemName = \App\Items::fetchItemNameForAction($actionName);
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Jackhammer (gasoline)', 'Jackhammer (electric)',
-        'Pickaxe'], $agentID);
-      $labor = \App\Labor::where('userID', $agentID)->first();
+        'Pickaxe'], $contractorID);
+      $labor = \App\Labor::where('userID', $contractorID)->first();
       if (count($equipmentAvailable) < 1){
         return ['error' => "You don't have any equipment to mine with right now."];
       } else if (!\App\Land::doTheyHaveAccessTo('mountains', $contractorID)){
@@ -477,7 +477,7 @@ class Actions extends Model
       }
       $production = $modifier;
       if ($robot == null){
-        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
+        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $contractorID);
         if (!$equipmentCaption){
           return ['error' => 'Something technical happened with your equipment. Sorry'];
         }

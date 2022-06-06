@@ -37,7 +37,7 @@
 <div class='ms-3'>
   When you do your rebirth, you keep all of your stuff
   (land, contracts, items, etc) but your actions and action points will be
-  reset back to 0. There is also a
+  reset back to 0. (You can only Rebirth once every hour.) There is also a
   <span class='fw-bold text-danger'>50% tax</span> on your Clacks. Fortunately,
   you do get a few prestige perk options that are available. You can either:
   <div class='ms-3'>
