@@ -144,6 +144,7 @@ class Land extends Model
         $resourceArr[] = 'copper';
         $resourceArr[] = 'iron';
         $resourceArr[] = 'uranium';
+        $resourceArr[] = 'stone';
       }
       foreach($resourceArr as $resource){
         $howMuch = \App\Land::fetchResourceRange($resource);
@@ -160,6 +161,7 @@ class Land extends Model
         'logs'     => ['min' => 1000, 'max' => 20000],
         'oil'     => ['min' => 10, 'max' => 100000],
         'sand'    => ['min' => 1000000, 'max'=> 10000000],
+        'stone'   => ['min' => 1000, 'max' => 100000000],
         'uranium' => ['min' => 100000, 'max' => 1000000],
       ];
       return $resourceArr[$resource];

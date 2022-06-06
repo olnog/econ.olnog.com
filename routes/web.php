@@ -15,8 +15,11 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-  for ($i = 0; $i < 100; $i++){
-    //var_dump(\App\Land::new(5));
+  $lands = \App\Land::where('type', 'mountains')->get();
+  $range = \App\Land::fetchResourceRange('stone');
+  foreach ($lands as $land){
+    $land->stone = rand($range['min'], $range['max']);
+    $land->save();
   }
 });
 
