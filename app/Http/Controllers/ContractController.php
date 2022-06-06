@@ -635,11 +635,7 @@ class ContractController extends Controller
         $user = Auth::user();
         $freelancer = \App\User::find($contract->userID);
         $freelanceLabor = \App\Labor::where('userID', $contract->userID)->first();
-        $user->clacks -= $contract->price;
-        $clacks = $user->clacks;
-        $user->save();
-        $freelancer->clacks += $contract->price;
-        $freelancer->save();
+
         $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null, false, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
@@ -649,7 +645,11 @@ class ContractController extends Controller
             . number_format($user->clacks) . "]</span> - "
             . $msg['status'];
         }
-
+        $user->clacks -= $contract->price;
+        $clacks = $user->clacks;
+        $user->save();
+        $freelancer->clacks += $contract->price;
+        $freelancer->save();
         if ($contract->until == 'finite'){
           $contract->conditionFulfilled++;
         }
