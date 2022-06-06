@@ -133,12 +133,18 @@ class BuildingController extends Controller
     {
       $building = \App\Buildings::find($id);
       $buildingType = \App\BuildingTypes::find($building->buildingTypeID);
+      $leaseBuildingContract = \App\Contracts
+        ::where('userID', \Auth::id())->where('active', 1)
+        ->where('buildingID', $id)->where('category', 'leaseBuilding')
+        ->first();
+      if ($leaseBuildingContract != null){
+        \App\BuildingLease::bad($leaseBuildingContract->id, ' they destroyed this building');
+      }
       \App\Buildings::destroyBuilding($id);
       echo json_encode([
         'actions'       => \App\Actions::fetch(\Auth::id()),
         'buildings'     => \App\Buildings::fetch(),
         'info'       => \App\User::fetchInfo(),
-
         'itemCapacity'  => \App\User::find(Auth::id()),
         'numOfItems'    => \App\Items::fetchTotalQuantity(Auth::id()),
         'status'        => "You destroyed your " . $buildingType->name,
