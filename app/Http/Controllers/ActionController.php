@@ -56,6 +56,7 @@ class ActionController extends Controller
         'food'               => \App\Items::fetchByName('Food', \Auth::id())->quantity,
         'freelanceContracts'   => \App\Contracts::where('active', 1)
           ->where('category', 'freelance')->orderBy('action')
+          ->where('userID', '!=', \Auth::id())
           ->orderBy('price', 'desc')->get(),
         'hireableContracts'   => \App\Contracts::where('active', 1)
           ->where('userID', '!=', \Auth::id())

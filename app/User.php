@@ -38,6 +38,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    
+
     public static function fetchInfo(){
       $labor = \App\Labor::fetch();
       $user = \App\User::find(\Auth::id());

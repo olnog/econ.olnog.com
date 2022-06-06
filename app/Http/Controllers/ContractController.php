@@ -110,7 +110,7 @@ class ContractController extends Controller
      */
     public function store(Request $request)
     {
-      echo $request->buildingID;
+      //echo $request->category;
       $contractItem = \App\Items::fetchByName('Contracts', Auth::id());
       if ($contractItem->quantity < 1){
         echo "You don't have any contracts.";

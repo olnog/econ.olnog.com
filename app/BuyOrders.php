@@ -12,7 +12,7 @@ class BuyOrders extends Model
     $buyOrders = \App\BuyOrders::where('active', 1)->get();
     foreach($buyOrders as $buyOrder){
       if(time() - strtotime($buyOrder->updated_at) > 86400){
-        $buyOrder->cost = ceil($buyOrder->cost * 1.1);
+        $buyOrder->cost = ceil($buyOrder->cost * 1.5);
         $buyOrder->save();
       }
     }

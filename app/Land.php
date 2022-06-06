@@ -138,7 +138,7 @@ class Land extends Model
       if ($landType == 'forest'){
         $resourceArr[] = 'logs';
       } else if ($landType == 'desert'){
-        $resourceArr['sand'];
+        $resourceArr[] = 'sand';
       } else if ($landType == 'mountains'){
         $resourceArr[] = 'coal';
         $resourceArr[] = 'copper';
@@ -175,6 +175,10 @@ class Land extends Model
       return \App\Land::where('hostileTakeoverBy', '>', 0)->count() > 0;
     }
 
+    public static function isThisUserExperiencingAHostileTakeover($userID){
+      return \App\Land::where('userID', $userID)->whereNotNull('hostileTakeoverBy')->count() > 0;
+    }
+
     static public function new($userID){
       $land = new Land;
       $land->protected = true;
@@ -185,7 +189,7 @@ class Land extends Model
         $land->type = 'plains';
       } else if ($landTypeChance == 4){
         $land->type = 'desert';
-      } else if ($landTypeChance >= 8 && $landTypeChance <= 9){
+      } else if ($landTypeChance == 8 || $landTypeChance == 9){
         $land->type = 'mountains';
       } else if ($landTypeChance >= 5 && $landTypeChance <= 7){
         $land->type = 'forest';

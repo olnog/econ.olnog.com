@@ -49,11 +49,15 @@
       </form>
 
     </div>
-  </div><div class='row text-center' >
-    <span id='hostileTakeover' class='text-danger d-none'>
-      You are currently experiencing a hostile takeover. Go to land page to see more info.
-    </span>
-  </div><div class='row'>
+  </div>
+  @if($hostileTakeover)
+    <div class='row text-center' >
+      <span id='hostileTakeover' class='text-danger'>
+        You are currently experiencing a hostile takeover. Go to land page to see more info.
+      </span>
+    </div>
+  @endif
+  <div class='row'>
     <div class='text-center mt-3'>
       <button id='lastAction'class='btn btn-primary action' disabled>Last Action?</button>
       <button id='startAutomation'class='btn btn-success' disabled>&#9658;</button>
@@ -132,13 +136,13 @@
     <div><textarea name='whatTheySaid' class='form-control' row=3 placeholder="feedback here"></textarea></div>
     <div class='fw-bold text-center'>Feels</div>
     <div class='row border'>
-      <div class='col text-center text-success'>
+      <div class='col text-center text-danger'>
         <input type='radio' name='feedbackFeeling' value='bad' class='me-1'>
         bad
       </div><div class='col text-center'>
         <input type='radio' name='feedbackFeeling' value='neutral' class='me-1' checked>
         neutral
-      </div><div class='col text-center text-danger'>
+      </div><div class='col text-center text-success'>
         <input type='radio' name='feedbackFeeling' value='good' class='me-1'>
         good
       </div>

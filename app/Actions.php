@@ -77,7 +77,7 @@ class Actions extends Model
     if ($robotID != null){
       $robot = \App\Robot::find($robotID);
     }
-    if ($robot == null && $agentID == $contractorID
+    if (!$useFood && $robot == null && $agentID == $contractorID
       && strtotime('now') - strtotime(\App\User::find($agentID)->lastAction)
         == 0){
       return ['error' => "Sorry, you're doing this too often."];
@@ -213,7 +213,7 @@ class Actions extends Model
       if ($numOfLandfound > 0 ){
         $status .= $landFound;
       } else {
-        $status .= "[&empty;] (" . $minChance . ":" . $numOfParcels . ")";
+        $status .= "<span class='fn'>No land found!</span> (" . $minChance . ":" . $numOfParcels . " chance)";
       }
       if ($satStatus != "" || $equipmentCaption != ""){
         $status = "<span class='actionInput'>" . $electricityCaption . $foodCaption . $satStatus . $equipmentCaption
@@ -565,8 +565,8 @@ class Actions extends Model
       || $actionName == 'plant-plant-x-field'
       || $actionName == 'plant-herbal-greens-field'){
       $contractor = \App\User::find($contractorID);
-      if ($contractor->buildingSlots
-        >= \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)){
+      if (\App\Buildings::howManyBuildingsAndFieldsDoTheyHave($contractorID)
+        >= $contractor->buildingSlots){
         return ['error' => " You don't have enough building slots."];
       }
       $itemName = \App\Items::fetchItemNameForAction($actionName);
@@ -949,7 +949,7 @@ class Actions extends Model
       || $action == 'plant-plant-x-field')
         && \App\Buildings::howManyBuildingsAndFieldsDoTheyHave($userID)
         < \App\User::find(Auth::id())->buildingSlots
-        && Land::doTheyHaveAccessTo('jungle')
+        && Land::doTheyHaveAccessTo('plains')
         && \App\Buildings::howManyFieldsForThisLandType('plains', $userID)
           < \App\Buildings::howManyFieldsCanTheyHave('plains', $userID)){
         $actionable[] = $action;
@@ -1059,10 +1059,10 @@ class Actions extends Model
         'hunt'                                  => 2,
         'make-paper'                            => 10,
         'mill-log'                              => 100,
-        'plant-rubber-plantation'               => 10,
-        'plant-wheat-field'                     => 10,
-        'plant-plant-x-field'                   => 10,
-        'plant-herbal-greens-field'             => 10,
+        'plant-rubber-plantation'               => 100,
+        'plant-wheat-field'                     => 100,
+        'plant-plant-x-field'                   => 100,
+        'plant-herbal-greens-field'             => 100,
         'pump-oil'                              => 100,
       ];
       $baseProduction = 1;

@@ -69,17 +69,17 @@ class Bids extends Model
     }
     if ($lastBid->userID == $land->userID){ // owner is winner
       $owner->clacks += ($allOfOwnersBids - $ownersFirstBid );
-      \App\History::new($owner->id, 'bid',
+      \App\History::new($owner->id, 'land',
         "You maintained ownership over parcel #" . $landID
         . " and you got back " . ($allOfOwnersBids - $ownersFirstBid )
         . " clacks.");
-      \App\History::new($attacker->id, 'bid',
-        "You lost the hostile takeover of parcel #" . $landID);
+      \App\History::new($attacker->id, 'land',
+        "You lost the hostile takeover of parcel #" . $landID . " to " . $owner->name);
     } else if ($lastBid->userID == $land->hostileTakeoverBy){
-      \App\History::new($owner->id, 'bid',
-        "You lost ownership of parcel #" . $landID . " but you got back "
+      \App\History::new($owner->id, 'land',
+        "You lost ownership of parcel #" . $landID . " to " . $owner->name . " but you got back "
         . $ownersFirstBid . " clacks.");
-      \App\History::new($attacker->id, 'bid',
+      \App\History::new($attacker->id, 'land',
         "You won the hostile takeover of parcel #" . $landID . ". Congrats!");
       $owner->clacks += $ownersFirstBid ;
       $attacker->save();

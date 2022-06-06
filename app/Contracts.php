@@ -128,7 +128,7 @@ class Contracts extends Model
       ::join('users', 'contracts.userID', 'users.id')
       ->select('contracts.id', 'category', 'itemTypeID', 'price', 'until',
       'userID', 'condition', 'conditionFulfilled', 'users.name as username',
-      'buildingTypeID', 'buildingID', 'action', 'minSkillLevel', 'landID', 'landType', 'buildingName')
+      'buildingTypeID', 'buildingID', 'contracts.action', 'minSkillLevel', 'landID', 'landType', 'buildingName')
       ->where('active', true)->orderBy('contracts.created_at', 'desc')->get();
   }
   public static function fetchHighestBuy($itemTypeID){

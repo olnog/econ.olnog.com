@@ -51,7 +51,7 @@ $(document).on('click', '#startAutomation', function(e) {
       updateWorkHoursStop()
       stopAutomation()
     }
-  }, 2000)
+  }, 3000)
 })
 
 $(document).on('click', '#stopAutomation', function(e) {

@@ -161,24 +161,16 @@
     <input type='number' name='price' value='1'>
     clack(s)
     <input type='radio' name='whichPrice' value='price' checked>
-     per action OR
-    <input type='radio' name='whichPrice' value='pricePerSkill'>
-    per skill level
+     per action
   </div><div>
     Action:
     <select name='action'>
       <option></option>
       @foreach($hireableActions as $action)
         @if (!in_array($action->name, $banned))
-          <option value='{{ $action }}'>{{ $action->name }}</option>
+          <option value='{{ $action->name }}'>{{ $action->name }}</option>
         @endif
       @endforeach
-    </select>
-  </div><div>
-    Min Skill Level: <select name='minSkillLevel'>
-    @for($i = 1; $i < 6; $i++)
-      <option value='{{ $i }}'>{{ $i }}</option>
-    @endfor
     </select>
   </div><div>
     Until:

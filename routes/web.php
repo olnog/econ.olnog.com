@@ -15,7 +15,9 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-
+  for ($i = 0; $i < 100; $i++){
+    //var_dump(\App\Land::new(5));
+  }
 });
 
 Route::get('/stop', function(){
