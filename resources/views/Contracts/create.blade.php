@@ -227,15 +227,11 @@
       @csrf()
       <input type='hidden' name='category' value='sellOrder' >
       Selling: <select name='itemTypeID'>
-      <option></option>
       @foreach($items as $item)
-        <option></option>
-        @if ($item->name != 'Nuclear Waste')
-        <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif>
+        <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif >
           {{number_format($item->quantity)}}
           {{ $item->name }}
         </option>
-        @endif
       @endforeach
       </select>
       for <input type='number' name='price' > clacks each
