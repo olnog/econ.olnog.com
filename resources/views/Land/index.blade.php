@@ -38,8 +38,9 @@
     <input type='radio'  name='landFilter' class='landFilter loadLand' value='all' @if ($filter != 'mine' && $filter != 'hostile')checked @endif> All
 
     <input type='radio' name='landFilter' class='landFilter loadLand' value='mine' @if ($filter == 'mine') checked @endif> Your Land?
+  </div><div class='col'>
 
-    <input type='radio' name='landFilter' class='landFilter loadLand' value='hostile' @if ($filter == 'hostile') checked @endif> Hostile Takeovers?
+    <input type='checkbox' name='hostileTakeover' id='hostileFilter' class=' loadLand' value='hostile' @if ($hostile) checked @endif> Only hostile takeovers?
   </div><div class='col'>
     Land Type:
     <select name='landTypeFilter' id='landTypeFilter' class='loadLand'>
@@ -54,7 +55,7 @@
     </select>
   </div><div class='col'>
     Owner:
-    <input type='text' id='landOwnerFilter' class='landFilter'>
+    <input type='text' id='landOwnerFilter' class='landFilter' value='{{$owner}}'>
 
     <button id='clearLandOwnerFilter' class='btn btn-outline-danger'>x</button>
 

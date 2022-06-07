@@ -70,6 +70,12 @@ class Land extends Model
       $averageBribe = \App\Land::averageBribe();
       $numOfUnprotectedParcels = 0;
       foreach($land as $parcel){
+        if ($parcel->protected && $parcel->bribe < $averageBribe
+          && $parcel->hostileTakeoverBy == null){
+          \App\History::new($parcel->userID, 'land', "Parcel #" . $parcel->id
+            . " did not reach the minimum bribe threshold of " . $averageBribe
+            . " clacks and is now unprotected.");
+        }
         $parcel->protected = false;
         if ($parcel->bribe >= $averageBribe
           && $parcel->hostileTakeoverBy == null){
