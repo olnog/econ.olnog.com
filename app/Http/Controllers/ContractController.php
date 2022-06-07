@@ -138,9 +138,9 @@ class ContractController extends Controller
         return;
       } else if ($request->category == 'sellOrder'
         && (\App\ItemTypes::find($request->itemTypeID) == null
-        || \App\Items::where('itemTypeID', $request->itemTypeID)->first()
+        || \App\Items::where('itemTypeID', $request->itemTypeID)
+        ->where('userID', \Auth::id())->first()
           ->quantity < 1)){
-          \App\History::new(5, 'bugs', "User #" . \Auth::id() . " cannot resolve item type #" . $request->itemTypeID);
           echo "You don't appear to have this item. <a href='" . route('contracts.create') . "'>back</a>";
           return;
       } else if ($request->category == 'sellLand'
