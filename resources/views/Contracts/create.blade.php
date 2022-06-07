@@ -229,9 +229,8 @@
       Selling: <select name='itemTypeID'>
       <option></option>
       @foreach($items as $item)
-        <option></option>
         @if ($item->name != 'Nuclear Waste')
-        <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif>
+        <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif >
           {{number_format($item->quantity)}}
           {{ $item->name }}
         </option>

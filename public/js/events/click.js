@@ -25,7 +25,7 @@ $(document).on('click', '#chatSend', function(e) {
 
 $(document).on('click', '#clearLandOwnerFilter', function(e) {
   $("#landOwnerFilter").val('')
-  formatLand()
+  loadLand()
 })
 
 $(document).on('click', '.destroyBuilding', function(e) {

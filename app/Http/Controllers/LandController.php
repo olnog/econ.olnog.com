@@ -16,7 +16,12 @@ class LandController extends Controller
       $landType = $request->landType;
       $filter  = $request->filter;
       $sort = $request->sort;
+      $hostile = $request->hostile == 'true';
       $landTypes = \App\Land::fetchLandTypes();
+      $owner = $request->owner;
+      $ownerUser = \App\User::where('name', $owner)->first();
+
+
       if ($filter == null && $landType == null){
         $filter = 'mine';
         $landType = 'all';
@@ -24,7 +29,6 @@ class LandController extends Controller
       } else if ($filter == 'all' && $landType == 'all'){
         $landType = $landTypes[rand(0, count($landTypes) -1)];
       }
-
       if ($filter == 'mine' ){
         $land = Land::join('users', 'land.userID', 'users.id')
           ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
@@ -37,20 +41,6 @@ class LandController extends Controller
             'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
             'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
             ->where('type', $landType)->where('userID', \Auth::id())
-            ->orderBy($sort)->get();
-        }
-      } else if ($filter == 'hostile'){
-        $land = Land::join('users', 'land.userID', 'users.id')
-          ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-          'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-          'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
-          ->whereNotNull('hostileTakeoverBy')->orderBy($sort)->get();
-        if ($landType != 'all'){
-          $land = Land::join('users', 'land.userID', 'users.id')
-            ->select('land.id', 'land.created_at', 'type', 'userID', 'protected',
-            'hostileTakeoverBy', 'name', 'bribe', 'valuation', 'stone', 'iron',
-            'coal', 'copper', 'oil', 'sand', 'uranium', 'logs', 'depleted')
-            ->where('type', $landType)->whereNotNull('hostileTakeoverBy')
             ->orderBy($sort)->get();
         }
       } else if ($filter == 'all'){
@@ -68,13 +58,34 @@ class LandController extends Controller
         }
       }
 
+      $newLand = [];
+      if ($hostile){
+        foreach($land as $parcel){
+          if ($parcel->hostileTakeoverBy > 0){
+            $newLand [] = $parcel;
+          }
+        }
+        $land = $newLand;
+      }
 
+      if ($owner != null || $owner != ''){
+        foreach($land as $parcel){
+          if ($ownerUser != null && $parcel->userID == $ownerUser->id){
+            $newLand [] = $parcel;
+          }
+        }
+        $land = $newLand;
+      }
+      var_dump($owner);
       return view('Land.index')->with([
         'autobribe' => \App\User::find(\Auth::id())->autoBribe,
         'filter'    => $filter,
+        'hostile'   => $hostile,
         'land'      => $land,
         'landType'  => $landType,
+        'owner'     => $owner,
         'sort'      => $request->sort,
+
       ]);
     }
 

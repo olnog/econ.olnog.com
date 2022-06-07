@@ -138,7 +138,6 @@ class ContractController extends Controller
         return;
       } else if ($request->category == 'sellOrder'
         && (\App\ItemTypes::find($request->itemTypeID) == null
-        || \App\Items:: fetchTotalQuantity(Auth::id()) < 1
         || \App\Items::where('itemTypeID', $request->itemTypeID)->first()
           ->quantity < 1)){
           echo "You don't appear to have this item. <a href='" . route('contracts.create') . "'>back</a>";
@@ -162,6 +161,7 @@ class ContractController extends Controller
 
     }
       $possibleCategories = ['hire', 'freelance','buyOrder', 'sellOrder', 'buyLand', 'sellLand', 'construction', 'repair', 'reproduction', 'lease', 'leaseBuilding'];
+      var_dump($request->category, $request->price);
       if (!in_array($request->category, $possibleCategories) || !filter_var($request->price, FILTER_VALIDATE_INT)){
         echo "This doesn't apper to be a valid type of contract. ";
         return;
@@ -636,7 +636,7 @@ class ContractController extends Controller
         $user = Auth::user();
         if ($user->clacks < $contract->price){
           echo json_encode(['error'=> "You do not have enough clacks. "]);
-          return;          
+          return;
         }
         $freelancer = \App\User::find($contract->userID);
         $freelanceLabor = \App\Labor::where('userID', $contract->userID)->first();

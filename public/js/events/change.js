@@ -123,8 +123,8 @@ $(document).on('change', '.loadLand', function(e) {
 })
 
 $(document).on('keydown', '#landOwnerFilter', function(e) {
-  if (e.which == 13 || $("#landOwnerFilter").val() == ''){
-    formatLand()
+  if (e.which == 13 ){
+    loadLand()
   }
 
 })

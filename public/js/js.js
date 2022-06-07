@@ -3,13 +3,17 @@ robot = new Robot()
 loadPage('actions')
 
 function loadLand(){
+  let hostile = $("#hostileFilter").is(':checked')
   let landFilter = $(".landFilter:checked").val()
   let landTypeFilter = $("#landTypeFilter").val()
   let landSort = $("#landSortByFilter").val()
-  $.get("/land?filter=" + landFilter + "&landType=" + landTypeFilter + "&sort=" + landSort , function(data){
+  let owner = $("#landOwnerFilter").val()
+  $.get("/land?filter=" + landFilter + "&landType=" + landTypeFilter
+    + "&sort=" + landSort + "&hostile=" + hostile + "&owner=" + owner,
+    function(data){
     $("#land").html(data)
-
   })
+
 }
 
 function loadPage (page){
