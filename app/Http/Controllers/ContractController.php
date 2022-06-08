@@ -25,6 +25,9 @@ class ContractController extends Controller
           })->orWhere(function($query){
             $query->where('active', 1)
                   ->where('category', 'buyLand');
+          })->orWhere(function($query){
+            $query->where('active', 1)
+                  ->where('category', 'lease');
           })->get();
 
       } else if ($request->filter == 'labor'){

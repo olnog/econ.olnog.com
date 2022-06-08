@@ -254,6 +254,7 @@ function displayContracts(){
 
 function fetchContracts(id){
   $.get("/contracts?filter="+id, function(data){
+    console.log(data)
     $("#market").html(data)
     if (id == 'items'){
       $("#contractItemFilterDiv").removeClass('d-none')
