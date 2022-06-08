@@ -228,6 +228,10 @@
       <input type='hidden' name='category' value='sellOrder' >
       Selling: <select name='itemTypeID'>
       @foreach($items as $item)
+<<<<<<< HEAD
+=======
+        @if ($item->name != 'Nuclear Waste')
+>>>>>>> f5ef9db6785d86bf76fcaded389889f9d831dbeb
         <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif >
           {{number_format($item->quantity)}}
           {{ $item->name }}

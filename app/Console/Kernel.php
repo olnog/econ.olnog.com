@@ -28,13 +28,15 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function(){
           \App\BuyOrders::check();
-          \App\Bids::checkBids();
           \App\Buildings::solarPowerplants();
         })->hourly();
         $schedule->call(function(){
           \App\Land::checkBribes();
           \App\Report::new();
         })->daily();
+        $schedule->call(function(){
+          \App\Bids::checkBids();
+        })->everyFifteenMinutes();
         $schedule->call(function(){
           \App\Actions::offline();
         })->everyMinute();
