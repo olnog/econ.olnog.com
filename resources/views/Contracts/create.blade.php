@@ -137,8 +137,16 @@
       <select name='action'>
         <option></option>
         @foreach($freelanceActions as $action)
+          <?php
+            $lowestFreelance = \App\Contracts::fetchLowestFreelance($action);
+          ?>
           @if (($action == 'build' || $action=='repair') || !in_array($action, $banned))
-            <option>{{ $action }}</option>
+            <option value='{{ $action }}'>
+              {{ $action }}
+              @if ($lowestFreelance != null)
+                [Market: {{$lowestFreelance->price}}]
+              @endif
+            </option>
           @endif
         @endforeach
       </select>

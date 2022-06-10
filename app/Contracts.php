@@ -153,6 +153,12 @@ class Contracts extends Model
       ->where('landType', $type)->orderBy('price', 'desc')->orderBy('created_at', 'desc')->first();
   }
 
+  public static function fetchHighestFreelance($actionName){
+    return \App\Contracts::where('active', 1)->where('category', 'freelance')
+      ->where('active', 1)->where('action', $actionName)
+      ->orderBy('price', 'desc')->orderBy('created_at', 'desc')->first();
+  }
+
   public static function fetchHighestHireContract($actionName){
     return \App\Contracts::where('active', 1)->where('category', 'hire')
       ->where('action', $actionName)->orderBy('price', 'desc')
@@ -169,5 +175,9 @@ class Contracts extends Model
       ->where('active', 1)->where('itemTypeID', $itemTypeID)
       ->orderBy('price', 'asc')->orderBy('created_at', 'desc')->first();
   }
-
+  public static function fetchLowestFreelance($actionName){
+    return \App\Contracts::where('active', 1)->where('category', 'freelance')
+      ->where('active', 1)->where('action', $actionName)
+      ->orderBy('price', 'asc')->orderBy('created_at', 'desc')->first();
+  }
 }
