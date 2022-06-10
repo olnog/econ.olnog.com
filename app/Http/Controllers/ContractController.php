@@ -168,9 +168,11 @@ class ContractController extends Controller
         echo "There is already a contract to buy/sell this item at that price."
           . "<a href='" . route('contracts.create') . "'>back</a>";
         return;
+
       }
+
       $possibleCategories = ['hire', 'freelance','buyOrder', 'sellOrder', 'buyLand', 'sellLand', 'construction', 'repair', 'reproduction', 'lease', 'leaseBuilding'];
-      if (!in_array($request->category, $possibleCategories) || !filter_var($request->price, FILTER_VALIDATE_INT)){
+      if (!in_array($request->category, $possibleCategories) || !filter_var($request->price, FILTER_VALIDATE_FLOAT)){
         echo "This doesn't apper to be a valid type of contract. ";
         return;
       }

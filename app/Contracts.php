@@ -139,6 +139,7 @@ class Contracts extends Model
       'buildingTypeID', 'buildingID', 'contracts.action', 'minSkillLevel', 'landID', 'landType', 'buildingName')
       ->where('active', true)->orderBy('contracts.created_at', 'desc')->get();
   }
+
   public static function fetchHighestBuy($itemTypeID){
     return \App\Contracts::where('active', 1)->where('category', 'buyOrder')
       ->where('active', 1)->where('itemTypeID', $itemTypeID)
@@ -163,4 +164,10 @@ class Contracts extends Model
       ->where('active', 1)->where('itemTypeID', $itemTypeID)
       ->orderBy('price', 'desc')->orderBy('created_at', 'desc')->first();
   }
+  public static function fetchLowestSell($itemTypeID){
+    return \App\Contracts::where('active', 1)->where('category', 'sellOrder')
+      ->where('active', 1)->where('itemTypeID', $itemTypeID)
+      ->orderBy('price', 'asc')->orderBy('created_at', 'desc')->first();
+  }
+
 }

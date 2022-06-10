@@ -99,7 +99,7 @@
     <?php $quantity = \App\Items::fetchByName($itemName, $userID)->quantity; ?>
     {{$username}} <span class='fw-bold'>buying</span>
     <span class='text-decoration-underline'>
-    {{$itemName}}</span> for {{number_format($contract->price)}} clack(s) each until
+    {{$itemName}}</span> for {{$contract->price}} clack(s) each until
     @if ($contract->until == 'gone')
        they run out of money or space"
     @elseif ($contract->until == 'bought')
@@ -112,6 +112,7 @@
        {{number_format($contract->conditionFulfilled)}} so far ]
     @endif
     <div class='ms-3'>You have {{number_format($quantity)}} {{$itemName}}</div>
+    <!--
     <div class='ms-3'>
       @if ($contract->userID == $userID)
         <button id='cancelContract-{{$contract->id}}'
@@ -135,7 +136,7 @@
         @endif
       @endif
     </div>
-
+-->
 
 
   @elseif ($contract->category == 'freelance')
@@ -293,7 +294,7 @@
   @elseif ($contract->category == 'sellOrder')
     {{$username}} <span class='fw-bold'>selling</span>
     <span class='text-decoration-underline'>{{$itemName}}</span> for
-      {{number_format($contract->price)}} clack(s) each until
+      {{$contract->price}} clack(s) each until
     @if ($contract->until == 'gone')
       {{$itemName}} runs out
     @elseif ($contract->until == 'sold')
@@ -302,6 +303,7 @@
     @elseif ($contract->until == 'earn')
       they earn a certain amount of money
     @endif
+    <!--
     <div class='ms-3'>
       @if ($contract->userID == $userID)
         <button id='cancelContract-{{$contract->id}}'
@@ -325,6 +327,7 @@
         @endif
       @endif
     </div>
+  -->
 
 
   @endif
