@@ -13,6 +13,7 @@ class BuyOrders extends Model
     foreach($buyOrders as $buyOrder){
       if(time() - strtotime($buyOrder->updated_at) > 86400){
         $buyOrder->cost = ceil($buyOrder->cost * 1.5);
+        $buyOrder->unitCost = round($buyOrder->cost / $buyOrder->quantity, 2);
         $buyOrder->save();
       }
     }
