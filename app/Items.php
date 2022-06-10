@@ -80,7 +80,7 @@ class Items extends Model
       "make-gasoline-car"                   => 'Car (gasoline)',
       "make-gasoline-engine"                => 'Gasoline Engines',
       "make-gasoline-tractor"               => 'Tractor (gasoline)',
-      "make-HerbMed"                        => 'Herb Meds',
+      "make-HerbMed"                        => 'HerbMeds',
       "make-iron-axe"                       => 'Axe (iron)',
       "make-iron-handmill"                  => 'Handmill (iron)',
       "make-iron-pickaxe"                   => 'Pickaxe (iron)',

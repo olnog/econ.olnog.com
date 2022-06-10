@@ -151,18 +151,24 @@ class ContractController extends Controller
           buildings. <a href='" . route('contracts.create') . "'>back</a>";
         return ;
 
-    } else if ($request->category == 'lease'
-      && !\App\Land::doTheyOwn($request->landType, \Auth::id())){
-      echo "You don't own this type of land. (" . $request->landType . ")";
-      return ;
-    } else if ($request->category == 'leaseBuilding'){
-      $building = \App\Buildings::find($request->buildingID);
-      if ($building->uses == 0){
-        echo "There aren't any uses left for this building.";
+      } else if ($request->category == 'lease'
+        && !\App\Land::doTheyOwn($request->landType, \Auth::id())){
+        echo "You don't own this type of land. (" . $request->landType . ")";
         return ;
+      } else if ($request->category == 'leaseBuilding'){
+        $building = \App\Buildings::find($request->buildingID);
+        if ($building->uses == 0){
+          echo "There aren't any uses left for this building.";
+          return ;
+        }
+      } else if(($request->category != 'sellOrder'
+        || $request->category != 'buyOrder')
+        && \App\Contracts::where('active', 1)
+        ->where('itemTypeID', $request->itemTypeID)->where('price', $request->price)->count() > 0){
+        echo "There is already a contract to buy/sell this item at that price."
+          . "<a href='" . route('contracts.create') . "'>back</a>";
+        return;
       }
-
-    }
       $possibleCategories = ['hire', 'freelance','buyOrder', 'sellOrder', 'buyLand', 'sellLand', 'construction', 'repair', 'reproduction', 'lease', 'leaseBuilding'];
       if (!in_array($request->category, $possibleCategories) || !filter_var($request->price, FILTER_VALIDATE_INT)){
         echo "This doesn't apper to be a valid type of contract. ";
