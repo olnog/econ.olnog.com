@@ -70,7 +70,7 @@ class BuyOrderController extends Controller
         if ($newBuyOrder->cost < $newBuyOrder->quantity){
           $newBuyOrder->cost = $newBuyOrder->quantity;
         }
-        $newBuyOrder->unitCost = round($newBuyOrder->cost / $newBuyOrder->quantity);
+        $newBuyOrder->unitCost = round($newBuyOrder->cost / $newBuyOrder->quantity, 2);
         $newBuyOrder->itemTypeID = $buyOrder->itemTypeID;
 
         $newBuyOrder->save();
