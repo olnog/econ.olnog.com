@@ -44,6 +44,8 @@ function displayHeaders(info){
   }
   $("#numOfItems").html(numOfItems)
   $("#username").html(info.username)
+  settings = info.settings
+  console.log(settings.sound)
 }
 
 function displayError(errorMsg){ //4

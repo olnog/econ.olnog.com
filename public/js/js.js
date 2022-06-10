@@ -213,18 +213,6 @@ function payBribe(landID, amount){
     displayHeaders(JSON.parse(data).info)
   })
 }
-function playSkill(){
-  if (!settings.sound){
-    return
-  }
-  let audio = new Audio('js/skill.wav');
-  audio.play();
-  currentskillPoints = labor.availableSkillPoints
-}
-
-
-
-
 
 function rebirth(){
   window.location.href = "/reborn"
