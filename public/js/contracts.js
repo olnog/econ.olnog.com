@@ -176,6 +176,8 @@ function reproduction(contractID){
 
       return
     }
+    displayHeaders(JSON.parse(data).info)
+
     status(JSON.parse(data).status)
     window.location.reload()
   })
@@ -204,6 +206,8 @@ function sellToBuyOrder(contractID, quantity, page){
         return
       }
     status(JSON.parse(data).status)
+    displayHeaders(JSON.parse(data).info)
+
     if (page == 'items'){
       loadPage('items')
       return

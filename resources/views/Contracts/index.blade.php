@@ -46,7 +46,16 @@
 
 <div id='contractListings'>
 
+@if (count($contracts) < 1 )
 
+  <div class='text-center'>
+  @if ($filter == null || $filter == 'mine')
+    You don't have anything on the market yet. Buy or create a Contract to be able to setup an order on the market.
+  @else
+    No contracts yet.
+  @endif
+  </div>
+@endif
 @foreach ($contracts as $contract)
 <?php
   $username = "You are ";

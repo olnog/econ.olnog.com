@@ -71,7 +71,7 @@ function disableForAutomation(){
 }
 
 function stopAutomation(wasThereAnError){
-  if (!stopButtonPressed){
+  if (!stopButtonPressed && settings.sound){
     let audio = new Audio('audio/stop.wav')
     audio.play()
   }
