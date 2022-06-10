@@ -123,7 +123,14 @@
     <div class=''>
       <span class='fw-bold'>freelancing</span> (pay clacks)
     </div><div id='freelanceActions' class='ps-5'>
+      <?php $lastFreelanceAction = null; ?>
       @foreach($freelanceContracts as $contract)
+        @if ($contract->action == $lastFreelanceAction)
+          @continue
+        @endif
+        <?php
+          $lastFreelanceAction = $contract->action;
+        ?>
         @if($contract->action == 'build' )
           @if(count($buildableBuildings) > 0 && $canTheyBuild)
             <div>
@@ -136,7 +143,7 @@
                 @endforeach
               </select>
               <button id='freelanceBuild-{{$contract->id}}-actions'
-                class='freelanceBuild btn btn-danger'
+                class='freelanceBuild btn btn-danger m-3'
                 @if (count($buildableBuildings) < 1) disabled @endif>
                 {{$contract->action}} (-{{$contract->price}})
               </button>
@@ -152,14 +159,14 @@
                 @endforeach
               </select>
               <button id='freelanceRepair-{{$contract->id}}-actions'
-                class='freelanceRepair btn btn-danger' @if (count($repairableBuildings) < 1) disabled @endif>
+                class='freelanceRepair btn btn-danger m-3' @if (count($repairableBuildings) < 1) disabled @endif>
                 {{$contract->action}} (-{{$contract->price}})
               </button>
             </div>
           @endif
         @else
           <button id='freelanceAction-{{$contract->id}}-actions'
-            class='freelance btn btn-danger' @if ($actionBeingDoneNow) disabled @endif>
+            class='freelance btn btn-danger m-2' @if ($actionBeingDoneNow) disabled @endif>
             {{$contract->action}} (-{{$contract->price}})
           </button>
         @endif
