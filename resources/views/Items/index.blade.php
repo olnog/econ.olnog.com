@@ -13,7 +13,7 @@
 @foreach ($items as $item)
   <?php
     $buyContract = \App\Contracts::fetchHighestBuy($item->itemTypeID);
-    $sellContract = \App\Contracts::fetchHighestSell($item->itemTypeID);
+    $sellContract = \App\Contracts::fetchLowestSell($item->itemTypeID);
    ?>
   <div class='mt-3 @if ($item->quantity < 1)  noQuantity d-none @endif'>
     <div class='row'>

@@ -194,15 +194,18 @@
       Buying: <select name='itemTypeID'>
       <option></option>
       @foreach($itemTypes as $itemType)
+        <?php
+          $highestBuy = \App\Contracts::fetchHighestBuy($itemType->id);
+        ?>
         <option value='{{$itemType->id}}'
           @if($itemTypeID = $itemType->id) selected @endif >{{ $itemType->name }}
-          @if ($itemType->material != null)
-            ({{ $itemType->material }} / {{ $itemType->durability }})
+          @if ($highestBuy != null)
+            [Market: {{$highestBuy->price}}]
           @endif
         </option>
       @endforeach
       </select>
-      for <input type='number' name='price' > clacks each
+      for <input type='number' name='price' min=.01 step=.01 value=''> clacks each
     </div><div class='mt-3'>
       Until:
     </div><div class='ms-3'>
@@ -228,13 +231,19 @@
       <input type='hidden' name='category' value='sellOrder' >
       Selling: <select name='itemTypeID'>
       @foreach($items as $item)
+        <?php
+          $lowestSell = \App\Contracts::fetchLowestSell($item->itemTypeID);
+        ?>
         <option value='{{$item->itemTypeID}}' @if($itemID == $item->itemTypeID) selected @endif >
           {{number_format($item->quantity)}}
           {{ $item->name }}
+          @if ($lowestSell != null)
+            [Market: {{$lowestSell->price}}]
+          @endif
         </option>
       @endforeach
       </select>
-      for <input type='number' name='price' > clacks each
+      for <input type='number' name='price' min=.01 step=.01> clacks each
     </div><div class='mt-3'>
       Until:
     </div><div class='ms-3'>
