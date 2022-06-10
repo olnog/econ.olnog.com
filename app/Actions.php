@@ -91,7 +91,7 @@ class Actions extends Model
         ->where('userID', $contractorID)->count();
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Chainsaw (electric)',
-        'Chainsaw (gasoline)', 'Axe'], $agentID);
+        'Chainsaw (gasoline)', 'Axe'], $contractorID);
       if (count($equipmentAvailable) == 0){
         return [
           'error' =>
@@ -112,7 +112,7 @@ class Actions extends Model
       $production = $baseChop;
       if ($robot == null){
         $equipmentCaption = Equipment
-          ::useEquipped($equipmentAvailable[0], $agentID);
+          ::useEquipped($equipmentAvailable[0], $contractorID);
         if (!$equipmentCaption){
           return [
             'error' => "Something went wrong with an equipment check. Sorry."
@@ -171,7 +171,7 @@ class Actions extends Model
 
     } else if ($actionName == 'explore'){
       $equipmentAvailable = \App\Equipment
-        ::whichOfTheseCanTheyUse(['Car (gasoline)', 'Car (diesel)'], $agentID);
+        ::whichOfTheseCanTheyUse(['Car (gasoline)', 'Car (diesel)'], $contractorID);
       $numOfParcels = \App\Land::where('userID', '>', 0)->count() + 1;
       $satellite = \App\Items::fetchByName('Satellite', $contractorID);
       $electricity = \App\Items::fetchByName('Electricity', $contractorID);
@@ -191,7 +191,7 @@ class Actions extends Model
       } else if (count($equipmentAvailable) > 0){
         $minChance = 100;
         if ($robot == null){
-          $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $agentID);
+          $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $contractorID);
           if (!$equipmentCaption){
             return ['error' => "Something technical went wrong with your car. Sorry."];
           }
@@ -228,7 +228,7 @@ class Actions extends Model
       || $actionName == 'harvest-rubber'){
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Tractor (gasoline)', 'Tractor (diesel)'],
-        $agentID);
+        $contractorID);
       $howManyFields = 1;
       $totalYield = 0;
       $itemName = \App\Items::fetchItemNameForAction($actionName);
@@ -255,7 +255,7 @@ class Actions extends Model
         }
         if ($robot == null){
           $equipmentCaption = \App\Equipment
-            ::useEquipped($equipmentAvailable[0], $agentID);
+            ::useEquipped($equipmentAvailable[0], $contractorID);
           if (!$equipmentCaption){
             return [
               'error'
@@ -335,7 +335,7 @@ class Actions extends Model
         }
       } else if ($robot == null
         && Labor::areTheyEquippedWith('Handmill', $agentID)){
-        $equipmentCaption = Equipment::useEquipped('Handmill', $agentID);
+        $equipmentCaption = Equipment::useEquipped('Handmill', $contractorID);
       }
       $production = $modifier * .5;
       if ($robot == null){
@@ -375,7 +375,7 @@ class Actions extends Model
           return $buildingCaption;
         }
       } else if ($robot == null && Labor::areTheyEquippedWith('Saw', $agentID)){
-          $equipmentCaption = Equipment::useEquipped('Saw', $agentID);
+          $equipmentCaption = Equipment::useEquipped('Saw', $contractorID);
       }
       $production *= $modifier;
       $itemCaption = \App\Items
@@ -397,7 +397,7 @@ class Actions extends Model
         ->where('userID', $contractorID)->count();
       $equipmentAvailable = \App\Equipment
         ::whichOfTheseCanTheyUse(['Bulldozer (gasoline)', 'Bulldozer (diesel)',
-        'Shovel'], $agentID);
+        'Shovel'], $contractorID);
       if (count($equipmentAvailable) < 1){
         return ['error' => "You don't have any equipment to mine Sand."];
       } else if (!\App\Land::doTheyHaveAccessTo('desert', $contractorID)){
@@ -420,7 +420,7 @@ class Actions extends Model
       }
       $production = $modifier;
       if ($robot == null){
-        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
+        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $contractorID);
         $production = $action->rank * ($modifier + $landBonus);
       }
       $landResource = \App\Land::takeResource('Sand',  $agentID, $production, true);
