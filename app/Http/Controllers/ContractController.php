@@ -697,6 +697,10 @@ class ContractController extends Controller
           }
           echo json_encode(['error' => 'Sorry, they only have ' . $sellerItem->quantity . " items right now."]);
           return;
+        } else if ($contract->until == 'sold'
+          && $request->quantity > $contract->condition - $contract->conditionFulfilled){
+          echo json_encode(['error' => 'Sorry, they only have ' . ($contract->condition - $contract->conditionFulfilled) . " items right now. Not " . $request->quantity . "."]);
+          return;
         }
         $seller = \App\User::find($contract->userID);
         $seller->clacks += $contract->price * $request->quantity;
