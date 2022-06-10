@@ -125,7 +125,6 @@ class ContractController extends Controller
         && $request->category != 'sellOrder' ) && $user->clacks < $request->price){
         echo "You don't have enough clacks to cover the contract price.";
         return;
-
       } else if ($request->category == 'construction'
         && (\App\Skills::fetchByIdentifier('construction', \Auth::id())->rank < 1)){
         echo "You aren't able to do Construction.";
