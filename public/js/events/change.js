@@ -68,6 +68,18 @@ $(document).on('change', '#contractItemFilter', function(e) {
   }
 })
 
+$(document).on('change', '#contractLaborFilter', function(e) {
+  $(".contracts").removeClass('d-none')
+  $("#pleaseUseLaborFilter").removeClass('d-none')
+  if ($("#contractLaborFilter").val() != ''){
+    $(".contracts").addClass('d-none')
+    $("#pleaseUseLaborFilter").addClass('d-none')
+
+    $(".laborClass" + $("#contractLaborFilter").val()).removeClass('d-none')
+    return
+  }
+})
+
 $(document).on('change', '#contractLandFilter', function(e) {
   console.log($("#contractLandFilter").val())
   $(".contracts").removeClass('d-none')

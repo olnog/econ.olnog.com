@@ -14,6 +14,7 @@ class ContractController extends Controller
      */
     public function index(Request $request)
     {
+
       $contracts = \App\Contracts::where('active', 1)
         ->where('userID', \Auth::id())->get();
 
@@ -66,6 +67,8 @@ class ContractController extends Controller
         'contracts'             => $contracts,
         'clacks'                => \App\User::find(\Auth::id())->clacks,
         'filter'                => $request->filter,
+        'laborActions'      => \App\Contracts::fetchLabor(),
+
         'landTypes'             => \App\Land::fetchLandTypes(),
         'ownedLandTypes'        => \App\Land::fetchLandTypesTheyOwn(\Auth::id()),
         'relevantItems'         => \App\Items::fetchItemsInContracts(),
