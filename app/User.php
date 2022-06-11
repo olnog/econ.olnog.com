@@ -38,7 +38,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    
+
 
     public static function fetchInfo(){
       $labor = \App\Labor::fetch();
@@ -52,6 +52,7 @@ class User extends Authenticatable
       return [
         'buildingSlots'   => $user->buildingSlots,
         'clacks'          => $user->clacks,
+        'food'            => \App\Items::fetchByName('Food', \Auth::id())->quantity,
         'numOfActions'    => $numOfActions,
         'numOfBuildings'  => $numOfBuildings,
         'numOfContracts'  => $numOfContracts,

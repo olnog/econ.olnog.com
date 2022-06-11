@@ -347,6 +347,11 @@ class ContractController extends Controller
      */
     public function update(Request $request, $id)
     {
+      $food = \App\Items::fetchByName('Food', \Auth::id());
+      if ($request->automating == 'true' && $food->quantity < 1){
+        echo json_encode(['error' => "You're out of food. Buy or create some more."]);
+        return;
+      }
       $contract = \App\Contracts::find($id);
       if ($contract == null){
         echo json_encode(['error' => "This shouldn't have happened. Sorry."]);

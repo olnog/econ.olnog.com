@@ -9,9 +9,11 @@ function fetchLand(){
 function displayAutomation(){
   if (lastAction != null || lastContractAction != null){
     $("#lastAction").prop('disabled', false)
-    $("#startAutomation").prop('disabled', false)
+    if (food > 0){
+      $("#startAutomation").prop('disabled', false)
+    }
   }
-  if (lastAction == null && lastContractAction == null){
+  if (lastAction == null && lastContractAction == null ){
     $("#lastAction").prop('disabled', true)
     $("#startAutomation").prop('disabled', true)
     if (automation != null){
@@ -26,7 +28,8 @@ function displayAutomation(){
 
 
 function displayHeaders(info){
-
+  food = info.food
+  $("#laborFood").html(info.food.toLocaleString())
   $("#buildingSlots").html(info.buildingSlots.toLocaleString())
   $("#clacks").html(info.clacks.toLocaleString())
   $("#numOfParcels").html(info.numOfParcels.toLocaleString())
