@@ -32,6 +32,7 @@
   </select>
   <input type='checkbox' class='contractFilterByCategory ms-3' value='buyOrder' checked> buying
   <input type='checkbox' class='contractFilterByCategory ms-3' value='sellOrder' checked> selling
+  <span id='pleaseUseItemFilter' class='ms-3 fw-bold text-decoration-underline'> Please select an item in the filter menu</span>
 </div><div id='contractLandFilterDiv' class='d-none'>
   Filter By Land Type:
   <select id='contractLandFilter'>
@@ -69,7 +70,7 @@
 <div class="mt-3 {{$contract->category}}@if($contract->landType != null) {{$contract->landType}} @endif
   @if ($contract->userID != $userID)  notMyContract  @endif
   @if ($contract->category == 'buyOrder' || $contract->category == 'sellOrder')
-  itemClass{{$contract->itemTypeID}}
+  itemClass{{$contract->itemTypeID}} d-none
   @endif contracts p-3">
 
 

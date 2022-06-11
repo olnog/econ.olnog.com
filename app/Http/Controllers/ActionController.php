@@ -91,7 +91,11 @@ class ActionController extends Controller
     {
       \App\Metric::logAllButtons(\Auth::id(), $request->buttons);
 
-      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null, $request->automation  == 'true', false);
+      $whoUsesFood = null;
+      if ($request->automation == 'true'){
+        $whoUsesFood = \Auth::id();
+      }
+      $msg = \App\Actions::do($request->name, Auth::id(), Auth::id(), null, $whoUsesFood, false);
       $status = "";
 
       if (isset($msg['error'])){

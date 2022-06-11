@@ -106,7 +106,7 @@
     @endif
     @foreach($actions as $action)
       @continue (in_array($action, $banned))
-      <button id='action-{{$action}}' class='m-2 action btn
+      <button id='action-{{$action}}' class='m-2 action btn disabledActions
       @if (in_array($action, $actionable))
         btn-primary
       @else
@@ -166,7 +166,7 @@
           @endif
         @else
           <button id='freelanceAction-{{$contract->id}}-actions'
-            class='freelance btn btn-danger m-2' @if ($actionBeingDoneNow) disabled @endif>
+            class='freelance btn btn-danger m-2' >
             {{$contract->action}} (-{{$contract->price}})
           </button>
         @endif
@@ -182,7 +182,7 @@
       @foreach($hireableContracts as $contract)
         @if(in_array($contract->action, $actions))
           <button id='hireAction-{{$contract->id}}-actions'
-            class='hire btn btn-success ' @if ($actionBeingDoneNow) disabled @endif>
+            class='hire btn btn-success disabledActions' @if ($actionBeingDoneNow) disabled @endif>
             {{$contract->action}} (+{{$contract->price}})
           </button>
         @endif

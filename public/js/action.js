@@ -9,9 +9,10 @@ function action (actionName){
   $.post( "/actions", {name: actionName, buttons: buttonMetric,
       automation: automation != null, consumption: JSON.stringify(consumption),
       _token: csrf }).done(function(data){
-        $(".action").prop('disabled', true)
+      $(".disabledActions").prop('disabled', true)
     if (automation == null){
-      setTimeout( function (){$(".action").prop('disabled', false)}, 1000)
+
+      resetActionDisable()
     }
     loadPage('actions')
     buttonMetric = []
@@ -25,7 +26,7 @@ function action (actionName){
     status(JSON.parse(data).status)
     csrfToken = JSON.parse(data).csrf
     displayHeaders(JSON.parse(data).info)
-    displayAutomation(JSON.parse(data).lastAction)
+    displayAutomation()
   }).fail(function(){ // DID THIS WORK? 05/21/22
     location.reload()
   })

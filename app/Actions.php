@@ -17,11 +17,11 @@ class Actions extends Model
     $foodCaption = "";
     $feedingChildren = \App\Labor::feedChildren($agentID);
 
-    if ($useFood || $feedingChildren !== null){
+    if ($useFood != null || $feedingChildren !== null){
       $foodUsed = 0;
-      $food = \App\Items::fetchByName('Food', $agentID);
+      $food = \App\Items::fetchByName('Food', $useFood);
 
-      if ($useFood){
+      if ($useFood != null){
         if ($food->quantity == 0){
           return ['error' => "You're automating actions but you don't have any more food." ];
         }
@@ -77,7 +77,7 @@ class Actions extends Model
     if ($robotID != null){
       $robot = \App\Robot::find($robotID);
     }
-    if (!$useFood && $robot == null && $agentID == $contractorID
+    if ($useFood == null && $robot == null && $agentID == $contractorID
       && strtotime('now') - strtotime(\App\User::find($agentID)->lastAction)
         == 0){
       return ['error' => "Sorry, you're doing this too often."];
