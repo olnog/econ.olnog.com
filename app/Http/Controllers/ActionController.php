@@ -47,6 +47,7 @@ class ActionController extends Controller
         'canTheyBuild'       => \App\Buildings
           ::howManyBuildingsAndFieldsDoTheyHave(\Auth::id())
           < \App\User::find(\Auth::id())->buildingSlots,
+        'clacks'              => \App\User::find(\Auth::id())->clacks,
         'electricity'         => \App\Items
           ::fetchByName('Electricity', \Auth::id())->quantity,
         'equipped'            => [

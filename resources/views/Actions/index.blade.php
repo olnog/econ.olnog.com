@@ -144,7 +144,8 @@
               </select>
               <button id='freelanceBuild-{{$contract->id}}-actions'
                 class='freelanceBuild btn btn-danger m-3'
-                @if (count($buildableBuildings) < 1) disabled @endif>
+                @if (count($buildableBuildings) < 1
+                || $clacks < $contract->price) disabled @endif>
                 {{$contract->action}} (-{{$contract->price}})
               </button>
             </div>
@@ -159,14 +160,15 @@
                 @endforeach
               </select>
               <button id='freelanceRepair-{{$contract->id}}-actions'
-                class='freelanceRepair btn btn-danger m-3' @if (count($repairableBuildings) < 1) disabled @endif>
+                class='freelanceRepair btn btn-danger m-3'
+                @if (count($repairableBuildings) < 1 || $clacks < $contract->price) disabled @endif>
                 {{$contract->action}} (-{{$contract->price}})
               </button>
             </div>
           @endif
         @else
           <button id='freelanceAction-{{$contract->id}}-actions'
-            class='freelance btn btn-danger m-2' >
+            class='freelance btn btn-danger m-2' @if ($clacks < $contract->price) disabled @endif>
             {{$contract->action}} (-{{$contract->price}})
           </button>
         @endif
