@@ -2,6 +2,11 @@ robot = new Robot()
 
 loadPage('actions')
 
+function resetActionDisable(){
+  setTimeout( function (){$(".disabledActions").prop('disabled', false)}, 1000)
+
+}
+
 function loadLand(){
   let hostile = $("#hostileFilter").is(':checked')
   let landFilter = $(".landFilter:checked").val()

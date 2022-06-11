@@ -573,6 +573,7 @@ class ContractController extends Controller
         $builderStatus = "Freelance Contract - Clacks: <span class='fp'>+"
         . number_format($contract->price) . "</span> ["
         . number_format($builder->clacks) . "]";
+
         $status = "<span class='fw-bold'>Clacks: <span class='fn'>-"
           . number_format($contract->price) . "</span> ["
           . number_format($contractor->clacks) . "]</span> - "
@@ -607,9 +608,12 @@ class ContractController extends Controller
           $contract->save();
           return;
         }
+        $whoUsesFood = null;
+        if ($request->automating == 'true'){
+          $whoUsesFood = \Auth::id();
+        }
         $msg = \App\Actions::do($contract->action, Auth::id(),
-          $contract->userID, null, false, false);
-
+          $contract->userID, null, $whoUsesFood, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
         }  else {
@@ -618,7 +622,12 @@ class ContractController extends Controller
           if ($user->clacks > 1){
             $clackCaption = ' clacks. ';
           }
-          $status = "<span class='fw-bold'>Clacks: <span class='fp'>+"
+          $foodCaption = '';
+          if ($request->automating == 'true'){
+            $food = \App\Items::fetchByName('Food', \Auth::id());
+            $foodCaption = "Food: <span class='fn'>-1</span> [" . $food->quantity . "] ";
+          }
+          $status = "<span class='fw-bold'>" . $foodCaption . "Clacks: <span class='fp'>+"
             . number_format($contract->price) . "</span> ["
             . number_format($user->clacks) . "]</span> &rarr; " . $contract->action . " (" . $employer->name . ")";
         }
@@ -650,8 +659,11 @@ class ContractController extends Controller
         }
         $freelancer = \App\User::find($contract->userID);
         $freelanceLabor = \App\Labor::where('userID', $contract->userID)->first();
-
-        $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null, false, false);
+        $whoUsesFood = null;
+        if ($request->automating == 'true'){
+          $whoUsesFood = \Auth::id();
+        }
+        $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null, $whoUsesFood, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
           \App\Contracts::endContract($status);

@@ -38,8 +38,9 @@ class Robot extends Model
             = ['error' => "This is not a valid action for this robot."];
           continue;
         }
+
         $msg = \App\Actions::do($actionType->name, \Auth::id(), \Auth::id(),
-          $robotID, false, false);
+          $robotID, null, false);
         if (isset($msg['status'])){
           $robot->uses--;
 

@@ -84,7 +84,7 @@ function contractBuild(contractID, buildingName, page){
 
 
 function freelance(contractID){
-  $.post( "/contracts/" + contractID, {type: 'freelance', _token: fetchCSRF(),
+  $.post( "/contracts/" + contractID, {type: 'freelance', automating: automation != null, _token: fetchCSRF(),
     _method: 'PUT' }).done(function(data){
       console.log(data)
       if (JSON.parse(data).error != undefined){
@@ -92,8 +92,10 @@ function freelance(contractID){
 
         return
       }
+      resetActionDisable()
       status(JSON.parse(data).status)
       displayHeaders(JSON.parse(data).info)
+      displayAutomation()
 
       if (page == 'actions'){
         loadPage('actions')
@@ -104,14 +106,18 @@ function freelance(contractID){
 }
 
 function hire(contractID, page){
-  $.post( "/contracts/" + contractID, {type: 'hire', _token: fetchCSRF(),
+  $.post( "/contracts/" + contractID, {type: 'hire', automating: automation != null, _token: fetchCSRF(),
     _method: 'PUT' }).done(function(data){
+      console.log(data)
       if (JSON.parse(data).error != undefined){
         displayError(JSON.parse(data).error)
         return
       }
+      resetActionDisable()
     status(JSON.parse(data).status)
     displayHeaders(JSON.parse(data).info)
+    displayAutomation()
+
     if (page == 'actions'){
       loadPage('actions')
       return

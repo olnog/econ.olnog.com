@@ -58,9 +58,11 @@ $(document).on('change', '.contractFilterByCategory', function(e) {
 
 $(document).on('change', '#contractItemFilter', function(e) {
   console.log($("#contractItemFilter").val())
-  $(".contracts").removeClass('d-none')
+  $("#pleaseUseItemFilter").removeClass('d-none')
+  $(".contracts").addClass('d-none')
+
   if ($("#contractItemFilter").val() != ''){
-    $(".contracts").addClass('d-none')
+    $("#pleaseUseItemFilter").addClass('d-none')
     $(".itemClass" + $("#contractItemFilter").val()).removeClass('d-none')
     return
   }

@@ -305,7 +305,6 @@ class Items extends Model
   }
 
   public static function make($itemName, $quantity, $contractorID, $agentID){
-    //var_dump($itemName, $quantity);
     $item = \App\Items::fetchByName($itemName, $contractorID);
     $item->quantity += $quantity;
     $item->save();
