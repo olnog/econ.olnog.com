@@ -40,6 +40,7 @@ class BuildingLeaseController extends Controller
           'actions'         =>  \App\Actions::fetch(\Auth::id()),
           'buildingLeases'  =>  \App\BuildingLease::fetch(),
           'contracts'       =>  \App\Contracts::fetch(),
+          'info'            => \App\User::fetchInfo(),
         ]);
     }
 

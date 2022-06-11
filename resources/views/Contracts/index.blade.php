@@ -218,12 +218,15 @@
      @if ($contract->userID == $userID)
        <button id='cancelContract-{{$contract->id}}'
          class='cancelContract btn btn-warning'>cancel</button>
-     @elseif (\App\Lease::areTheyAlreadyLeasing($contract->landType, $userID)){
-       <button id='cancelLease-{{$contract->id}}'
-         class='cancelLease btn btn-warning ms-3'>
-         cancel lease
-       </button>
-         You are currently leasing this land.
+     @elseif (\App\Lease::areTheyAlreadyLeasing($contract->landType, $userID))
+        You are currently leasing this type of land.
+        @if (\App\Lease::areTheyLeasingThis($contract->id, $userID))
+         <button id='cancelLease-{{$contract->id}}'
+            class='cancelLease btn btn-warning ms-3'>
+            cancel lease
+          </button>
+
+         @endif
      @elseif ($clacks >= $contract->price)
        <button id='lease-{{$contract->id}}' class='lease btn btn-danger'>
          accept lease

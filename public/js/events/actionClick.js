@@ -32,7 +32,7 @@ $(document).on('click', '#startAutomation', function(e) {
   $("#workHoursCent").prop('disabled', true)
   disableForAutomation()
   automation = setInterval(function(){
-
+    $(".disabledActions").prop('disabled', true)
     if (lastAction != null){
       action(lastAction)
     } else if(lastContractAction != null){

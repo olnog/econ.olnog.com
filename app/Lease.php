@@ -13,6 +13,11 @@ class Lease extends Model
       ->where('landType', $landType)->count() > 0;
   }
 
+  public static function areTheyLeasingThis($contractID, $userID){
+    return \App\Lease::where('userID', $userID)->where('active', 1)
+      ->where('contractID', $contractID)->count() > 0;
+  }
+
   public static function bad($contractID, $reason){
     $leases = \App\Lease::where('contractID', $contractID)->where('active', 1)
       ->get();
