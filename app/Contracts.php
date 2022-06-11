@@ -180,4 +180,21 @@ class Contracts extends Model
       ->where('active', 1)->where('action', $actionName)
       ->orderBy('price', 'asc')->orderBy('created_at', 'desc')->first();
   }
+
+  public static function fetchLabor(){
+    $categoryArr = ['category' => 'freelance', 'category' => 'hire'];
+    $actions = \App\Contracts::where('active', 1)
+      ->where('category', 'freelance')->orWhere('category', 'hire')
+      ->orderBy('action', 'asc')->get();
+    $lastAction = null;
+    $actionList = [];
+    foreach($actions as $action){
+      if ($action->action == $lastAction){
+        continue;
+      }
+      $actionList[] = $action->action;
+      $lastAction = $action->action;
+    }
+    return $actionList;
+  }
 }

@@ -23,8 +23,17 @@
     </li>
   </ul>
 </div>
+<div id='contractLaborFilterDiv'  class='d-none'>
+  Filter By Action:
+  <select id='contractLaborFilter' class='text-center'>
+    <option></option>
+    @foreach($laborActions as $laborAction)
+      <option value='{{$laborAction}}'>{{implode(' ', explode('-', $laborAction))}}</option>
+    @endforeach
+  </select>
+  <span id='pleaseUseLaborFilter' class='ms-3 fw-bold text-decoration-underline'> Please select an action in the filter menu</span>
 
-<div id='contractItemFilterDiv'  class='d-none'>
+</div><div id='contractItemFilterDiv'  class='d-none'>
   Filter By Item: <select id='contractItemFilter'><option></option>
     @foreach($relevantItems as $itemTypeID => $itemName)
       <option value='{{$itemTypeID}}'>{{$itemName}}</option>
@@ -40,7 +49,6 @@
     @foreach ($landTypes as $landType)
       <option>{{$landType}}</option>
     @endforeach
-
   </select>
 </div>
 <div id='newContactInContracts' class='text-center'></div>
@@ -70,7 +78,9 @@
 <div class="mt-3 {{$contract->category}}@if($contract->landType != null) {{$contract->landType}} @endif
   @if ($contract->userID != $userID)  notMyContract  @endif
   @if ($contract->category == 'buyOrder' || $contract->category == 'sellOrder')
-  itemClass{{$contract->itemTypeID}} d-none
+    itemClass{{$contract->itemTypeID}} d-none
+  @elseif ($contract->category == 'freelance' || $contract->category == 'hire')
+    laborClass{{$contract->action}} d-none
   @endif contracts p-3">
 
 
@@ -113,35 +123,38 @@
        {{number_format($contract->conditionFulfilled)}} so far ]
     @endif
     <div class='ms-3'>You have {{number_format($quantity)}} {{$itemName}}</div>
-    <!--
+
+
     <div class='ms-3'>
       @if ($contract->userID == $userID)
         <button id='cancelContract-{{$contract->id}}'
           class='cancelContract btn btn-warning'>cancel</button>
       @else
-        @if ($quantity >=  1)
-          <button id='sellToBuyContract-{{$contract->id}}-1'
-            class='sellToBuyContract btn btn-success'>sell x1 (+{{number_format($contract->price)}} clacks)</button>
-        @endif
-        @if ($quantity >=  10)
-          <button id='sellToBuyContract-{{$contract->id}}-10'
-            class='sellToBuyContract btn btn-success'>sell x10 (+{{$contract->price * 10}} clacks)</button>
-        @endif
-        @if ($quantity >=  100)
-          <button id='sellToBuyContract-{{$contract->id}}-100'
-            class='sellToBuyContract btn btn-success'>sell x100 (+{{$contract->price * 100}} clacks)</button>
-        @endif
-        @if ($quantity >=  1000)
-          <button id='sellToBuyContract-{{$contract->id}}-1000'
-            class='sellToBuyContract btn btn-success'>sell x1,000 (+{{$contract->price * 1000}} clacks)</button>
+        @if (\App\Contracts::fetchHighestBuy($contract->itemTypeID)->id == $contract->id)
+          @if ($quantity >=  1)
+            <button id='sellToBuyContract-{{$contract->id}}-1'
+              class='sellToBuyContract btn btn-success'>sell x1 (+{{number_format($contract->price)}} clacks)</button>
+          @endif
+          @if ($quantity >=  10)
+            <button id='sellToBuyContract-{{$contract->id}}-10'
+              class='sellToBuyContract btn btn-success'>sell x10 (+{{$contract->price * 10}} clacks)</button>
+          @endif
+          @if ($quantity >=  100)
+            <button id='sellToBuyContract-{{$contract->id}}-100'
+              class='sellToBuyContract btn btn-success'>sell x100 (+{{$contract->price * 100}} clacks)</button>
+          @endif
+          @if ($quantity >=  1000)
+            <button id='sellToBuyContract-{{$contract->id}}-1000'
+              class='sellToBuyContract btn btn-success'>sell x1,000 (+{{$contract->price * 1000}} clacks)</button>
+          @endif
         @endif
       @endif
     </div>
--->
+
 
 
   @elseif ($contract->category == 'freelance')
-    {{$username}}  available to <span class='fw-bold'>freelance</span> {{$contract->action}}
+    {{$username}}  available to <span class='fw-bold'>freelance</span> {{$contract->action}} lvl. {{\App\Actions::fetchByName($contract->userID, $contract->action)->rank}}
      for {{number_format($contract->price)}} clack(s) until
     @if ($contract->until == 'workHours')
        there are no more work hours available.
@@ -307,31 +320,32 @@
     @elseif ($contract->until == 'earn')
       they earn a certain amount of money
     @endif
-    <!--
     <div class='ms-3'>
       @if ($contract->userID == $userID)
         <button id='cancelContract-{{$contract->id}}'
           class='cancelContract btn btn-warning'>cancel</button>
       @else
-        @if($clacks >= $contract->price)
-          <button id='buyFromSellContract-{{$contract->id}}-1'
-            class='buyFromSellContract btn btn-danger'>buy x1</button>
-        @endif
-        @if ($clacks >= $contract->price * 10 )
-          <button id='buyFromSellContract-{{$contract->id}}-10'
-            class='buyFromSellContract btn btn-danger'>buy x10</button>
-        @endif
-        @if ($clacks >= $contract->price * 100  )
-          <button id='buyFromSellContract-{{$contract->id}}-100'
-            class='buyFromSellContract btn btn-danger'>buy x100</button>
-        @endif
-        @if ($clacks >= $contract->price * 1000 )
-          <button id='buyFromSellContract-{{$contract->id}}-1000'
-            class='buyFromSellContract btn btn-danger'>buy x1,000</button>
+        @if (\App\Contracts::fetchLowestSell($contract->itemTypeID)->id == $contract->id)
+          @if($clacks >= $contract->price)
+            <button id='buyFromSellContract-{{$contract->id}}-1'
+              class='buyFromSellContract btn btn-danger'>buy x1</button>
+          @endif
+          @if ($clacks >= $contract->price * 10 )
+            <button id='buyFromSellContract-{{$contract->id}}-10'
+              class='buyFromSellContract btn btn-danger'>buy x10</button>
+          @endif
+          @if ($clacks >= $contract->price * 100  )
+            <button id='buyFromSellContract-{{$contract->id}}-100'
+              class='buyFromSellContract btn btn-danger'>buy x100</button>
+          @endif
+          @if ($clacks >= $contract->price * 1000 )
+            <button id='buyFromSellContract-{{$contract->id}}-1000'
+              class='buyFromSellContract btn btn-danger'>buy x1,000</button>
+          @endif
         @endif
       @endif
     </div>
-  -->
+
 
 
   @endif

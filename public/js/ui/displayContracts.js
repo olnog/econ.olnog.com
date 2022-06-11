@@ -258,6 +258,8 @@ function fetchContracts(id){
     $("#market").html(data)
     if (id == 'items'){
       $("#contractItemFilterDiv").removeClass('d-none')
+    } else if (id == 'labor'){
+      $("#contractLaborFilterDiv").removeClass('d-none')
     } else if (id == 'land'){
       $("#contractLandFilterDiv").removeClass('d-none')
 
