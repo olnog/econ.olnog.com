@@ -658,7 +658,6 @@ class ContractController extends Controller
 
 
       } else if ($request->type == 'freelance'){
-
         $status = "";
         $user = Auth::user();
         if ($user->clacks < $contract->price){
