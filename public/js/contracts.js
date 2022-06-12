@@ -97,7 +97,7 @@ function freelance(contractID){
       displayHeaders(JSON.parse(data).info)
       displayAutomation()
 
-      if (page == 'actions'){
+      if (page == undefined || page == 'actions'){
         loadPage('actions')
         return
       }

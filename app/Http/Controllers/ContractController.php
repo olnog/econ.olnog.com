@@ -658,7 +658,6 @@ class ContractController extends Controller
 
 
       } else if ($request->type == 'freelance'){
-
         $status = "";
         $user = Auth::user();
         if ($user->clacks < $contract->price){
@@ -674,6 +673,16 @@ class ContractController extends Controller
         $msg = \App\Actions::do($contract->action, $contract->userID, Auth::id(), null, $whoUsesFood, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
+          $equipmentAvailable = \App\Equipment
+            ::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($contract->action), $contract->userID);
+          if (empty($equipmentAvailable) && \App\Equipment::whichEquipment($contract->action) != null){
+            $status = "The contractor does not have the appropriate equipment for this. We canceled the contract.";
+            \App\History::new($contract->userID, 'contracts', "Your contract to "
+              . $contract->action
+              . " was cancelled because you didn't have the appropriate equipment.");
+            $contract->active = 0;
+            $contract->save();
+          }
           \App\Contracts::endContract($status);
           return;
         }  else {

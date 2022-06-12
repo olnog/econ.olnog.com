@@ -58,7 +58,7 @@ class ActionController extends Controller
         'freelanceContracts'   => \App\Contracts::where('active', 1)
           ->where('category', 'freelance')->orderBy('action')
           ->where('userID', '!=', \Auth::id())
-          ->orderBy('price', 'desc')->get(),
+          ->orderBy('price', 'asc')->get(),
         'hireableContracts'   => \App\Contracts::where('active', 1)
           ->where('userID', '!=', \Auth::id())
           ->where('category', 'hire')

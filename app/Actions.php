@@ -83,15 +83,15 @@ class Actions extends Model
       return ['error' => "Sorry, you're doing this too often."];
     }
 
+    $equipmentAvailable = \App\Equipment
+      ::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($actionName), $agentID);
+
     \App\Metric::newAction($agentID, $actionName);
 
     if ($actionName == 'chop-tree'){
       $leaseStatus = '';
       $landBonus = \App\Land::where('type', 'forest')
         ->where('userID', $contractorID)->count();
-      $equipmentAvailable = \App\Equipment
-        ::whichOfTheseCanTheyUse(['Chainsaw (electric)',
-        'Chainsaw (gasoline)', 'Axe'], $contractorID);
       if (count($equipmentAvailable) == 0){
         return [
           'error' =>
@@ -112,7 +112,7 @@ class Actions extends Model
       $production = $baseChop;
       if ($robot == null){
         $equipmentCaption = Equipment
-          ::useEquipped($equipmentAvailable[0], $contractorID);
+          ::useEquipped($equipmentAvailable[0], $agentID);
         if (!$equipmentCaption){
           return [
             'error' => "Something went wrong with an equipment check. Sorry."
@@ -170,8 +170,6 @@ class Actions extends Model
 
 
     } else if ($actionName == 'explore'){
-      $equipmentAvailable = \App\Equipment
-        ::whichOfTheseCanTheyUse(['Car (gasoline)', 'Car (diesel)'], $contractorID);
       $numOfParcels = \App\Land::where('userID', '>', 0)->count() + 1;
       $satellite = \App\Items::fetchByName('Satellite', $contractorID);
       $electricity = \App\Items::fetchByName('Electricity', $contractorID);
@@ -191,7 +189,7 @@ class Actions extends Model
       } else if (count($equipmentAvailable) > 0){
         $minChance = 100;
         if ($robot == null){
-          $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $contractorID);
+          $equipmentCaption = \App\Equipment::useEquipped($equipmentAvailable[0], $agentID);
           if (!$equipmentCaption){
             return ['error' => "Something technical went wrong with your car. Sorry."];
           }
@@ -226,9 +224,6 @@ class Actions extends Model
       || $actionName == 'harvest-plant-x'
       || $actionName == 'harvest-herbal-greens'
       || $actionName == 'harvest-rubber'){
-      $equipmentAvailable = \App\Equipment
-        ::whichOfTheseCanTheyUse(['Tractor (gasoline)', 'Tractor (diesel)'],
-        $contractorID);
       $howManyFields = 1;
       $totalYield = 0;
       $itemName = \App\Items::fetchItemNameForAction($actionName);
@@ -255,7 +250,7 @@ class Actions extends Model
         }
         if ($robot == null){
           $equipmentCaption = \App\Equipment
-            ::useEquipped($equipmentAvailable[0], $contractorID);
+            ::useEquipped($equipmentAvailable[0], $agentID);
           if (!$equipmentCaption){
             return [
               'error'
@@ -335,7 +330,7 @@ class Actions extends Model
         }
       } else if ($robot == null
         && Labor::areTheyEquippedWith('Handmill', $agentID)){
-        $equipmentCaption = Equipment::useEquipped('Handmill', $contractorID);
+        $equipmentCaption = Equipment::useEquipped('Handmill', $agentID);
       }
       $production = $modifier * .5;
       if ($robot == null){
@@ -375,7 +370,7 @@ class Actions extends Model
           return $buildingCaption;
         }
       } else if ($robot == null && Labor::areTheyEquippedWith('Saw', $agentID)){
-          $equipmentCaption = Equipment::useEquipped('Saw', $contractorID);
+          $equipmentCaption = Equipment::useEquipped('Saw', $agentID);
       }
       $production *= $modifier;
       $itemCaption = \App\Items
@@ -395,9 +390,6 @@ class Actions extends Model
       $leaseStatus = '';
       $landBonus = \App\Land::where('type', 'desert')
         ->where('userID', $contractorID)->count();
-      $equipmentAvailable = \App\Equipment
-        ::whichOfTheseCanTheyUse(['Bulldozer (gasoline)', 'Bulldozer (diesel)',
-        'Shovel'], $contractorID);
       if (count($equipmentAvailable) < 1){
         return ['error' => "You don't have any equipment to mine Sand."];
       } else if (!\App\Land::doTheyHaveAccessTo('desert', $contractorID)){
@@ -420,7 +412,7 @@ class Actions extends Model
       }
       $production = $modifier;
       if ($robot == null){
-        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $contractorID);
+        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
         $production = $action->rank * ($modifier + $landBonus);
       }
       $landResource = \App\Land::takeResource('Sand',  $agentID, $production, true);
@@ -439,9 +431,6 @@ class Actions extends Model
       || $actionName == 'mine-stone' || $actionName == 'mine-copper-ore'
       || $actionName == 'mine-uranium-ore'){
       $itemName = \App\Items::fetchItemNameForAction($actionName);
-      $equipmentAvailable = \App\Equipment
-        ::whichOfTheseCanTheyUse(['Jackhammer (gasoline)', 'Jackhammer (electric)',
-        'Pickaxe'], $contractorID);
       $labor = \App\Labor::where('userID', $contractorID)->first();
       if (count($equipmentAvailable) < 1){
         return ['error' => "You don't have any equipment to mine with right now."];
@@ -477,7 +466,7 @@ class Actions extends Model
       }
       $production = $modifier;
       if ($robot == null){
-        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $contractorID);
+        $equipmentCaption = Equipment::useEquipped($equipmentAvailable[0], $agentID);
         if (!$equipmentCaption){
           return ['error' => 'Something technical happened with your equipment. Sorry'];
         }
@@ -851,8 +840,7 @@ class Actions extends Model
       ];
 
       if ($action == 'chop-tree'
-        && count(\App\Equipment::whichOfTheseCanTheyUse(['Chainsaw (electric)',
-        'Chainsaw (gasoline)', 'Axe'], \Auth::id())) > 0
+        && count(\App\Equipment::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($action), \Auth::id())) > 0
         && Land::doTheyHaveAccessTo('forest')){
         $actionable[] = $action;
 
@@ -917,21 +905,18 @@ class Actions extends Model
 
       } else if (($action == 'mine-sand')
         && Land::doTheyHaveAccessTo('desert')
-        && count(\App\Equipment::whichOfTheseCanTheyUse(['Bulldozer (gasoline)',
-        'Bulldozer (diesel)', 'Shovel'], \Auth::id())) > 0){
+        && count(\App\Equipment::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($action), \Auth::id())) > 0){
         $actionable[] = $action;
 
       } else if (($action == 'mine-coal' || $action == 'mine-stone'
         || $action == 'mine-iron-ore' || $action == 'mine-copper-ore')
         && Land::doTheyHaveAccessTo('mountains')
-        && count(\App\Equipment::whichOfTheseCanTheyUse(['Jackhammer (electric)',
-        'Jackhammer (gasoline)', 'Pickaxe'], \Auth::id())) > 0){
+        && count(\App\Equipment::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($action), \Auth::id())) > 0){
         $actionable[] = $action;
 
       } else if ($action == 'mine-uranium-ore'
         && Land::doTheyHaveAccessTo('mountains')
-        && count(\App\Equipment::whichOfTheseCanTheyUse(['Jackhammer (electric)',
-        'Jackhammer (gasoline)', 'Pickaxe'], \Auth::id())) > 0
+        && count(\App\Equipment::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($action), \Auth::id())) > 0
         && $wearingRadiationSuit){
         $actionable[] = $action;
 

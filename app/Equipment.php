@@ -102,6 +102,9 @@ class Equipment extends Model
 
 
   public static function whichOfTheseCanTheyUse($equipmentArr, $userID){
+    if ($equipmentArr == null){
+      return null;
+    }
     $fuelArr = \App\Equipment::fetchFuel();
     $usableEquipArr = [];
     foreach ($equipmentArr as $equipmentName){
@@ -128,5 +131,33 @@ class Equipment extends Model
       }
     }
     return $usableEquipArr;
+  }
+
+  public static function whichEquipment($actionName){
+    $equipmentArr = [
+      'chop-tree'             => ['Chainsaw (electric)','Chainsaw (gasoline)',
+                                  'Axe'],
+      'explore'               => ['Car (gasoline)', 'Car (diesel)'],
+      'harvest-wheat'         => ['Tractor (gasoline)', 'Tractor (diesel)'],
+      'harvest-plant-x'       => ['Tractor (gasoline)', 'Tractor (diesel)'],
+      'harvest-herbal-greens' => ['Tractor (gasoline)', 'Tractor (diesel)'],
+      'harvest-rubber'        => ['Tractor (gasoline)', 'Tractor (diesel)'],
+      'mine-sand'             => ['Bulldozer (gasoline)', 'Bulldozer (diesel)',
+                                  'Shovel'],
+      'mine-coal'             => ['Jackhammer (gasoline)', 'Jackhammer (electric)',
+                                  'Pickaxe'],
+      'mine-iron-ore'         => ['Jackhammer (gasoline)', 'Jackhammer (electric)',
+                                  'Pickaxe'],
+      'mine-stone'             => ['Jackhammer (gasoline)', 'Jackhammer (electric)',
+                                  'Pickaxe'],
+      'mine-copper-ore'        => ['Jackhammer (gasoline)', 'Jackhammer (electric)',
+                                  'Pickaxe'],
+      'mine-uranium-ore'       => ['Jackhammer (gasoline)', 'Jackhammer (electric)',
+                                  'Pickaxe'],
+    ];
+    if (!in_array($actionName, array_keys($equipmentArr))){
+      return null;
+    }
+    return $equipmentArr[$actionName];
   }
 }

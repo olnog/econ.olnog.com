@@ -15,10 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-<<<<<<< HEAD
-=======
-  var_dump(\App\Contracts::fetchLabor());
->>>>>>> caba6b04e5d3b6adcf48efd18ad2056aa207b506
+
 });
 
 Route::get('/stop', function(){
