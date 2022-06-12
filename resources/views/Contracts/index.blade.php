@@ -77,9 +77,11 @@
 @endif
 <div class="mt-3 {{$contract->category}}@if($contract->landType != null) {{$contract->landType}} @endif
   @if ($contract->userID != $userID)  notMyContract  @endif
-  @if ($contract->category == 'buyOrder' || $contract->category == 'sellOrder')
+  @if (($filter != 'mine' && $filter != null)
+    && ($contract->category == 'buyOrder' || $contract->category == 'sellOrder'))
     itemClass{{$contract->itemTypeID}} d-none
-  @elseif ($contract->category == 'freelance' || $contract->category == 'hire')
+  @elseif (($filter != 'mine' && $filter != null)
+    && ($contract->category == 'freelance' || $contract->category == 'hire'))
     laborClass{{$contract->action}} d-none
   @endif contracts p-3">
 
