@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
+
 });
 
 Route::get('/stop', function(){

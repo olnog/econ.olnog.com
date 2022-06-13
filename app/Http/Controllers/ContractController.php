@@ -164,8 +164,8 @@ class ContractController extends Controller
           echo "There aren't any uses left for this building.";
           return ;
         }
-      } else if(($request->category != 'sellOrder'
-        || $request->category != 'buyOrder')
+      } else if(($request->category == 'sellOrder'
+         || $request->category == 'buyOrder')
         && \App\Contracts::where('active', 1)
         ->where('itemTypeID', $request->itemTypeID)->where('price', $request->price)->count() > 0){
         echo "There is already a contract to buy/sell this item at that price."

@@ -20,7 +20,9 @@ class Actions extends Model
     if ($useFood != null || $feedingChildren !== null){
       $foodUsed = 0;
       $food = \App\Items::fetchByName('Food', $useFood);
-
+      if ($food == null){
+        \App\History::new(5, 'bugs', $useFood . " does not have food. BUG");
+      }
       if ($useFood != null){
         if ($food->quantity == 0){
           return ['error' => "You're automating actions but you don't have any more food." ];
@@ -805,7 +807,10 @@ class Actions extends Model
     $actionable = [];
     $labor = \App\Labor::where('userID', $userID)->first();
     $wearingRadiationSuit = false;
-    if ($labor->alsoEquipped != null){
+    if ($labor == null){
+      \App\History::new(5 , 'bugs', "fetchActionable being called and labor is null: " . $userID . " \ " . $onlyUnlocked . " \ " . $justThisOne);
+    }
+    if ($labor != null && $labor->alsoEquipped != null){
       $equipment = \App\Equipment::find($labor->alsoEquipped);
       $itemType = \App\ItemTypes::find($equipment->itemTypeID);
       if ($itemType->name == 'Radiation Suit'){
@@ -1004,6 +1009,9 @@ class Actions extends Model
 
   public static function fetchByName($userID, $name){
     $actionType = \App\ActionTypes::where('name', $name)->first();
+    if ($actionType == null){
+      \App\History::new(5, 'bugs', $userID .  ": " . $name . " is not a valid Action type. BUG");
+    }
     return \App\Actions::where('actionTypeID', $actionType->id)
       ->where('userID', $userID)->first();
 
