@@ -804,11 +804,13 @@ class Actions extends Model
   }
 
   public static function fetchActionable($userID, $onlyUnlocked, $justThisOne){
+
     $actionable = [];
     $labor = \App\Labor::where('userID', $userID)->first();
     $wearingRadiationSuit = false;
     if ($labor == null){
       \App\History::new(5 , 'bugs', "fetchActionable being called and labor is null: " . $userID . " \ " . $onlyUnlocked . " \ " . $justThisOne);
+      return null;
     }
     if ($labor != null && $labor->alsoEquipped != null){
       $equipment = \App\Equipment::find($labor->alsoEquipped);

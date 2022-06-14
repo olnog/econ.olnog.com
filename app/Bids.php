@@ -77,7 +77,7 @@ class Bids extends Model
         "You lost the hostile takeover of parcel #" . $landID . " to " . $owner->name);
     } else if ($lastBid->userID == $land->hostileTakeoverBy){
       \App\History::new($owner->id, 'land',
-        "You lost ownership of parcel #" . $landID . " to " . $owner->name . " but you got back "
+        "You lost ownership of parcel #" . $landID . " to " . $attacker->name . " but you got back "
         . $ownersFirstBid . " clacks.");
       \App\History::new($attacker->id, 'land',
         "You won the hostile takeover of parcel #" . $landID . ". Congrats!");
