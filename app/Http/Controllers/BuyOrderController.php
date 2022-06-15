@@ -66,7 +66,7 @@ class BuyOrderController extends Controller
 
         $newBuyOrder = new \App\BuyOrders;
         $newBuyOrder->quantity = $buyOrder->quantity * 2;
-        $newBuyOrder->cost = $buyOrder->cost * 1.75;
+        $newBuyOrder->cost = $buyOrder->cost * .75;
         if ($newBuyOrder->cost < $newBuyOrder->quantity){
           $newBuyOrder->cost = $newBuyOrder->quantity;
         }
