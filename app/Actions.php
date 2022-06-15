@@ -16,12 +16,27 @@ class Actions extends Model
     $electricityCaption = "";
     $foodCaption = "";
     $feedingChildren = \App\Labor::feedChildren($agentID);
-
+    $childrenStatus = '';
+    $foodUsed = 0;
+    if ($feedingChildren !== null){
+      $childrenStatus = " (Children) ";
+      $foodUsed += $feedingChildren;
+      if ($feedingChildren === false ){
+        $childrenStatus = " Children: 0 ";
+      }
+    }
     if ($useFood != null || $feedingChildren !== null){
-      $foodUsed = 0;
-      $food = \App\Items::fetchByName('Food', $useFood);
+
+
+      if ($useFood == null){
+
+        $food = \App\Items::fetchByName('Food', $agentID);
+      } else {
+        $foodUsed = 0;
+        $food = \App\Items::fetchByName('Food', $useFood);
+      }
       if ($food == null){
-        \App\History::new(5, 'bugs', $useFood . " does not have food. BUG");
+        \App\History::new(5, 'bugs', $useFood . " does not have food.  BUG");
       }
       if ($useFood != null){
         if ($food->quantity == 0){
@@ -32,14 +47,7 @@ class Actions extends Model
         $food->save();
         $foodUsed = 1;
       }
-      if ($feedingChildren === false ){
-        $childrenStatus = " Children: 0 ";
-      } else if ($feedingChildren === null){
-        $childrenStatus = '';
-      } else {
-        $childrenStatus = " (Children) ";
-        $foodUsed += $feedingChildren;
-      }
+
       $foodCaption = $childrenStatus . "Food: <span class='fn'>-" . $foodUsed
         . "</span> [" . number_format($food->quantity) . "] ";
     }
@@ -786,7 +794,7 @@ class Actions extends Model
   public static function doTheyHaveEnoughToBuild($buildingName){
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
     foreach ($buildingCosts as $material => $cost){
-      $item = Items::fetchByName($material, Auth::id());
+      $item = Items::fetchByName($material, \Auth::id());
       if($item->quantity < $cost){
         return false;
       }
