@@ -329,7 +329,7 @@ class Actions extends Model
       }
       $buildingName = '';
       $modifier = 10;
-      if ($labor == null
+      if ($robot == null
         && \App\Buildings::doTheyHaveAccessTo('Gristmill', $contractorID)
         && $wheat->quantity >= 100){
         $modifier = 100;
@@ -795,6 +795,9 @@ class Actions extends Model
     $buildingCosts = \App\BuildingTypes::fetchBuildingCost($buildingName);
     foreach ($buildingCosts as $material => $cost){
       $item = Items::fetchByName($material, \Auth::id());
+      if ($item == null){
+        \App\History::new(5, 'bug', $buildingName . ": " . $material);
+      }
       if($item->quantity < $cost){
         return false;
       }

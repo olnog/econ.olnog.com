@@ -33,6 +33,9 @@ class Items extends Model
 
   static public function fetchByName($name, $userID){
     $itemType = \App\ItemTypes::where('name', $name)->first();
+    if ($itemType == null){
+      \App\History::new(5, 'bugs', "\App\Items::fetchByName() UserID: " . $userID . ": " . $name);
+    }
     return \App\Items::where('itemTypeID', $itemType->id)->where('userID', $userID)->first();
   }
 
@@ -89,7 +92,7 @@ class Items extends Model
       "make-nanites"                        => 'Nanites',
       "make-NanoMeds"                       => 'NanoMeds',
       "make-paper"                          => 'Paper',
-      "make-radiation-suit"                 => 'Chem Lab',
+      "make-radiation-suit"                 => 'Radiation Suit',
       "make-robot"                          => 'Robots',
       "make-rocket-engine"                  => 'Rocket Engines',
       "make-satellite"                      => 'Satellite',
