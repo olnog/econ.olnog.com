@@ -251,12 +251,11 @@ class Land extends Model
           $i++;
           $user->clacks -= ($user->autoBribe - $parcel->bribe);
           $parcel->valuation += ($user->autoBribe - $parcel->bribe);
-          $parcel->bribe += ($user->autoBribe - $parcel->bribe);
+          //$parcel->bribe += ($user->autoBribe - $parcel->bribe);
           $user->save();
           $parcel->save();
           \App\History::new($user->id, 'land', " Parcel #" . $parcel->id
-            . " is now worth " . $parcel->valuation
-            . " and has a total bribe worth " . $parcel->bribe . ".");
+            . " is now worth " . $parcel->valuation . ".");
         }
       }
       \App\History::new($user->id, 'land', " You auto-paid bribes on " . $i . " parcels that you own.");
