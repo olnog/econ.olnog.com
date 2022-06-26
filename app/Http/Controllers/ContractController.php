@@ -675,7 +675,10 @@ class ContractController extends Controller
           $status = $msg['error'];
           $equipmentAvailable = \App\Equipment
             ::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($contract->action), $contract->userID);
-          if (empty($equipmentAvailable) && \App\Equipment::whichEquipment($contract->action) != null){
+          $excludedActions = ['explore', 'harvest-wheat', 'harvest-plant-x', 'harvest-herbal-greens', 'harvest-rubber'];
+          if (empty($equipmentAvailable)
+            && \App\Equipment::whichEquipment($contract->action) != null
+            && !in_array($contract->action, $excludedActions)){
             $status = "The contractor does not have the appropriate equipment for this. We canceled the contract.";
             \App\History::new($contract->userID, 'contracts', "Your contract to "
               . $contract->action
