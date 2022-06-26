@@ -51,7 +51,7 @@ class User extends Authenticatable
         ->where('active', 1)->count();
       return [
         'buildingSlots'   => $user->buildingSlots,
-        'clacks'          => $user->clacks,
+        'clacks'          => number_format($user->clacks) . substr(strval($user->clacks - floor($user->clacks)), 1),
         'food'            => \App\Items::fetchByName('Food', \Auth::id())->quantity,
         'numOfActions'    => $numOfActions,
         'numOfBuildings'  => $numOfBuildings,
