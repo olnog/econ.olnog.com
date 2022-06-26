@@ -367,7 +367,7 @@ class Buildings extends Model
   public static function solarPowerplants(){
     $buildingType = \App\BuildingTypes::fetchByName('Solar Power Plant');
     $powerPlants = \App\Buildings::where('buildingTypeID', $buildingType->id)->get();
-    $increment = 100;
+    $increment = 1000;
     foreach ($powerPlants as $powerPlant){
       if ($powerPlant->electricity < 24 * $increment){
         $powerPlant->electricity += $increment;
