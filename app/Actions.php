@@ -71,12 +71,17 @@ class Actions extends Model
       $agentID);
     $reqBuildings = \App\Buildings
       ::whichBuildingsDoTheyHaveAccessTo($actionName, $contractorID);
+
     $robot = null;
     $status = "";
     if ($reqBuildings !== null && count($reqBuildings) < 1){
-      return ['error' => "You don't have the necessary building ("
+      $agentCaption = "You ";
+      if ($agentID != $contractorID){
+        $agentCaption = "You (if paying a freelancer) or they (if being hired) ";
+      }
+      return ['error' => $agentCaption . " need to build or repair the following building ("
         .  implode(', ', \App\Buildings::fetchRequiredBuildingsFor($actionName))
-        . ") for this."];
+        . ") in order to do this."];
     } else if (!\App\Items::doTheyHaveEnoughFor($actionName)){
       return ['error' => \App\Items::use(\App\Items
         ::fetchActionItemInput($actionName), $contractorID)['error']];

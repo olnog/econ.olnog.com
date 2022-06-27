@@ -624,6 +624,8 @@ class ContractController extends Controller
           $contract->userID, null, $whoUsesFood, false);
         if (isset($msg['error'])){
           $status = $msg['error'];
+          \App\Contracts::endContract($status);
+          return;
         }  else {
           $status = $msg['status'];
           $clackCaption = ' clack. ';
