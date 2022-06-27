@@ -183,9 +183,15 @@ class Contracts extends Model
 
   public static function fetchLabor(){
     $categoryArr = ['category' => 'freelance', 'category' => 'hire'];
-    $actions = \App\Contracts::where('active', 1)
-      ->where('category', 'freelance')->orWhere('category', 'hire')
-      ->orderBy('action', 'asc')->get();
+    $actions = \App\Contracts::
+      orWhere(function($query){
+        $query->where('active', 1)
+              ->where('category', 'freelance');
+      })->orWhere(function($query){
+        $query->where('active', 1)
+              ->where('category', 'hire');
+      })->orderBy('action', 'asc')->get();
+
     $lastAction = null;
     $actionList = [];
     foreach($actions as $action){
