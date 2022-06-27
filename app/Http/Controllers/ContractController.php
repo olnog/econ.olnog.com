@@ -867,7 +867,8 @@ class ContractController extends Controller
         $status = "<span class='actionInput'>"
           . $itemType->name . ": <span class='fn'>-" . $request->quantity
           . "</span> [" . $sellerItem->quantity
-          . "]</span> &rarr; Clacks: <span class='fp'>+" . number_format($contract->price)
+          . "]</span> &rarr; Clacks: <span class='fp'>+"
+          . number_format($request->quantity * $contract->price)
           . "</span> [" . number_format($seller->clacks) . "]";
 
 
@@ -880,7 +881,7 @@ class ContractController extends Controller
         $buyer->save();
         $clacks = $seller->clacks;
         \App\History::new($buyer->id, 'contract', "<span class='actionInput'>Clacks: <span class='fn'>-"
-          . number_format($contract->price) . "</span> ["
+          . number_format($request->quantity * $contract->price) . "</span> ["
           . number_format($buyer->clacks) . "]</span> &rarr; ". $itemType->name
           . ": <span class='fp'>+" . number_format($request->quantity) . " ["
           . number_format($buyerItem->quantity) . "]");
