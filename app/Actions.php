@@ -861,7 +861,6 @@ class Actions extends Model
         'smelt-copper', 'smelt-iron', 'smelt-steel',
         'transfer-electricity-from-solar-power-plant'
       ];
-
       if ($action == 'chop-tree'
         && count(\App\Equipment::whichOfTheseCanTheyUse(\App\Equipment::whichEquipment($action), \Auth::id())) > 0
         && Land::doTheyHaveAccessTo('forest')){
@@ -913,10 +912,10 @@ class Actions extends Model
         $actionable[] = $action;
 
       } else if ($action == 'mill-flour'
-      && (Equipment::doTheyHave('Handmill', Auth::id())
+      && ((Equipment::doTheyHave('Handmill', Auth::id())
         && Items::doTheyHave('Flour', 10))
         || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
-        && Items::doTheyHave('Flour', 100))){
+        && Items::doTheyHave('Flour', 100)))){
         $actionable[] = $action;
 
       } else if ($action == 'mill-log'
@@ -1011,6 +1010,7 @@ class Actions extends Model
         && \App\Items::doTheyHaveEnoughFor($action)){
         $actionable[] = $action;
       }
+
       if ($justThisOne != null){
         break;
       }
