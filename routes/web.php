@@ -15,8 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-//  var_dump(\App\Buildings
-//    ::whichBuildingsDoTheyHaveAccessTo('generate-electricity-with-coal', 466));
+
 });
 
 Route::get('/stop', function(){

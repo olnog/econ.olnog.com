@@ -914,9 +914,9 @@ class Actions extends Model
 
       } else if ($action == 'mill-flour'
       && (Equipment::doTheyHave('Handmill', Auth::id())
-        && Items::doTheyHave('Flour', 10))
+        && Items::doTheyHave('Wheat', 10))
         || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
-        && Items::doTheyHave('Flour', 100))){
+        && Items::doTheyHave('Wheat', 100))){
         $actionable[] = $action;
 
       } else if ($action == 'mill-log'

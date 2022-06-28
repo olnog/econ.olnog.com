@@ -149,6 +149,10 @@
             <button id='sellToBuyContract-{{$contract->id}}-1000'
               class='sellToBuyContract btn btn-success'>sell x1,000 (+{{$contract->price * 1000}} clacks)</button>
           @endif
+          @if ($quantity >=  10000)
+            <button id='sellToBuyContract-{{$contract->id}}-11000'
+              class='sellToBuyContract btn btn-success'>sell x10k (+{{$contract->price * 10000}} clacks)</button>
+          @endif
         @endif
       @endif
     </div>
@@ -344,6 +348,11 @@
             <button id='buyFromSellContract-{{$contract->id}}-1000'
               class='buyFromSellContract btn btn-danger'>buy x1,000</button>
           @endif
+          @if ($clacks >= $contract->price * 10000 )
+            <button id='buyFromSellContract-{{$contract->id}}-10000'
+              class='buyFromSellContract btn btn-danger'>buy x10k</button>
+          @endif
+
         @endif
       @endif
     </div>
