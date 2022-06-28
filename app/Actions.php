@@ -912,10 +912,17 @@ class Actions extends Model
         $actionable[] = $action;
 
       } else if ($action == 'mill-flour'
+<<<<<<< HEAD
       && ((Equipment::doTheyHave('Handmill', Auth::id())
         && Items::doTheyHave('Flour', 10))
         || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
         && Items::doTheyHave('Flour', 100)))){
+=======
+      && (Equipment::doTheyHave('Handmill', Auth::id())
+        && Items::doTheyHave('Wheat', 10))
+        || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
+        && Items::doTheyHave('Wheat', 100))){
+>>>>>>> 6c41e32276146a47cc8833a7ba6bb78072c4122d
         $actionable[] = $action;
 
       } else if ($action == 'mill-log'
