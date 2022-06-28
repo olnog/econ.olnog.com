@@ -15,11 +15,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/test', function(){
-<<<<<<< HEAD
-  
-=======
 
->>>>>>> 6c41e32276146a47cc8833a7ba6bb78072c4122d
 });
 
 Route::get('/stop', function(){
