@@ -193,7 +193,7 @@ class Items extends Model
          => ['HerbMeds' => 10, 'Bio Material' => 10,'Electricity' => 10],
       'make-book'                             => ['Paper' => 100],
       'make-contract'                         => ['Paper' => 1],
-      'make-cpu'                              => ['Silicon' => 100, 'Copper Ingots' => 100, 'Electricity' => 1000],
+      'make-CPU'                              => ['Silicon' => 100, 'Copper Ingots' => 100, 'Electricity' => 1000],
       'make-clone'                            => ['Genetic Material' => 1000, 'Electricity'=> 100000],
       'make-diesel-bulldozer'                 => ['Steel Ingots' => 250,
         'Diesel Engines'=> 1, 'Copper Ingots' => 50, 'Electricity'=> 1000],
@@ -332,6 +332,7 @@ class Items extends Model
   public static function use($itemArr, $contractorID){
     $status = "";
     foreach($itemArr as $itemName => $quantity){
+
       $item = \App\Items::fetchByName($itemName, $contractorID);
       if ($item->quantity < $quantity){
         return ['error'=>'You need at least ' . number_format($quantity) . " " . $itemName];
