@@ -272,7 +272,7 @@ class Buildings extends Model
       "make-stone-saw"                      => null,
       "make-stone-shovel"                   => null,
       "make-tire"                           => ['Chem Lab'],
-      "mill-flour"                          => null,
+      "mill-wheat"                          => null,
       "mill-log"                            => null,
       "mine-coal"                           => null,
       "mine-copper-ore"                     => null,

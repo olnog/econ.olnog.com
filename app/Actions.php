@@ -38,7 +38,7 @@ class Actions extends Model
       if ($food == null){
         \App\History::new(5, 'bugs', $useFood . " does not have food.  BUG");
       }
-      if ($useFood != null){
+      if ($food != null && $useFood != null){
         if ($food->quantity == 0){
           return ['error' => "You're automating actions but you don't have any more food." ];
         }
@@ -321,7 +321,7 @@ class Actions extends Model
         . "</span> &rarr; " . $output;
 
 
-    } else if ($actionName == 'mill-flour'){
+    } else if ($actionName == 'mill-wheat'){
       $wheat = Items::fetchByName('Wheat', $contractorID);
       if ($robot == null && !Labor::areTheyEquippedWith('Handmill', $agentID)
         && !\App\Buildings::doTheyHaveAccessTo('Gristmill', $contractorID)){
@@ -854,7 +854,7 @@ class Actions extends Model
         ::whichBuildingsDoTheyHaveAccessTo($action, \Auth::id());
       $coveredActions = ['chop-tree', 'cook-meat', 'cook-flour',
         'harvest-herbal-greens', 'harvest-plant-x', 'harvest-wheat',
-        'harvest-rubber', 'make-book', 'mill-flour', 'mill-log', 'mine-sand',
+        'harvest-rubber', 'make-book', 'mill-wheat', 'mill-log', 'mine-sand',
         'mine-coal', 'mine-stone', 'mine-iron-ore', 'mine-copper-ore',
         'mine-uranium-ore', 'plant-rubber-plantation', 'plant-wheat-field',
         'plant-herbal-greens-field', 'plant-plant-x-field', 'program-robot',
@@ -911,11 +911,11 @@ class Actions extends Model
         && $labor->availableSkillPoints < 1){
         $actionable[] = $action;
 
-      } else if ($action == 'mill-flour'
+      } else if ($action == 'mill-wheat'
       && ((Equipment::doTheyHave('Handmill', Auth::id())
-        && Items::doTheyHave('Flour', 10))
+        && Items::doTheyHave('Wheat', 10))
         || (\App\Buildings::doTheyHaveAccessTo('Gristmill', Auth::id())
-        && Items::doTheyHave('Flour', 100)))){
+        && Items::doTheyHave('Wheat', 100)))){
 
         $actionable[] = $action;
 
