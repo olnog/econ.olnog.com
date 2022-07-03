@@ -35,7 +35,7 @@ class RobotController extends Controller
     public function store(Request $request)
     {
       $robot = \App\Items::fetchByName('Robots', \Auth::id());
-      $bannedActions = \App\Robot::fetchBannedActions();
+      $bannedActions = \App\Actions::fetchBanned();
       $action = \App\Actions::fetchByName(\Auth::id(), $request->actionName);
       if ($robot->quantity < 1){
         echo json_encode(['error' => "You don't have any Robots."]);

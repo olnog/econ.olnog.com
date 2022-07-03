@@ -47,9 +47,10 @@ class Actions extends Model
         $food->save();
         $foodUsed = 1;
       }
-
-      $foodCaption = $childrenStatus . "Food: <span class='fn'>-" . $foodUsed
-        . "</span> [" . number_format($food->quantity) . "] ";
+      if ($food != null){
+        $foodCaption = $childrenStatus . "Food: <span class='fn'>-" . $foodUsed
+          . "</span> [" . number_format($food->quantity) . "] ";
+      }
     }
     if ($robotID != null){
       $electricity = \App\Items::fetchByName('Electricity', $agentID);

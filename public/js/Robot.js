@@ -40,7 +40,7 @@ class Robot{
     if (actionName == 'null'){
       return
     }
-    $.post( "/robots", {actionName: actionName, _token: fetchCSRF() }).done(function(data){
+    $.post( "/robots", {actionName: actionName.split(' ').join('-'), _token: fetchCSRF() }).done(function(data){
       if (JSON.parse(data).error != undefined){
         displayError(JSON.parse(data).error)
         return
