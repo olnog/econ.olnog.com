@@ -43,8 +43,9 @@ class Robot extends Model
           $robotID, null, false);
         if (isset($msg['status'])){
           $robot->uses--;
-
+          \App\History::new(\Auth::id(), 'robots', "Robot #" . $robotID . ": " . $msg['status']);
         }
+
         $status[$robotID] = $msg;
         $robot->save();
 

@@ -436,7 +436,7 @@ class Actions extends Model
         return $landResource;
       }
       $output = \App\Items::make('Sand', $production, $contractorID, $agentID);
-      $status = "<span class='actionInput'>";
+      $status = "<span class='actionInput'>" . $electricityCaption;
       if ($agentID == $contractorID){
         $status .=  $foodCaption . $equipmentCaption . $leaseStatus;
       }
@@ -508,7 +508,7 @@ class Actions extends Model
       }
       $output = \App\Items::make($itemName, $production, $contractorID, $agentID);
       if ($buildingCaption != ""){
-        $status .=  "<span class='actionInput'>";
+        $status .=  "<span class='actionInput'>" . $electricityCaption;
       }
       if ($agentID == $contractorID){
         $status .= $foodCaption . $equipmentCaption  . $leaseStatus;
